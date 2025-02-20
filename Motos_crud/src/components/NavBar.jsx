@@ -1,22 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { styled, alpha, useTheme } from "@mui/material/styles";
 import {
-  Box,
-  AppBar as MuiAppBar,
-  Toolbar,
-  Typography,
-  IconButton,
-  InputBase,
-  Switch,
-  FormControlLabel,
-  Drawer,
-  Divider,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
-  Collapse
+  Box, AppBar as MuiAppBar, Toolbar, Typography, IconButton, InputBase, Switch, FormControlLabel, Drawer,
+  Divider, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Collapse
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import SearchIcon from "@mui/icons-material/Search";
@@ -28,6 +14,8 @@ import { useLocation, useNavigate } from "react-router-dom";
 import HomeIcon from "@mui/icons-material/Home";
 import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+import LogoutIcon from '@mui/icons-material/Logout';
+import MeetingRoomIcon from '@mui/icons-material/MeetingRoom';
 
 
 const drawerWidth = 250;
@@ -137,11 +125,13 @@ const LogoutButton = styled("button")(({ theme }) => ({
 export const NavBar = ({ onSearch }) => {
   const navigate = useNavigate();
   const [selectedItem, setSelectedItem] = useState(location.pathname);
-  const handleNavigate = (path) => navigate(path); // Navega a la ruta correspondiente
+  const handleNavigate = (path) => navigate(path);
   const [openProducts, setOpenProducts] = useState(false);
+  const [openServices, setOpenServices] = useState(false);
+  const [openAlmacen, setOpenAlmacen] = useState(false);
 
   useEffect(() => {
-    setSelectedItem(location.pathname); // Actualiza el ítem seleccionado cuando cambie la ruta
+    setSelectedItem(location.pathname);
   }, [location.pathname]);
 
   const [open, setOpen] = useState(false);
@@ -168,23 +158,34 @@ export const NavBar = ({ onSearch }) => {
     setOpenProducts(!openProducts); // Alternar el estado de abierto/cerrado
   };
 
+  const handleServicesClick = () => {
+    setOpenServices(!openServices);  // Alternar el estado de abierto/cerrado
+  };
+
+  const handleAlmacenClick = () => {
+    setOpenAlmacen(!openAlmacen);  // Alternar el estado de abierto/cerrado
+  };
+
   // Títulos dinámicos para cada ruta
   const routeTitles = {
     "/inicio": "Inicio",
     "/motos": "Administración de Motos",
-    "/AgregarProductos": "Agregar Productos",
-    "/productos": "Productos"
+    "/AgregarProductos": "Productos",
+    "/productos": "Productos",
+    "/servicios/RealizarServicio": "Servicios",
+    "/servicios/ListaServicios": "Servicios"
   };
 
   // Obtén el título según la ruta actual
   const currentTitle = routeTitles[location.pathname] || "Inicio";
 
   return (
-    <Box sx={{ display: 'flex' }}>
+    <Box sx={{ display: "flex" }}>
+      {/* AppBar con Drawer integrado */}
       <AppBar
         position="fixed"
         open={open}
-        style={{ backgroundColor: "#a93226" }}
+        style={{ backgroundColor: "#34495e  " }}
       >
         <Toolbar>
           <IconButton
@@ -199,6 +200,31 @@ export const NavBar = ({ onSearch }) => {
           <Typography variant="h6" style={{ flexGrow: 1 }}>
             {currentTitle}
           </Typography>
+
+          {/* Switch para mostrar inactivas
+                  <FormControlLabel
+                      control={
+                          <Switch
+                              checked={showInactive}
+                              onChange={(e) => setShowInactive(e.target.checked)}
+                              color="default"
+                          />
+                      }
+                      label="Mostrar inactivas"
+                      sx={{ color: 'white' }}
+                  /> */}
+
+          {/* Barra de búsqueda */}
+          <Search>
+            <SearchIconWrapper>
+              <SearchIcon />
+            </SearchIconWrapper>
+            <StyledInputBase
+              placeholder="Buscar"
+              inputProps={{ "aria-label": "search" }}
+              onChange={handleSearchChange}
+            />
+          </Search>
         </Toolbar>
       </AppBar>
 
@@ -215,7 +241,7 @@ export const NavBar = ({ onSearch }) => {
         anchor="left"
         open={open}
       >
-        <DrawerHeader style={{ backgroundColor: "#f39c12" }}>
+        <DrawerHeader style={{ backgroundColor: "#34495e" }}>
           <IconButton onClick={handleDrawerClose}>
             <ArrowBackIosNewIcon style={{ color: "white" }} />
             <Typography variant="h6" style={{ color: "white", marginRight: 50 }}>
@@ -292,8 +318,138 @@ export const NavBar = ({ onSearch }) => {
               </ListItem>
             </List>
           </Collapse>
+
+          <ListItem button onClick={handleServicesClick}>
+            <ListItemIcon sx={{ minWidth: 32 }}>
+              {openServices ? <ArrowDropDownIcon /> : <ArrowRightIcon />}
+            </ListItemIcon>
+            <ListItemText primary="Servicios" />
+          </ListItem>
+
+          {/* Subcategorías de "Productos" */}
+          <Collapse in={openServices} timeout="auto" unmountOnExit>
+            <List component="div" disablePadding>
+              <ListItem
+                button
+                selected={selectedItem === "/servicios/ListaMantenimientos"}
+                onClick={() => handleNavigate("/servicios/ListaMantenimientos")}
+                sx={{ paddingLeft: 4 }}
+              >
+                <ListItemIcon sx={{ minWidth: 32 }}>
+                  <CategoryIcon sx={{ fontSize: 18 }} />
+                </ListItemIcon>
+
+                <ListItemText
+                  primary={
+                    <Typography variant="body2" sx={{ fontSize: "0.875rem" }}>
+                      Lista de Mantenimientos
+                    </Typography>
+                  }
+                />
+              </ListItem>
+
+              <ListItem
+                button
+                selected={selectedItem === "/servicios/RealizarMantenimiento"}
+                onClick={() => handleNavigate("/servicios/RealizarMantenimiento")}
+                sx={{ paddingLeft: 4 }}
+              >
+                <ListItemIcon sx={{ minWidth: 32 }}>
+                  <InventoryTwoToneIcon sx={{ fontSize: 18 }} />
+                </ListItemIcon>
+                <ListItemText
+                  primary={
+                    <Typography variant="body2" sx={{ fontSize: "0.875rem" }}>
+                      Realizar Mantenimiento
+                    </Typography>
+                  }
+                />
+              </ListItem>
+              <ListItem
+                button
+                selected={selectedItem === "/servicios/CatalogoServicios"}
+                onClick={() => handleNavigate("/servicios/CatalogoServicios")}
+                sx={{ paddingLeft: 4 }}
+              >
+                <ListItemIcon sx={{ minWidth: 32 }}>
+                  <InventoryTwoToneIcon sx={{ fontSize: 18 }} />
+                </ListItemIcon>
+                <ListItemText
+                  primary={
+                    <Typography variant="body2" sx={{ fontSize: "0.875rem" }}>
+                      Catalogo Servicios
+                    </Typography>
+                  }
+                />
+              </ListItem>
+              <ListItem
+                button
+                selected={selectedItem === "/servicios/AgregarServicios"}
+                onClick={() => handleNavigate("/servicios/AgregarServicios")}
+                sx={{ paddingLeft: 4 }}
+              >
+                <ListItemIcon sx={{ minWidth: 32 }}>
+                  <InventoryTwoToneIcon sx={{ fontSize: 18 }} />
+                </ListItemIcon>
+                <ListItemText
+                  primary={
+                    <Typography variant="body2" sx={{ fontSize: "0.875rem" }}>
+                      Agregar Servicios
+                    </Typography>
+                  }
+                />
+              </ListItem>
+            </List>
+          </Collapse>
+
+          <ListItem button onClick={handleAlmacenClick}>
+            <ListItemIcon sx={{ minWidth: 32 }}>
+              {openAlmacen ? <ArrowDropDownIcon /> : <ArrowRightIcon />}
+            </ListItemIcon>
+            <ListItemText primary="Almacen" />
+          </ListItem>
+
+          <Collapse in={openAlmacen} timeout="auto" unmountOnExit>
+            <List component="div" disablePadding>
+              <ListItem
+                button
+                selected={selectedItem === "/almacen/Entradas"}
+                onClick={() => handleNavigate("/almacen/Entradas")}
+                sx={{ paddingLeft: 4 }}
+              >
+                <ListItemIcon sx={{ minWidth: 32 }}>
+                  <MeetingRoomIcon sx={{ fontSize: 18 }} />
+                </ListItemIcon>
+
+                <ListItemText
+                  primary={
+                    <Typography variant="body2" sx={{ fontSize: "0.875rem" }}>
+                      Entradas
+                    </Typography>
+                  }
+                />
+              </ListItem>
+            </List>
+          </Collapse>
+
         </List>
         <Divider />
+        <ListItem
+          button
+          onClick={handleLogout}
+          sx={{ paddingLeft: 4 }}
+        >
+          <ListItemIcon sx={{ minWidth: 32 }}>
+            <LogoutIcon sx={{ fontSize: 18, color: 'red' }} />
+          </ListItemIcon>
+          <ListItemText
+            primary={
+              <Typography variant="body2" sx={{ fontSize: "0.875rem" }}>
+                Cerrar Sesión
+              </Typography>
+            }
+          />
+        </ListItem>
       </Drawer>
 
       <Main open={open}>

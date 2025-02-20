@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { NavBar } from "../components/NavBar";
 import TwoWheelerIcon from "@mui/icons-material/TwoWheeler";
 import ProductionQuantityLimitsIcon from '@mui/icons-material/ProductionQuantityLimits';
+import ConnectWithoutContactIcon from '@mui/icons-material/ConnectWithoutContact';
 import CategoryIcon from '@mui/icons-material/Category';
 import { useLocation, useNavigate } from 'react-router-dom';
 
@@ -30,6 +31,7 @@ export const HomeScreen = () => {
                     </div>
 
                     <div className="col-md-3">
+                        {/* <div className="col-md-3">
                         <div
                             className="card shadow text-center d-flex flex-column align-items-center justify-content-center btn-card"
                             onClick={() => handleNavigate('/AgregarProductos')}>
@@ -37,16 +39,27 @@ export const HomeScreen = () => {
                             <h6 className="mt-2">Agregar Productos</h6>
                         </div>
                     </div>
+                    </div> */}
 
-                    <div className="col-md-3">
-                        <div
-                            className="card shadow text-center d-flex flex-column align-items-center justify-content-center btn-card"
-                            onClick={() => handleNavigate('/Productos')}>
-                            <ProductionQuantityLimitsIcon className="icon-large" />
-                            <h6 className="mt-2">Productos</h6>
+                        <div className="col-md-3">
+                            <div
+                                className="card shadow text-center d-flex flex-column align-items-center justify-content-center btn-card"
+                                onClick={() => handleNavigate('/Productos')}>
+                                <ProductionQuantityLimitsIcon className="icon-large" />
+                                <h6 className="mt-2">Productos</h6>
+                            </div>
                         </div>
-                    </div>
 
+                        <div className="col-md-3">
+                            <div
+                                className="card shadow text-center d-flex flex-column align-items-center justify-content-center btn-card"
+                                onClick={() => handleNavigate('/Proveedores')}>
+                                <ConnectWithoutContactIcon className="icon-large" />
+                                <h6 className="mt-2">Proveedores</h6>
+                            </div>
+                        </div>
+
+                    </div>
                 </div>
             </div>
 
@@ -73,4 +86,5 @@ export const HomeScreen = () => {
             </style>
         </>
     );
+
 };

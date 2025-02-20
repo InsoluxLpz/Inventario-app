@@ -60,15 +60,10 @@ export const MotosTable = () => {
     setOpenModalAgregar(false);
   };
 
-  // const handleEliminarMoto = (id) => {
-  //     eliminarMoto(id, (idEliminado) => {
-  //         setMotos((motosActuales) => motosActuales.filter((moto) => moto.id !== idEliminado));
-  //     });
-  // };
+
 
   const handleActualizarStatus = (id) => {
     ActualizarStatus(id, (idActualizado) => {
-      // Aquí simplemente actualizas el estado de la moto en lugar de eliminarla
       setMotos((motosActuales) =>
         motosActuales.map((moto) =>
           moto.id === idActualizado ? { ...moto, status: 0 } : moto

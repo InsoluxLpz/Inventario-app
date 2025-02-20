@@ -54,16 +54,14 @@ router.put('/actualizar_proveedor/:id', async (req, res) => {
 
     try {
         const query = `UPDATE cat_proveedores_prueba SET nombreProveedor = ?, telefonoContacto = ?, rfc = ?, telefonoEmpresa = ? WHERE id = ?`;
-
         const values = [nombreProveedor, telefonoContacto, rfc, telefonoEmpresa, id];
 
-        const [result] = await db.query(query, values);
+        await db.query(query, values);
 
-        if (result.affectedRows === 0) {
-            return res.status(404).json({ message: 'Proveedor no encontrado' });
-        }
+        const [updateProveedor] = await db.query('SELECT * FROM cat_proveedores_prueba WHERE id = ?', [id]);
 
-        return res.status(200).json({ message: 'Proveedor actualizado correctamente' });
+
+        return res.status(200).json(updateProveedor[0]);
     } catch (error) {
         console.error('Error al actualizar el proveedor:', error);
         return res.status(500).json({ message: 'Error al actualizar el proveedor' });
@@ -80,7 +78,7 @@ router.put('/actualizar_status_proveedores/:id', async (req, res) => {
 
     console.log("se hare la actualizacion del status prveedores")
 
-    const query = `UPDATE cat_productos_prueba SET status = 0 WHERE id = ?`
+    const query = `UPDATE cat_proveedores_prueba SET status = 0 WHERE id = ?`
 
     try {
         const [results] = await db.query(query, [id]);
@@ -117,3 +115,4 @@ router.delete('/eliminar_proveedor/:id', async (req, res) => {
 });
 
 module.exports = router;
+
