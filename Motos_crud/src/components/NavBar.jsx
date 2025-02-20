@@ -260,6 +260,14 @@ export const NavBar = ({ onSearch }) => {
             <ListItemIcon sx={{ minWidth: 32 }}><HomeIcon /></ListItemIcon>
             <ListItemText primary="Inicio" />
           </ListItem>
+          <ListItem
+            button
+            selected={selectedItem === "/Proveedores"}
+            onClick={() => handleNavigate("/Proveedores")}
+          >
+            <ListItemIcon sx={{ minWidth: 32 }}><HomeIcon /></ListItemIcon>
+            <ListItemText primary="Proveedores" />
+          </ListItem>
 
           <ListItem
             button
