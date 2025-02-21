@@ -170,7 +170,6 @@ export const NavBar = ({ onSearch }) => {
   const routeTitles = {
     "/inicio": "Inicio",
     "/motos": "Administración de Motos",
-    "/AgregarProductos": "Productos",
     "/productos": "Productos",
     "/servicios/RealizarServicio": "Servicios",
     "/servicios/ListaServicios": "Servicios"
@@ -290,25 +289,6 @@ export const NavBar = ({ onSearch }) => {
             <List component="div" disablePadding>
               <ListItem
                 button
-                selected={selectedItem === "/AgregarProductos"}
-                onClick={() => handleNavigate("/AgregarProductos")}
-                sx={{ paddingLeft: 4 }}
-              >
-                <ListItemIcon sx={{ minWidth: 32 }}>
-                  <CategoryIcon sx={{ fontSize: 18 }} />
-                </ListItemIcon>
-
-                <ListItemText
-                  primary={
-                    <Typography variant="body2" sx={{ fontSize: "0.875rem" }}>
-                      Agregar Producto
-                    </Typography>
-                  }
-                />
-              </ListItem>
-
-              <ListItem
-                button
                 selected={selectedItem === "/productos"}
                 onClick={() => handleNavigate("/productos")}
                 sx={{ paddingLeft: 4 }}
@@ -358,23 +338,6 @@ export const NavBar = ({ onSearch }) => {
 
               <ListItem
                 button
-                selected={selectedItem === "/servicios/RealizarMantenimiento"}
-                onClick={() => handleNavigate("/servicios/RealizarMantenimiento")}
-                sx={{ paddingLeft: 4 }}
-              >
-                <ListItemIcon sx={{ minWidth: 32 }}>
-                  <InventoryTwoToneIcon sx={{ fontSize: 18 }} />
-                </ListItemIcon>
-                <ListItemText
-                  primary={
-                    <Typography variant="body2" sx={{ fontSize: "0.875rem" }}>
-                      Realizar Mantenimiento
-                    </Typography>
-                  }
-                />
-              </ListItem>
-              <ListItem
-                button
                 selected={selectedItem === "/servicios/CatalogoServicios"}
                 onClick={() => handleNavigate("/servicios/CatalogoServicios")}
                 sx={{ paddingLeft: 4 }}
@@ -390,23 +353,7 @@ export const NavBar = ({ onSearch }) => {
                   }
                 />
               </ListItem>
-              <ListItem
-                button
-                selected={selectedItem === "/servicios/AgregarServicios"}
-                onClick={() => handleNavigate("/servicios/AgregarServicios")}
-                sx={{ paddingLeft: 4 }}
-              >
-                <ListItemIcon sx={{ minWidth: 32 }}>
-                  <InventoryTwoToneIcon sx={{ fontSize: 18 }} />
-                </ListItemIcon>
-                <ListItemText
-                  primary={
-                    <Typography variant="body2" sx={{ fontSize: "0.875rem" }}>
-                      Agregar Servicios
-                    </Typography>
-                  }
-                />
-              </ListItem>
+
             </List>
           </Collapse>
 

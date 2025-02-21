@@ -5,6 +5,8 @@ import ProductionQuantityLimitsIcon from '@mui/icons-material/ProductionQuantity
 import ConnectWithoutContactIcon from '@mui/icons-material/ConnectWithoutContact';
 import CategoryIcon from '@mui/icons-material/Category';
 import { useLocation, useNavigate } from 'react-router-dom';
+import MiscellaneousServicesIcon from '@mui/icons-material/MiscellaneousServices';
+import EngineeringIcon from '@mui/icons-material/Engineering';
 
 export const HomeScreen = () => {
 
@@ -21,6 +23,7 @@ export const HomeScreen = () => {
             <NavBar />
             <div className="container mt-4">
                 <div className="row justify-content-center">
+
                     <div className="col-md-3">
                         <div
                             className="card shadow text-center d-flex flex-column align-items-center justify-content-center btn-card"
@@ -31,35 +34,39 @@ export const HomeScreen = () => {
                     </div>
 
                     <div className="col-md-3">
-                        {/* <div className="col-md-3">
                         <div
                             className="card shadow text-center d-flex flex-column align-items-center justify-content-center btn-card"
-                            onClick={() => handleNavigate('/AgregarProductos')}>
+                            onClick={() => handleNavigate('/Productos')}>
                             <ProductionQuantityLimitsIcon className="icon-large" />
-                            <h6 className="mt-2">Agregar Productos</h6>
+                            <h6 className="mt-2">Productos</h6>
                         </div>
                     </div>
-                    </div> */}
 
-                        <div className="col-md-3">
-                            <div
-                                className="card shadow text-center d-flex flex-column align-items-center justify-content-center btn-card"
-                                onClick={() => handleNavigate('/Productos')}>
-                                <ProductionQuantityLimitsIcon className="icon-large" />
-                                <h6 className="mt-2">Productos</h6>
-                            </div>
+                    <div className="col-md-3">
+                        <div
+                            className="card shadow text-center d-flex flex-column align-items-center justify-content-center btn-card"
+                            onClick={() => handleNavigate('/Proveedores')}>
+                            <ConnectWithoutContactIcon className="icon-large" />
+                            <h6 className="mt-2">Proveedores</h6>
                         </div>
-
-                        <div className="col-md-3">
-                            <div
-                                className="card shadow text-center d-flex flex-column align-items-center justify-content-center btn-card"
-                                onClick={() => handleNavigate('/Proveedores')}>
-                                <ConnectWithoutContactIcon className="icon-large" />
-                                <h6 className="mt-2">Proveedores</h6>
-                            </div>
-                        </div>
-
                     </div>
+                    <div className="col-md-3">
+                        <div
+                            className="card shadow text-center d-flex flex-column align-items-center justify-content-center btn-card"
+                            onClick={() => handleNavigate('/servicios/CatalogoServicios')}>
+                            <MiscellaneousServicesIcon className="icon-large" />
+                            <h6 className="mt-2">Servicios</h6>
+                        </div>
+                    </div>
+                    <div className="col-md-3 m-3">
+                        <div
+                            className="card shadow text-center d-flex flex-column align-items-center justify-content-center btn-card"
+                            onClick={() => handleNavigate('/servicios/ListaMantenimientos')}>
+                            <EngineeringIcon className="icon-large" />
+                            <h6 className="mt-2">Mantenimientos</h6>
+                        </div>
+                    </div>
+
                 </div>
             </div>
 

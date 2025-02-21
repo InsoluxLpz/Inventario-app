@@ -1,27 +1,24 @@
 import React, { useEffect, useState } from "react";
-import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
-import InventoryIcon from "@mui/icons-material/Inventory";
-import Paper from "@mui/material/Paper";
+import AddchartIcon from '@mui/icons-material/Addchart';
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
-import { Box, IconButton, Typography } from "@mui/material";
+import { Box, Button, IconButton, Typography } from "@mui/material";
 import { NavBar } from "../NavBar";
 import { EliminarServicio, ObtenerServicios } from "../../api/ServiciosApi";
-import { Navigate, useNavigate } from "react-router-dom";
 import { EditarServiciosModal } from "./EditarServiciosModal";
 import DeleteIcon from '@mui/icons-material/Delete';
+import { AgregarServicios } from "./AgregarServicios";
 
 export const CatalogoServicios = () => {
     const [servicios, setServicios] = useState([]);
-    const handleNavigate = (path) => navigate(path);
-    const navigate = useNavigate();
     const [openModalEditar, setOpenModalEditar] = useState(false);
     const [servicioSeleccionado, setServicioSeleccionado] = useState(null);
+    const [openModalAgregar, setOpenModalAgregar] = useState(false);
 
     const handleOpenModalEdit = (servicio) => {
         setServicioSeleccionado(servicio);
@@ -31,6 +28,13 @@ export const CatalogoServicios = () => {
     const handleCloseModalEdit = () => {
         setOpenModalEditar(false);
         setServicioSeleccionado(null);
+    };
+    const handleOpenModalAgregar = () => {
+        setOpenModalAgregar(true);
+    };
+
+    const handleCloseModalAgregar = () => {
+        setOpenModalAgregar(false);
     };
 
 
@@ -65,52 +69,58 @@ export const CatalogoServicios = () => {
     return (
         <>
             <NavBar />
-            <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%", maxWidth: 1870, margin: "0 auto" }}>
-                <Paper sx={{ width: "100%", p: 3, boxShadow: 3, borderRadius: 2, backgroundColor: "#f4f6f7" }}>
-                    <Typography variant="h5" sx={{ fontWeight: "bold", color: "#a93226", textAlign: "center" }}>
-                        Catalogo de Servicios
-                    </Typography>
-                    <TableContainer sx={{ maxHeight: 800, backgroundColor: "#f4f6f7 " }}>
-                        <Table stickyHeader>
-                            <TableHead>
-                                <TableRow>
-                                    <TableCell align="center" sx={{ fontWeight: "bold", backgroundColor: "#a93226", color: "white" }}>Id</TableCell>
-                                    <TableCell align="center" sx={{ fontWeight: "bold", backgroundColor: "#a93226", color: "white" }}>Nombre</TableCell>
-                                    <TableCell align="center" sx={{ fontWeight: "bold", backgroundColor: "#a93226", color: "white" }}>Descripción</TableCell>
-                                    <TableCell align="center" sx={{ fontWeight: "bold", backgroundColor: "#a93226", color: "white" }}>Opciones</TableCell>
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {servicios.map((servicio) => (
-                                    <TableRow key={servicio.id}>
-                                        <TableCell align="center">{servicio.id}</TableCell>
-                                        <TableCell align="center">{servicio.nombre}</TableCell>
-                                        <TableCell align="center">{servicio.descripcion}</TableCell>
-                                        <TableCell align="center">
-                                            <IconButton sx={{ backgroundColor: "#f39c12", ":hover": { backgroundColor: "#f8c471", opacity: 0.7 } }} onClick={() => handleOpenModalEdit(servicio)}>
-                                                <EditIcon />
-                                            </IconButton>
-                                            <IconButton color="error" sx={{ marginLeft: "10px" }} onClick={() => handleEliminarServicio(servicio.id)}>
-                                                <DeleteIcon sx={{ fontSize: 35 }} />
-                                            </IconButton>
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </TableContainer>
-                </Paper>
-                <IconButton sx={{ backgroundColor: "#e74c3c", color: "white", ":hover": { opacity: 0.7 }, position: "fixed", right: 50, bottom: 50 }} onClick={() => handleNavigate("/servicios/AgregarServicios")}>
-                    <AddIcon sx={{ fontSize: 40 }} />
-                </IconButton>
+
+            <Button
+                variant="contained"
+                sx={{ backgroundColor: "#1f618d", color: "white", ":hover": { opacity: 0.7 }, position: "fixed", right: 50, top: 80, borderRadius: "8px", padding: "10px 20px", display: "flex", alignItems: "center", gap: "8px", }}
+                onClick={handleOpenModalAgregar}>
+                <AddchartIcon sx={{ fontSize: 24 }} />
+                Agregar Servicio
+            </Button>
+
+            <Box display="flex" justifyContent="space-between" alignItems="center" sx={{ marginTop: 4 }}>
             </Box>
 
-            <EditarServiciosModal
-                onClose={handleCloseModalEdit}
-                modalOpen={openModalEditar}
-                servicio={servicioSeleccionado}
-                actualizarLista={actualizarLista}
-            />
+            <Box width="100%" maxWidth={1700} margin="0 auto">
+                <Box sx={{ backgroundColor: "#1f618d", padding: 1.5, borderRadius: "5px 5px 0 0" }}>
+                    <Typography variant="h6" color="white">
+                        CATALOGO DE SERVICIOS
+                    </Typography>
+                </Box>
+                <TableContainer sx={{ maxHeight: 800, backgroundColor: "#f4f6f7 " }}>
+                    <Table stickyHeader>
+                        <TableHead>
+                            <TableRow>
+                                <TableCell align="center" sx={{ fontWeight: "bold", color: "black" }}>Id</TableCell>
+                                <TableCell align="center" sx={{ fontWeight: "bold", color: "black" }}>Nombre</TableCell>
+                                <TableCell align="center" sx={{ fontWeight: "bold", color: "black" }}>Descripción</TableCell>
+                                <TableCell align="center" sx={{ fontWeight: "bold", color: "black" }}>Opciones</TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {servicios.map((servicio) => (
+                                <TableRow key={servicio.id}>
+                                    <TableCell align="center">{servicio.id}</TableCell>
+                                    <TableCell align="center">{servicio.nombre}</TableCell>
+                                    <TableCell align="center">{servicio.descripcion}</TableCell>
+                                    <TableCell align="center">
+                                        <IconButton sx={{ color: 'black' }} onClick={() => handleOpenModalEdit(servicio)}>
+                                            <EditIcon />
+                                        </IconButton>
+                                        <IconButton sx={{ marginLeft: "10px", color: 'black' }} onClick={() => handleEliminarServicio(servicio.id)}>
+                                            <DeleteIcon sx={{ fontSize: 35, color: 'red' }} />
+                                        </IconButton>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+            </Box>
+
+            <EditarServiciosModal onClose={handleCloseModalEdit} modalOpen={openModalEditar} servicio={servicioSeleccionado} actualizarLista={actualizarLista} />
+
+            <AgregarServicios onClose={handleCloseModalAgregar} modalOpen={openModalAgregar} />
         </>
     );
 };

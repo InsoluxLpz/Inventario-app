@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
-import InventoryIcon from "@mui/icons-material/Inventory";
 import Paper from "@mui/material/Paper";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -14,10 +13,13 @@ import { NavBar } from "../NavBar";
 import { obtenerProductos, ActualizarStatus } from "../../api/productosApi";
 import { EditarProductoModal } from "../relacionProductos/EditarProductoModal";
 import { useNavigate } from "react-router";
+import { AgregarProductoModal } from "./AgregarProductoModal";
 import AddchartIcon from '@mui/icons-material/Addchart';
+
 
 export const ProductoTable = () => {
   const [openModalEditar, setOpenModalEditar] = useState(false);
+  const [openModalAgregar, setOpenModalAgregar] = useState(false);
   const [productos, setProductos] = useState([]);
   const [productoSeleccionado, setProductoSeleccionado] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -37,6 +39,13 @@ export const ProductoTable = () => {
     } catch (error) {
       console.error("Error en la petición al obtener Productos");
     }
+  };
+
+  const handleModalAgregar = () => {
+    setOpenModalAgregar(true);
+  };
+  const handleCloseModalAgregar = () => {
+    setOpenModalAgregar(false);
   };
 
   const actualizarLista = (productoActualizado) => {
@@ -70,9 +79,8 @@ export const ProductoTable = () => {
 
       <Button
         variant="contained"
-        sx={{ backgroundColor: "#1f618d", color: "white", ":hover": { opacity: 0.7 }, position: "fixed", right: 50, top: 80, borderRadius: "8px", padding: "10px 20px", display: "flex", alignItems: "center", gap: "8px" }}
-        onClick={() => navigate("/AgregarProductos")}
-      >
+        sx={{ backgroundColor: "#1f618d", color: "white", ":hover": { opacity: 0.7 }, position: "fixed", right: 50, top: 80, borderRadius: "8px", padding: "10px 20px", display: "flex", alignItems: "center", gap: "8px", }}
+        onClick={handleModalAgregar}>
         <AddchartIcon sx={{ fontSize: 24 }} />
         Agregar Productos
       </Button>
@@ -126,9 +134,9 @@ export const ProductoTable = () => {
         </Paper>
       </Box>
 
-
-
       <EditarProductoModal modalOpen={openModalEditar} onClose={() => setOpenModalEditar(false)} producto={productoSeleccionado} actualizarLista={actualizarLista} />
+
+      <AgregarProductoModal modalOpen={openModalAgregar} onClose={handleCloseModalAgregar} />
 
     </>
   );

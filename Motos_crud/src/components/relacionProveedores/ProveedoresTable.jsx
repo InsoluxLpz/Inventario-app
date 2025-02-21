@@ -1,19 +1,6 @@
 import React, { useState, useEffect } from "react";
-import {
-  Box,
-  IconButton,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Typography,
-  FormControlLabel,
-  Switch,
-} from "@mui/material";
-import AddIcon from "@mui/icons-material/Add";
+import { Box, IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, FormControlLabel, Switch, Button, } from "@mui/material";
+import AddchartIcon from '@mui/icons-material/Addchart';
 import InventoryIcon from "@mui/icons-material/Inventory";
 import EditIcon from "@mui/icons-material/Edit";
 import { obtenerProveedores, ActualizarStatus } from "../../api/proovedoresApi";
@@ -91,7 +78,7 @@ export const ProveedoresTable = () => {
     const matchesSearchTerm = proveedor.nombreProveedor
       ?.toLowerCase()
       .includes(searchTerm.toLowerCase());
-    const matchesStatus = showInactive || proveedor.status !== 0; // Incluye a proveedores activos si 'showInactive' es falso
+    const matchesStatus = showInactive || proveedor.status !== 0;
 
     return matchesSearchTerm && matchesStatus;
   });
@@ -99,8 +86,17 @@ export const ProveedoresTable = () => {
   return (
     <>
       <NavBar onSearch={setSearchTerm} />
+
+      <Button
+        variant="contained"
+        sx={{ backgroundColor: "#1f618d", color: "white", ":hover": { opacity: 0.7 }, position: "fixed", right: 50, top: 80, borderRadius: "8px", padding: "10px 20px", display: "flex", alignItems: "center", gap: "8px", }}
+        onClick={handleOpenModalAgregar}>
+        <AddchartIcon sx={{ fontSize: 24 }} />
+        Agregar Proveedores
+      </Button>
+
       <Box
-        sx={{ display: "flex", justifyContent: "flex-end", marginBottom: 2 }}
+        sx={{ display: "flex", justifyContent: "flex-end", marginBottom: 2, marginTop: 2 }}
       >
         <FormControlLabel
           control={
@@ -226,25 +222,7 @@ export const ProveedoresTable = () => {
             </Table>
           </TableContainer>
         </Paper>
-        <IconButton
-          variant="contained"
-          onClick={handleOpenModalAgregar}
-          sx={{
-            backgroundColor: "#e74c3c",
-            color: "white",
-            ":hover": { backgroundColor: "#e74c3c", opacity: 0.7 },
-            position: "fixed",
-            right: 50,
-            bottom: 50,
-          }}
-          style={{
-            alignSelf: "flex-end",
-            marginBottom: "10px",
-            marginTop: "10px",
-          }}
-        >
-          <AddIcon sx={{ fontSize: 40 }} />
-        </IconButton>
+
       </Box>
       <AgregarProveedoresModal
         modalOpen={openModalAgregar}

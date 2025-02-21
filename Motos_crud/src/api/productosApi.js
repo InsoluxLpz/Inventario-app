@@ -128,5 +128,58 @@ export const ActualizarStatus = async (id, actualizarLista) => {
         console.error('Error al realizar la solicitud:', error);
         Swal.fire('Error', 'Hubo un problema al conectar con el servidor.', 'error');
     }
-    };
+};
+
+export const obtenerEntradas = async () => {
+    try {
+        const response = await fetch(`${API_URL}/productos/obtener_entradas`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+        });
+
+        if (response.ok) {
+            const data = await response.json()
+            return data;
+        }
+
+    } catch (error) {
+        console.error('Error al realizar la solicitud:', error);
+        Swal.fire('Error', 'Hubo un problema al conectar con el servidor.', 'error');
+        return null;
+    }
+};
+
+export const agregarEntradas = async (entradaData) => {
+    try {
+
+        const response = await fetch(`${API_URL}/productos/agregar_entrada`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(entradaData),
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            Swal.fire({
+                title: 'Éxito',
+                text: 'Entrada agregada correctamente.',
+                icon: 'success',
+                confirmButtonText: 'Aceptar'
+            });
+            return data;
+        } else {
+            Swal.fire('Error', data.message || 'Hubo un problema al agregar la entrada.', 'error');
+            return { error: data.message || 'Hubo un problema al agregar la moto.' };
+        }
+    } catch (error) {
+        console.error('Error al realizar la solicitud:', error);
+        Swal.fire('Error', 'Hubo un problema al conectar con el servidor.', 'error');
+        return null;
+    }
+};
 

@@ -8,7 +8,8 @@ import AddIcon from "@mui/icons-material/Add";
 import HomeIcon from '@mui/icons-material/Home';
 import HomeRepairServiceIcon from '@mui/icons-material/HomeRepairService';
 
-export const AgregarServicios = () => {
+export const AgregarServicios = ({ modalOpen, onClose }) => {
+    if (!modalOpen) return null;
 
     const [servicio, setServicio] = useState({
         nombre: "",
@@ -67,77 +68,62 @@ export const AgregarServicios = () => {
         <>
             <NavBar />
 
-            <Button
-                variant="contained"
-                sx={{ backgroundColor: "#1f618d", color: "white", ":hover": { opacity: 0.7 }, position: "fixed", right: 50, top: 80, borderRadius: "8px", padding: "10px 20px", display: "flex", alignItems: "center", gap: "8px" }}
-                onClick={() => navigate("/servicios/CatalogoServicios")}
-            >
-                <HomeRepairServiceIcon sx={{ fontSize: 24 }} />
-                Servicios
-            </Button>
 
-            <Box display="flex" justifyContent="space-between" alignItems="center" sx={{ marginTop: 4 }}>
-                {/* <Button variant="contained" color="primary" onClick={() => navigate("/servicios")}>
-                    📋 Catálogo Servicios
-                </Button> */}
-            </Box>
-
-            <Box width="100%" maxWidth={1700} margin="0 auto">
-                <Box sx={{ backgroundColor: "#1f618d", padding: 1.5, borderRadius: "5px 5px 0 0" }}>
-                    <Typography variant="h6" color="white">
-                        AGREGAR SERVICIO
-                    </Typography>
-                </Box>
-
-                <form onSubmit={handleSubmit} style={{ padding: "20px", background: "#f2f3f4" }}>
-                    <Box sx={{ maxWidth: "2000px", margin: "0 auto" }}>
-                        <div className="row">
-                            <div className="col-md-6 mb-3">
-                                <label className="form-label">Nombre</label>
-                                <input
-                                    type="text"
-                                    name="nombre"
-                                    className={`form-control ${errors.nombre ? "is-invalid" : ""} `}
-                                    value={servicio.nombre}
-                                    onChange={handleChange}
-                                />
-                                {errors.nombre && (
-                                    <div className="invalid-feedback">{errors.nombre}</div>
-                                )}
+            <div className="modal-backdrop">
+                <div className="modal fade show" style={{ display: "block" }} aria-labelledby="exampleModalLabel" tabIndex="-1" role="dialog">
+                    <div className="modal-dialog" role="document" style={{ maxWidth: "60vw", marginTop: 90 }}>
+                        <div className="modal-content w-100" style={{ maxWidth: "60vw" }}>
+                            <div className="modal-header" style={{ backgroundColor: '#1f618d' }}>
+                                <h5 className="modal-title" style={{ color: 'white' }}>Agregar Servicio</h5>
                             </div>
-                        </div>
-                        <div className="row">
-                            <div className="col-md-6 mb-3">
-                                <label className="form-label">Descripción</label>
-                                <textarea
-                                    type="text"
-                                    name="descripcion"
-                                    className={`form-control ${errors.descripcion ? "is-invalid" : ""}`}
-                                    value={servicio.descripcion}
-                                    onChange={handleChange}
-                                />
-                                {errors.descripcion && (
-                                    <div className="invalid-feedback">{errors.descripcion}</div>
-                                )}
-                            </div>
-                        </div>
 
-                    </Box>
-                    <Box display="flex" gap={2}>
-                        <Button type="submit" style={{ backgroundColor: "#0091ea", color: "white" }}>
-                            Guardar
-                        </Button>
-                        <Button type="button" style={{ backgroundColor: "#85929e", color: "white", }} onClick={() => handleNavigate("/servicios/CatalogoServicios")}>
-                            Cancelar
-                        </Button>
-                    </Box>
-                </form>
-                <IconButton sx={{ backgroundColor: "#1f618d", color: "white", ":hover": { backgroundColor: '#aed6f1 ' }, position: "fixed", right: 50, bottom: 50 }}
-                    onClick={() => navigate("/inicio")}
-                >
-                    <HomeIcon sx={{ fontSize: 40 }} />
-                </IconButton>
-            </Box >
+                            <form onSubmit={handleSubmit} style={{ padding: "20px" }}>
+                                <Box sx={{ maxWidth: "2000px", margin: "0 auto" }}>
+                                    <div className="row">
+                                        <div className="col-md-6 mb-3">
+                                            <label className="form-label">Nombre</label>
+                                            <input
+                                                type="text"
+                                                name="nombre"
+                                                className={`form-control ${errors.nombre ? "is-invalid" : ""} `}
+                                                value={servicio.nombre}
+                                                onChange={handleChange}
+                                            />
+                                            {errors.nombre && (
+                                                <div className="invalid-feedback">{errors.nombre}</div>
+                                            )}
+                                        </div>
+                                    </div>
+                                    <div className="row">
+                                        <div className="col-md-6 mb-3">
+                                            <label className="form-label">Descripción</label>
+                                            <textarea
+                                                type="text"
+                                                name="descripcion"
+                                                className={`form-control ${errors.descripcion ? "is-invalid" : ""}`}
+                                                value={servicio.descripcion}
+                                                onChange={handleChange}
+                                            />
+                                            {errors.descripcion && (
+                                                <div className="invalid-feedback">{errors.descripcion}</div>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                </Box>
+                                <Box display="flex" gap={2}>
+                                    <Button type="submit" style={{ backgroundColor: "#0091ea", color: "white" }}>
+                                        Guardar
+                                    </Button>
+                                    <Button type="button" style={{ backgroundColor: "#85929e", color: "white", }} onClick={onClose}>
+                                        Cancelar
+                                    </Button>
+                                </Box>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </>
     );
 };

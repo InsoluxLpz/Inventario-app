@@ -1,204 +1,247 @@
-import { useState } from "react";
-import { agregarMoto } from "../../api/motosApi";
-import { Button } from '@mui/material';
+import React, { useEffect, useState } from 'react'
+import { Button, IconButton, Tooltip } from '@mui/material';
+import { NavBar } from '../NavBar';
+import Select from "react-select";
+import { agregarProductos } from '../../api/productosApi';
+import { obtenerProveedores } from '../../api/proveedoresApi';
 
-export const AgregarProductoModal = ({ onClose, modalOpen, agregarMotoLista, listaMarcas }) => {
+
+export const AgregarProductoModal = ({ modalOpen, onClose }) => {
     if (!modalOpen) return null;
 
-    const marcas = listaMarcas;
-
     const [formData, setFormData] = useState({
-        inciso: "",
-        marca: "",
-        modelo: "",
-        color: "",
-        motor: "",
-        no_serie: "",
-        placa: "",
-        propietario: "",
-        fecha_compra: "",
-        status: "",
-        nota: "",
+        codigo: "",
+        nombre: "",
+        grupo: "",
+        precio: "",
+        descripcion: "",
+        unidad_medida: "",
+        proveedores: [],
     });
 
     const [errors, setErrors] = useState({});
+    const [proveedores, setProveedores] = useState([]);
+
+    useEffect(() => {
+        const cargarProveedores = async () => {
+            const data = await obtenerProveedores();
+            console.log(data)
+            if (data) {
+                setProveedores(data.map((prov) => ({ value: prov.nombreProveedor, label: prov.nombreProveedor })));
+            }
+        };
+        cargarProveedores();
+    }, []);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        const fieldsToClean = ["placa", "inciso", "no_serie"];
-        let cleanedValue = value;
-        if (fieldsToClean.includes(name)) {
-            cleanedValue = value.replace(/\s+/g, "").trim();
-        }
-
-        setFormData((prev) => ({ ...prev, [name]: cleanedValue }));
+        setFormData((prev) => ({ ...prev, [name]: value }));
         setErrors((prev) => ({ ...prev, [name]: "" }));
+    };
+
+    const handleSelectChange = (selectedOptions) => {
+        setFormData((prev) => ({
+            ...prev,
+            proveedores: selectedOptions ? selectedOptions.map(option => option.value) : [],
+        }));
+        setErrors((prev) => ({ ...prev, proveedores: "" }));
     };
 
     const validateForm = () => {
         const newErrors = {};
+
         Object.keys(formData).forEach((key) => {
-            // Excluir "nota" de la validación de campos vacíos
-            if (key !== "nota" && !formData[key].trim()) {
-                newErrors[key] = "Este campo es obligatorio";
+            if (key !== "descripcion") {
+                if (Array.isArray(formData[key])) {
+                    if (formData[key].length === 0) {
+                        newErrors[key] = "Este campo es obligatorio";
+                    }
+                } else if (!formData[key].trim()) {
+                    newErrors[key] = "Este campo es obligatorio";
+                }
             }
         });
+
         setErrors(newErrors);
-        return Object.keys(newErrors).length === 0; // Retorna true si no hay errores
+        return Object.keys(newErrors).length === 0;
     };
-
-
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (!validateForm()) return; // Validación de campos vacíos
+        if (!validateForm()) return;
+        const nuevoProducto = await agregarProductos(formData);
 
-        const result = await agregarMoto(formData);
-
-        if (result && result.error) {
-            // Si la API devuelve un error, verificamos si es un problema de duplicado
-            const newErrors = {};
-
-            if (result.error.includes("El número de serie ya existe.")) {
-                newErrors.no_serie = "Este número de serie ya está registrado.";
-            }
-            if (result.error.includes("placa ya existe")) {
-                newErrors.placa = "Esta placa ya está registrada.";
-            }
-            if (result.error.includes("El inciso ya existe.")) {
-                newErrors.inciso = "Este inciso ya está registrado.";
-            }
-
-            setErrors(newErrors);
-            return;
-        }
-
-        if (result) {
-            agregarMotoLista(result);
-            onClose();
+        if (nuevoProducto && !nuevoProducto.error) {
+            console.log(nuevoProducto);
+            setFormData({
+                codigo: "",
+                nombre: "",
+                grupo: "",
+                precio: "",
+                descripcion: "",
+                unidad_medida: "",
+                proveedores: [],
+            });
+            setErrors({});
+        } else if (nuevoProducto?.error) {
+            setErrors((prev) => ({ ...prev, codigo: nuevoProducto.error }));
         }
     };
 
     return (
-        <div >
-            <div style={{ display: "block" }} aria-labelledby="exampleModalLabel" tabIndex="-1" role="dialog">
-                <div className="modal-dialog" role="document" style={{ maxWidth: "60vw" }}>
-                    <div className="modal-content w-100" style={{ maxWidth: "60vw" }}>
-                        <div className="modal-header" style={{ backgroundColor: '#a93226' }}>
-                            <h5 className="modal-title" style={{ color: 'white' }}>Agregar Moto</h5>
+        <>
+            <NavBar />
+
+            <div className="modal-backdrop">
+                <div className="modal fade show" style={{ display: "block" }} aria-labelledby="exampleModalLabel" tabIndex="-1" role="dialog">
+                    <div className="modal-dialog" role="document" style={{ maxWidth: "60vw", marginTop: 90 }}>
+                        <div className="modal-content w-100" style={{ maxWidth: "60vw" }}>
+                            <div className="modal-header" style={{ backgroundColor: '#1f618d' }}>
+                                <h5 className="modal-title" style={{ color: 'white' }}>Agregar Producto</h5>
+                            </div>
+
+                            <form onSubmit={handleSubmit} style={{ padding: "20px", maxHeight: "300vh" }}>
+                                <div className="modal-body">
+                                    <div className="row">
+                                        <div className="col-md-6 mb-3">
+                                            <label className="form-label">Código</label>
+                                            <input
+                                                type="text"
+                                                name="codigo"
+                                                className={`form-control ${errors.codigo ? "is-invalid" : ""}`}
+                                                value={formData.codigo}
+                                                onChange={handleChange}
+                                            />
+                                            {errors.codigo && (
+                                                <div className="invalid-feedback">{errors.codigo}</div>
+                                            )}
+                                        </div>
+                                        <div className="col-md-6 mb-3">
+                                            <label className="form-label">Nombre</label>
+                                            <input
+                                                type="text"
+                                                name="nombre"
+                                                className={`form-control ${errors.nombre ? "is-invalid" : ""}`}
+                                                value={formData.nombre}
+                                                onChange={handleChange}
+                                            />
+                                            {errors.nombre && (
+                                                <div className="invalid-feedback">{errors.nombre}</div>
+                                            )}
+                                        </div>
+                                        <div className="col-md-6 mb-3">
+                                            <label className="form-label">Grupo</label>
+                                            <select
+                                                name="grupo"
+                                                className={`form-control ${errors.grupo ? "is-invalid" : ""}`}
+                                                value={formData.grupo}
+                                                onChange={handleChange}
+                                            >
+                                                <option value="" disabled>
+                                                    SELECCIONA
+                                                </option>
+                                                <option>FRENOS</option>
+                                                <option>LLANTAS</option>
+                                                <option>ACEITE</option>
+                                            </select>
+                                            {errors.grupo && (
+                                                <div className="invalid-feedback">{errors.grupo}</div>
+                                            )}
+                                        </div>
+                                        <div className="col-md-6 mb-3">
+                                            <label className="form-label">Precio</label>
+                                            <div className="input-group">
+                                                <span className="input-group-text" style={{ height: 47 }}>
+                                                    $
+                                                </span>
+                                                <input
+                                                    type="number"
+                                                    name="precio"
+                                                    className={`form-control ${errors.precio ? "is-invalid" : ""}`}
+                                                    value={formData.precio}
+                                                    onChange={handleChange}
+                                                />
+                                            </div>
+                                            {errors.precio && (
+                                                <div className="invalid-feedback">{errors.precio}</div>
+                                            )}
+                                        </div>
+
+                                        <div className="col-md-12 mb-3">
+                                            <label className="form-label">Descripción</label>
+                                            <textarea
+                                                name="descripcion"
+                                                className={`form-control ${errors.descripcion ? "is-valid" : ""
+                                                    }`}
+                                                value={formData.descripcion}
+                                                onChange={handleChange}
+                                            ></textarea>
+                                        </div>
+                                        <div className="col-md-6 mb-3">
+                                            <label className="form-label">Unidad de Medida</label>
+                                            <select
+                                                name="unidad_medida"
+                                                className={`form-control ${errors.unidad_medida ? "is-invalid" : ""
+                                                    }`}
+                                                value={formData.unidad_medida}
+                                                onChange={handleChange}
+                                            >
+                                                <option value="" disabled>
+                                                    SELECCIONA
+                                                </option>
+                                                <option>PIEZAS</option>
+                                                <option>CAJAS</option>
+                                                <option>LITROS</option>
+                                            </select>
+                                            {errors.unidad_medida && (
+                                                <div className="invalid-feedback">{errors.unidad_medida}</div>
+                                            )}
+                                        </div>
+
+                                        <div className="col-md-6 mb-3">
+                                            <label className="form-label">Proveedor</label>
+                                            <Select
+                                                name="proveedores"
+                                                options={proveedores}
+                                                isMulti
+                                                classNamePrefix="select"
+                                                value={formData.proveedores.map((p) => ({ value: p, label: p, }))}
+                                                onChange={handleSelectChange}
+                                                styles={{
+                                                    control: (base) => ({
+                                                        ...base,
+                                                        minHeight: "45px",
+                                                        height: "45px",
+                                                    }),
+                                                }}
+                                            />
+                                            {errors.proveedores && (
+                                                <div className="text-danger small">{errors.proveedores}</div>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Botones */}
+                                <div className="modal-footer ">
+                                    <Button type="submit" style={{ backgroundColor: "#0091ea", color: "white", padding: "10px 20px", }} onClick={handleSubmit}>
+                                        Guardar
+                                    </Button>
+
+                                    <Button type="button" style={{ backgroundColor: "#85929e", color: "white", padding: "10px 20px", margin: 20 }}
+
+                                        onClick={onClose}
+                                    >
+                                        Cancelar
+                                    </Button>
+                                </div>
+                            </form>
                         </div>
-                        <form onSubmit={handleSubmit}>
-                            <div className="modal-body">
-                                <div className="row">
-                                    <div className="col-md-4 mb-3">
-                                        <label className="form-label">Inciso</label>
-                                        <input type="number" name="inciso" className={`form-control ${errors.inciso ? "is-invalid" : ""}`} value={formData.inciso} onChange={handleChange} />
-                                        {errors.inciso && <div className="invalid-feedback">{errors.inciso}</div>}
-                                    </div>
-                                    <div className="col-md-4 mb-3">
-                                        <label className="form-label">Marca</label>
-                                        <select
-                                            name="marca"
-                                            className={`form-control ${errors.marca ? "is-invalid" : ""}`}
-                                            value={formData.marca}
-                                            onChange={(e) => setFormData({ ...formData, marca: e.target.value })}
-                                        >
-                                            <option value="" disabled>Selecciona</option>
-                                            {marcas.map((marca) => (
-                                                <option key={marca.id} value={marca.nombre}>{marca.nombre}</option>
-                                            ))}
-                                        </select>
-                                        {errors.marca && <div className="invalid-feedback">{errors.marca}</div>}
-                                    </div>
-                                    <div className="col-md-4 mb-3">
-                                        <label className="form-label">Año</label>
-                                        <input type="number" name="modelo" className={`form-control ${errors.modelo ? "is-invalid" : ""}`} value={formData.modelo} onChange={handleChange} />
-                                        {errors.modelo && <div className="invalid-feedback">{errors.modelo}</div>}
-                                    </div>
-                                </div>
-
-                                <div className="row">
-                                    <div className="col-md-4 mb-3">
-                                        <label className="form-label">Modelo</label>
-                                        <input type="text" className={`form-control `} />
-                                        {/* {errors.modelo && <div className="invalid-feedback">{errors.modelo}</div>} */}
-                                    </div>
-                                    {/* <div className="col-md-4 mb-3">
-                                        <label className="form-label">Modelo</label>
-                                        <input type="text" name="modelo" className={`form-control ${errors.modelo ? "is-invalid" : ""}`} value={formData.modelo} onChange={handleChange} />
-                                        {errors.modelo && <div className="invalid-feedback">{errors.modelo}</div>}
-                                    </div> */}
-
-                                    <div className="col-md-4 mb-3">
-                                        <label className="form-label">Color</label>
-                                        <input type="text" name="color" className={`form-control ${errors.color ? "is-invalid" : ""}`} value={formData.color} onChange={handleChange} />
-                                        {errors.color && <div className="invalid-feedback">{errors.color}</div>}
-                                    </div>
-                                    <div className="col-md-4 mb-3">
-                                        <label className="form-label">No. Serie</label>
-                                        <input type="text" name="no_serie" className={`form-control ${errors.no_serie ? "is-invalid" : ""}`} value={formData.no_serie} onChange={handleChange} />
-                                        {errors.no_serie && <div className="invalid-feedback">{errors.no_serie}</div>}
-                                    </div>
-                                </div>
-
-                                <div className="row">
-                                    <div className="col-md-4 mb-3">
-                                        <label className="form-label">Motor</label>
-                                        <input type="text" name="motor" className={`form-control ${errors.motor ? "is-invalid" : ""}`} value={formData.motor} onChange={handleChange} />
-                                        {errors.motor && <div className="invalid-feedback">{errors.motor}</div>}
-                                    </div>
-                                    <div className="col-md-4 mb-3">
-                                        <label className="form-label">Placa</label>
-                                        <input type="text" name="placa" className={`form-control ${errors.placa ? "is-invalid" : ""}`} value={formData.placa} onChange={handleChange} />
-                                        {errors.placa && <div className="invalid-feedback">{errors.placa}</div>}
-                                    </div>
-                                    <div className="col-md-4 mb-3">
-                                        <label className="form-label">Propietario</label>
-                                        <input type="text" name="propietario" className={`form-control ${errors.propietario ? "is-invalid" : ""}`} value={formData.propietario} onChange={handleChange} />
-                                        {errors.propietario && <div className="invalid-feedback">{errors.propietario}</div>}
-                                    </div>
-                                </div>
-
-                                <div className="row">
-                                    <div className="col-md-4 mb-3">
-                                        <label className="form-label">Fecha de Compra</label>
-                                        <input type="date" name="fecha_compra" className={`form-control ${errors.fecha_compra ? "is-invalid" : ""}`} value={formData.fecha_compra} onChange={handleChange} />
-                                        {errors.fecha_compra && <div className="invalid-feedback">{errors.fecha_compra}</div>}
-                                    </div>
-                                    <div className="col-md-4 mb-3">
-                                        <label className="form-label">Status</label>
-                                        <select
-                                            name="status"
-                                            className={`form-control ${errors.status ? "is-invalid" : ""}`}
-                                            value={formData.status}
-                                            onChange={handleChange}
-                                        >
-                                            <option value="" disabled>Selecciona</option>
-                                            <option value="0">Inactiva</option>
-                                            <option value="1">Activa</option>
-                                            <option value="2">Taller</option>
-                                            <option value="3">Accidente o Tránsito</option>
-                                        </select>
-                                        {errors.status && <div className="invalid-feedback">{errors.status}</div>}
-                                    </div>
-                                </div>
-                                <div>
-                                    <div className="mb-3">
-                                        <label className="form-label">Nota</label>
-                                        <textarea name="nota" className={`form-control`} value={formData.nota} onChange={handleChange}></textarea>
-                                    </div>
-                                </div>
-
-                            </div>
-                            <div className="modal-footer">
-                                <Button type="button" style={{ backgroundColor: '#a93226', color: 'white' }} onClick={onClose}>Cancelar</Button>
-                                <Button type="submit" style={{ backgroundColor: '#f5b041  ', marginLeft: 5, color: 'white' }} onClick={handleSubmit}>Guardar</Button>
-                            </div>
-                        </form>
                     </div>
                 </div>
             </div>
-        </div>
+
+        </>
     );
 };

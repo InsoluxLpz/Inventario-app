@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import AddIcon from "@mui/icons-material/Add";
+import AddchartIcon from '@mui/icons-material/Addchart';
 import EditIcon from "@mui/icons-material/Edit";
 import InventoryIcon from "@mui/icons-material/Inventory";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
@@ -10,20 +10,14 @@ import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
-import {
-  Box,
-  FormControlLabel,
-  IconButton,
-  Switch,
-  Typography,
-} from "@mui/material";
-import { EditarModal } from "../EditarModal";
-import { AgregarModal } from "../AgregarModal";
+import { Box, Button, FormControlLabel, IconButton, Switch, Typography, } from "@mui/material";
 import { ActualizarStatus, obtenerMotos } from "../../api/motosApi";
 import { useEffect } from "react";
 import { NavBar } from "../NavBar";
 import { obtenerMarcas } from "../../api/marcasApi";
 import { MarcasModal } from "./MarcasModal";
+import { EditarModal } from "./EditarModal";
+import { AgregarModal } from "./AgregarModal";
 
 export const MotosTable = () => {
   const [openModalEditar, setOpenModalEditar] = useState(false);
@@ -134,6 +128,15 @@ export const MotosTable = () => {
   return (
     <>
       <NavBar onSearch={setSearchTerm} />
+
+      <Button
+        variant="contained"
+        sx={{ backgroundColor: "#1f618d", color: "white", ":hover": { opacity: 0.7 }, position: "fixed", right: 50, top: 80, borderRadius: "8px", padding: "10px 20px", display: "flex", alignItems: "center", gap: "8px", }}
+        onClick={handleOpenModalAdd}>
+        <AddchartIcon sx={{ fontSize: 24 }} />
+        Agregar Motos
+      </Button>
+
       <Box
         sx={{
           display: "flex",
@@ -142,6 +145,7 @@ export const MotosTable = () => {
           width: "90%",
           maxWidth: 1400,
           margin: "0 auto",
+          marginTop: 4
         }}
       >
         {/* Contenedor con Header */}
@@ -328,25 +332,7 @@ export const MotosTable = () => {
             </Table>
           </TableContainer>
         </Paper>
-        <IconButton
-          variant="contained"
-          onClick={handleOpenModalAdd}
-          sx={{
-            backgroundColor: "#e74c3c",
-            color: "white",
-            ":hover": { backgroundColor: "#e74c3c", opacity: 0.7 },
-            position: "fixed",
-            right: 50,
-            bottom: 50,
-          }}
-          style={{
-            alignSelf: "flex-end",
-            marginBottom: "10px",
-            marginTop: "10px",
-          }}
-        >
-          <AddIcon sx={{ fontSize: 40 }} />
-        </IconButton>
+
       </Box>
 
       <EditarModal

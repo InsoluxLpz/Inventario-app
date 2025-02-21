@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { actualizarProductos } from "../../api/productosApi";
 import { Button } from "@mui/material";
+import { obtenerProveedores } from '../../api/proveedoresApi';
+import Select from "react-select";
 import Swal from "sweetalert2";
 
 export const EditarProductoModal = ({ onClose, modalOpen, producto, actualizarLista, listaGrupos }) => {
@@ -15,9 +17,21 @@ export const EditarProductoModal = ({ onClose, modalOpen, producto, actualizarLi
     unidad_medida: "",
     precio: "",
     descripcion: "",
+    proveedores: [],
   });
 
   const [errors, setErrors] = useState({});
+  const [proveedores, setProveedores] = useState([]);
+
+  useEffect(() => {
+    const cargarProveedores = async () => {
+      const data = await obtenerProveedores();
+      if (data) {
+        setProveedores(data.map((prov) => ({ value: prov.nombreProveedor, label: prov.nombreProveedor })));
+      }
+    };
+    cargarProveedores();
+  }, []);
 
   useEffect(() => {
     if (producto) {
@@ -28,6 +42,7 @@ export const EditarProductoModal = ({ onClose, modalOpen, producto, actualizarLi
         unidad_medida: producto.unidad_medida || "",
         precio: producto.precio || "",
         descripcion: producto.descripcion || "",
+        proveedores: Array.isArray(producto.proveedores) ? producto.proveedores : [],
       });
     }
   }, [producto]);
@@ -36,6 +51,14 @@ export const EditarProductoModal = ({ onClose, modalOpen, producto, actualizarLi
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
     setErrors((prev) => ({ ...prev, [name]: "" }));
+  };
+
+  const handleSelectChange = (selectedOptions) => {
+    setFormData((prev) => ({
+      ...prev,
+      proveedores: selectedOptions ? selectedOptions.map(option => option.value) : [],
+    }));
+    setErrors((prev) => ({ ...prev, proveedores: "" }));
   };
 
   const validateForm = () => {
@@ -56,7 +79,7 @@ export const EditarProductoModal = ({ onClose, modalOpen, producto, actualizarLi
 
     try {
       const updatedProducto = await actualizarProductos(producto.id, formData);
-      console.log("updatedProducto",updatedProducto)
+      console.log("updatedProducto", updatedProducto)
       if (updatedProducto?.error) {
         setErrors({ general: "Error al actualizar el producto" });
         return;
@@ -89,7 +112,7 @@ export const EditarProductoModal = ({ onClose, modalOpen, producto, actualizarLi
           <div className="modal-content w-100" style={{ maxWidth: "60vw" }}>
             <div
               className="modal-header"
-              style={{ backgroundColor: "#a93226" }}
+              style={{ backgroundColor: "#1f618d" }}
             >
               <h5 className="modal-title text-white">Editar Producto</h5>
               <button
@@ -106,9 +129,8 @@ export const EditarProductoModal = ({ onClose, modalOpen, producto, actualizarLi
                     <input
                       type="text"
                       name="codigo"
-                      className={`form-control ${
-                        errors.codigo ? "is-invalid" : ""
-                      }`}
+                      className={`form-control ${errors.codigo ? "is-invalid" : ""
+                        }`}
                       value={formData.codigo}
                       onChange={handleChange}
                     />
@@ -121,9 +143,8 @@ export const EditarProductoModal = ({ onClose, modalOpen, producto, actualizarLi
                     <input
                       type="text"
                       name="nombre"
-                      className={`form-control ${
-                        errors.nombre ? "is-invalid" : ""
-                      }`}
+                      className={`form-control ${errors.nombre ? "is-invalid" : ""
+                        }`}
                       value={formData.nombre}
                       onChange={handleChange}
                     />
@@ -135,9 +156,8 @@ export const EditarProductoModal = ({ onClose, modalOpen, producto, actualizarLi
                     <label className="form-label">Grupo</label>
                     <select
                       name="grupo"
-                      className={`form-control ${
-                        errors.grupo ? "is-invalid" : ""
-                      }`}
+                      className={`form-control ${errors.grupo ? "is-invalid" : ""
+                        }`}
                       value={formData.grupo}
                       onChange={handleChange}
                     >
@@ -163,9 +183,8 @@ export const EditarProductoModal = ({ onClose, modalOpen, producto, actualizarLi
                     <label className="form-label">Unidad de Medida</label>
                     <select
                       name="unidad_medida"
-                      className={`form-control ${
-                        errors.unidad_medida ? "is-invalid" : ""
-                      }`}
+                      className={`form-control ${errors.unidad_medida ? "is-invalid" : ""
+                        }`}
                       value={formData.unidad_medida}
                       onChange={handleChange}
                     >
@@ -191,9 +210,8 @@ export const EditarProductoModal = ({ onClose, modalOpen, producto, actualizarLi
                       <input
                         type="number"
                         name="precio"
-                        className={`form-control ${
-                          errors.precio ? "is-invalid" : ""
-                        }`}
+                        className={`form-control ${errors.precio ? "is-invalid" : ""
+                          }`}
                         value={formData.precio}
                         onChange={handleChange}
                       />
@@ -202,13 +220,34 @@ export const EditarProductoModal = ({ onClose, modalOpen, producto, actualizarLi
                       <div className="invalid-feedback">{errors.precio}</div>
                     )}
                   </div>
+
+                  <div className="col-md-6 mb-3">
+                    <label className="form-label">Proveedor</label>
+                    <Select
+                      name="proveedores"
+                      options={proveedores}
+                      isMulti
+                      classNamePrefix="select"
+                      value={formData.proveedores.map((p) => ({ value: p, label: p }))}
+                      onChange={handleSelectChange}
+                      styles={{
+                        control: (base) => ({
+                          ...base,
+                          minHeight: "45px", // Aumenta la altura del select
+                          height: "45px",
+                        }),
+                      }}
+                    />
+
+                    {errors.proveedores && <div className="text-danger small">{errors.proveedores}</div>}
+                  </div>
+
                   <div className="col-md-12 mb-3">
                     <label className="form-label">Descripción</label>
                     <textarea
                       name="descripcion"
-                      className={`form-control ${
-                        errors.descripcion ? "is-invalid" : ""
-                      }`}
+                      className={`form-control ${errors.descripcion ? "is-invalid" : ""
+                        }`}
                       value={formData.descripcion}
                       onChange={handleChange}
                     ></textarea>
@@ -224,21 +263,31 @@ export const EditarProductoModal = ({ onClose, modalOpen, producto, actualizarLi
                 )}
               </div>
               <div className="modal-footer">
-                <button
+                <Button
                   type="button"
-                  className="btn btn-secondary"
+                  style={{
+                    backgroundColor: "#85929e",
+                    color: "white",
+                    padding: "10px 20px",
+                    margin: 20
+                  }}
                   onClick={onClose}
                 >
                   Cancelar
-                </button>
-                <button type="submit" className="btn btn-warning">
+                </Button>
+                <Button type="submit" style={{
+                  backgroundColor: "#0091ea",
+                  color: "white",
+                  padding: "10px 20px",
+                }}>
                   Guardar
-                </button>
+                </Button>
               </div>
             </form>
           </div>
         </div>
       </div>
+
     </>
   );
 };

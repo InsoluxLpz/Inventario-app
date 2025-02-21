@@ -4,15 +4,15 @@ const router = express.Router();
 const db = dbConexion();
 
 router.post('/agregar_producto', async (req, res) => {
-    const { codigo, nombre, grupo, unidad_medida, precio, descripcion } = req.body;
+    console.log("Datos recibidos en el backend:", req.body);
 
+    const { codigo, nombre, grupo, unidad_medida, precio, descripcion, proveedores } = req.body;
 
-    if (!codigo || !nombre || !grupo || !unidad_medida || !precio) {
+    if (!codigo || !nombre || !grupo || !unidad_medida || !precio || !proveedores) {
         return res.status(400).json({ message: 'Hacen falta parámetros para guardar en la tabla' });
     }
 
     try {
-
         const existeQuery = `SELECT codigo FROM cat_productos_prueba WHERE codigo = ?`
         const [existe] = await db.query(existeQuery, [codigo]);
 
@@ -21,9 +21,10 @@ router.post('/agregar_producto', async (req, res) => {
         }
 
         const query = `
-            INSERT INTO cat_productos_prueba (codigo, nombre, grupo, unidad_medida, precio, descripcion) VALUES (?,?,?,?,?,?)`
+            INSERT INTO cat_productos_prueba (codigo, nombre, grupo, unidad_medida, precio, descripcion, proveedores) VALUES (?,?,?,?,?,?,?)`
 
-        const values = [codigo, nombre, grupo, unidad_medida, precio, descripcion];
+        const values = [codigo, nombre, grupo, unidad_medida, precio, descripcion, proveedores.join(", ")];
+
 
         await db.query(query, values);
 
@@ -123,6 +124,47 @@ router.put('/actualizar_status_productos/:id', async (req, res) => {
 
 router.delete('/eliminar_producto/:id', async (req, res) => {
 
+});
+
+router.post('/agregar_entrada', async (req, res) => {
+    const { producto, fecha, cantidad, costo_unitario, tipo, autorizo, proveedor } = req.body
+
+    if (!producto || !fecha || !cantidad || !costo_unitario || !tipo || !autorizo || !proveedor) {
+        return res.status(400).json({ message: 'Hacen falta parámetros para guardar en la tabla' });
+    }
+
+    try {
+        const query = ` INSERT INTO productos_entradas (producto, fecha, cantidad, costo_unitario, tipo, autorizo, proveedor) VALUES (?,?,?,?,?,?,?)`
+
+        const values = [producto, fecha, cantidad, costo_unitario, tipo, autorizo, proveedor];
+
+        await db.query(query, values);
+
+        return res.status(200).json('Entrada agregada correctamente')
+    } catch (error) {
+        console.error('Error al agregar el producto:', error);
+        return res.status(500).json({ message: 'Error al agregar el producto' });
+    }
+
+});
+
+router.get('/obtener_entradas', async (req, res) => {
+    try {
+
+        const query = `SELECT * FROM productos_entradas`;
+
+        const [results] = await db.query(query);
+
+        if (results.length === 0) {
+            return res.status(404).json('No hay valores que mostrar en la tabla')
+        }
+
+        return res.status(200).json(results)
+
+    } catch (error) {
+        console.error('Error al obtener los prodructos:', error);
+        return res.status(500).json({ message: 'Error al obtener los productos' });
+    }
 });
 
 module.exports = router;

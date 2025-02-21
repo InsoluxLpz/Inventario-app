@@ -1,8 +1,9 @@
 import React from 'react'
-import { AgregarProductosForm } from '../components/relacionProductos/AgregarProductosForm'
+
+import { ProductoTable } from '../components/relacionProductos/ProductoTable'
 
 export const AgregarProductosScreen = () => {
     return (
-        <AgregarProductosForm />
+        <ProductoTable />
     )
 }

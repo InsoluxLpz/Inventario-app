@@ -92,7 +92,7 @@ router.post('/agregar_mantenimiento', async (req, res) => {
     try {
         const query = `INSERT INTO servicio_motos (fecha_inicio, vehiculo, odometro, servicio, refacciones_almacen, costo_refacciones, costo_total, comentario, status) VALUES (?,?,?,?,?,?,?,?,?)`
 
-        const results = [fecha_inicio, vehiculo, odometro, servicio, refacciones_almacen, costo_refacciones, costo_total, comentario, status];
+        const results = [fecha_inicio, vehiculo, odometro, servicio.join(", "), refacciones_almacen, costo_refacciones, costo_total, comentario, status];
 
         await db.query(query, results);
 
