@@ -5,7 +5,7 @@ const db = dbConexion();
 
 // * Agregar proveedor
 router.post('/agregar_proveedor', async (req, res) => {
-    const { nombreProveedor, telefonoContacto, rfc, telefonoEmpresa } = req.body;
+    const { nombreProveedor, telefonoContacto, rfc, telefonoEmpresa, nombre_empresa } = req.body;
     console.log("llego la peticion");
 
     if (!nombreProveedor) {
@@ -13,9 +13,9 @@ router.post('/agregar_proveedor', async (req, res) => {
     }
 
     try {
-        const query = `INSERT INTO cat_proveedores_prueba (nombreProveedor, telefonoContacto, rfc, telefonoEmpresa) VALUES (?, ?, ?, ?)`;
+        const query = `INSERT INTO cat_proveedores_prueba (nombreProveedor, telefonoContacto, rfc, telefonoEmpresa, nombre_empresa) VALUES (?, ?, ?, ?, ?)`;
 
-        const values = [nombreProveedor, telefonoContacto, rfc, telefonoEmpresa];
+        const values = [nombreProveedor, telefonoContacto, rfc, telefonoEmpresa, nombre_empresa];
 
         await db.query(query, values);
 
@@ -46,15 +46,15 @@ router.get('/obtener_proveedores', async (req, res) => {
 // * Actualizar proveedor
 router.put('/actualizar_proveedor/:id', async (req, res) => {
     const { id } = req.params;
-    const { nombreProveedor, telefonoContacto, rfc, telefonoEmpresa } = req.body;
+    const { nombreProveedor, telefonoContacto, rfc, telefonoEmpresa, nombre_empresa } = req.body;
 
     if (!nombreProveedor) {
         return res.status(400).json({ message: 'El nombre del proveedor es obligatorio' });
     }
 
     try {
-        const query = `UPDATE cat_proveedores_prueba SET nombreProveedor = ?, telefonoContacto = ?, rfc = ?, telefonoEmpresa = ? WHERE id = ?`;
-        const values = [nombreProveedor, telefonoContacto, rfc, telefonoEmpresa, id];
+        const query = `UPDATE cat_proveedores_prueba SET nombreProveedor = ?, telefonoContacto = ?, rfc = ?, telefonoEmpresa = ?, nombre_empresa = ? WHERE id = ?`;
+        const values = [nombreProveedor, telefonoContacto, rfc, telefonoEmpresa, nombre_empresa, id];
 
         await db.query(query, values);
 

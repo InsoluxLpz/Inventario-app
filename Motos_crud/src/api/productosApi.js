@@ -97,8 +97,8 @@ export const ActualizarStatus = async (id, actualizarLista) => {
             text: "Esta acción cambiara el status de la nota a inactiva",
             icon: "question",
             showCancelButton: true,
-            confirmButtonColor: "#f5b041",
-            cancelButtonColor: "#a93226",
+            confirmButtonColor: "#f1c40f",
+            cancelButtonColor: "#7f8c8d",
             confirmButtonText: "Sí, cambiar",
             cancelButtonText: "Cancelar"
         });

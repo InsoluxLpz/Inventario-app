@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { ActualizarMoto } from "../../api/motosApi";
 import { Button } from '@mui/material';
 import '../../styles/LoginScreen.css';
+import Select from "react-select";
 
 export const EditarModal = ({ onClose, modalOpen, moto, actualizarLista, listaMarcas }) => {
     if (!modalOpen) return null;
@@ -61,7 +62,9 @@ export const EditarModal = ({ onClose, modalOpen, moto, actualizarLista, listaMa
         setErrors((prev) => ({ ...prev, [name]: "" }));
     };
 
-
+    const opcionesMarcas = [...marcas]
+        .sort((a, b) => a.nombre.localeCompare(b.nombre))
+        .map((marca) => ({ value: marca.nombre, label: marca.nombre }));
 
     const validateForm = () => {
         const newErrors = {};
@@ -118,12 +121,12 @@ export const EditarModal = ({ onClose, modalOpen, moto, actualizarLista, listaMa
     return (
         <div className="modal-backdrop">
             <div className="modal fade show" style={{ display: "block" }} aria-labelledby="exampleModalLabel" tabIndex="-1" role="dialog">
-                <div className="modal-dialog modal-dialog-centered mx-auto" role="document" style={{ maxWidth: "60vw", marginTop: 40 }}>
+                <div className="modal-dialog" role="document" style={{ maxWidth: "60vw", marginTop: 90 }}>
                     <div className="modal-content w-100" style={{ maxWidth: "60vw" }}>
-                        <div className="modal-header" style={{ backgroundColor: '#a93226' }}>
+                        <div className="modal-header" style={{ backgroundColor: '#1f618d' }}>
                             <h5 className="modal-title" style={{ color: 'white' }}>Editar Moto</h5>
                         </div>
-                        <form onSubmit={handleSubmit}>
+                        <form onSubmit={handleSubmit} >
                             <div className="modal-body">
                                 <div className="row">
                                     <div className="col-md-4 mb-3">
@@ -133,17 +136,26 @@ export const EditarModal = ({ onClose, modalOpen, moto, actualizarLista, listaMa
                                     </div>
                                     <div className="col-md-4 mb-3">
                                         <label className="form-label">Marca</label>
-                                        <select
+                                        <Select
                                             name="marca"
-                                            className={`form-control ${errors.marca ? "is-invalid" : ""}`}
-                                            value={formData.marca}
-                                            onChange={(e) => setFormData({ ...formData, marca: e.target.value })}
-                                        >
-                                            <option value="" disabled>Selecciona</option>
-                                            {marcas.map((marca) => (
-                                                <option key={marca.id} value={marca.nombre}>{marca.nombre}</option>
-                                            ))}
-                                        </select>
+                                            options={opcionesMarcas}
+                                            placeholder="SELECCIONA"
+                                            value={opcionesMarcas.find((op) => op.value === formData.marca)}
+                                            isSearchable={true}
+                                            onChange={(selectedOption) => setFormData({ ...formData, marca: selectedOption.value })}
+                                            styles={{
+                                                menuList: (provided) => ({
+                                                    ...provided,
+                                                    maxHeight: "200px", // Limita la altura del dropdow
+                                                    overflowY: "auto",  // Habilita scroll si hay muchos elementos
+                                                }),
+                                                control: (base) => ({
+                                                    ...base,
+                                                    minHeight: "45px",
+                                                    height: "45px",
+                                                }),
+                                            }}
+                                        />
                                         {errors.marca && <div className="invalid-feedback">{errors.marca}</div>}
                                     </div>
                                     <div className="col-md-4 mb-3">
@@ -205,10 +217,10 @@ export const EditarModal = ({ onClose, modalOpen, moto, actualizarLista, listaMa
                                             onChange={handleChange}
                                         >
                                             <option value="" disabled>Selecciona</option>
-                                            <option value="0">Inactiva</option>
                                             <option value="1">Activa</option>
-                                            <option value="2">Taller</option>
                                             <option value="3">Accidente o Tránsito</option>
+                                            <option value="0">Inactiva</option>
+                                            <option value="2">Taller</option>
                                         </select>
                                         {errors.status && <div className="invalid-feedback">{errors.status}</div>}
                                     </div>
@@ -222,8 +234,13 @@ export const EditarModal = ({ onClose, modalOpen, moto, actualizarLista, listaMa
 
                             </div>
                             <div className="modal-footer">
-                                <Button type="button" style={{ backgroundColor: '#a93226', color: 'white' }} onClick={onClose}>Cancelar</Button>
-                                <Button type="submit" style={{ backgroundColor: '#f5b041 ', marginLeft: 5, color: 'white' }} onClick={handleSubmit}>Guardar</Button>
+                                <Button type="submit" style={{ backgroundColor: "#f1c40f", color: "white" }} onClick={handleSubmit}>
+                                    Guardar
+                                </Button>
+
+                                <Button type="button" style={{ backgroundColor: "#7f8c8d", color: "white", marginLeft: 7 }} onClick={onClose}>
+                                    Cancelar
+                                </Button>
                             </div>
                         </form>
                     </div>

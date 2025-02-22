@@ -15,6 +15,7 @@ import { EditarProductoModal } from "../relacionProductos/EditarProductoModal";
 import { useNavigate } from "react-router";
 import { AgregarProductoModal } from "./AgregarProductoModal";
 import AddchartIcon from '@mui/icons-material/Addchart';
+import InventoryIcon from "@mui/icons-material/Inventory";
 
 
 export const ProductoTable = () => {
@@ -123,7 +124,16 @@ export const ProductoTable = () => {
                           setOpenModalEditar(true);
                         }}
                       >
-                        <EditIcon />
+                        <EditIcon sx={{ fontSize: 20 }} />
+                      </IconButton>
+
+                      <IconButton
+                        variant="contained"
+                        color="error"
+                        style={{ marginLeft: "10px" }}
+                        onClick={() => handleActualizarStatus(producto.id)}
+                      >
+                        <InventoryIcon sx={{ fontSize: 20 }} />
                       </IconButton>
                     </TableCell>
                   </TableRow>

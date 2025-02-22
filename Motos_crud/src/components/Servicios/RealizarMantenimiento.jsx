@@ -64,6 +64,11 @@ export const RealizarMantenimiento = ({ modalOpen, onClose }) => {
         }
     };
 
+    const opcionesVehiculos = [...motos]
+        .sort((a, b) => a.inciso - b.inciso)
+        .map((moto) => ({ value: moto.inciso, label: moto.inciso }));
+
+
     useEffect(() => {
         const cargarServicios = async () => {
             const data = await ObtenerServicios();
@@ -138,7 +143,7 @@ export const RealizarMantenimiento = ({ modalOpen, onClose }) => {
                     <div className="modal-dialog" role="document" style={{ maxWidth: "60vw", marginTop: 90 }}>
                         <div className="modal-content w-100" style={{ maxWidth: "60vw" }}>
                             <div className="modal-header" style={{ backgroundColor: '#1f618d' }}>
-                                <h5 className="modal-title" style={{ color: 'white' }}>Agregar Moto</h5>
+                                <h5 className="modal-title" style={{ color: 'white' }}>Agregar Mantenimiento</h5>
                             </div>
 
                             {/* Formulario */}
@@ -152,17 +157,26 @@ export const RealizarMantenimiento = ({ modalOpen, onClose }) => {
 
                                     <div className="col-md-4 mb-2">
                                         <label className="form-label">Vehiculo</label>
-                                        <select
+                                        <Select
                                             name="vehiculo"
-                                            className={`form-control ${errors.vehiculo ? "is-invalid" : ""}`}
-                                            value={formData.vehiculo}
-                                            onChange={(e) => setFormData({ ...formData, vehiculo: e.target.value })}
-                                        >
-                                            <option value="" disabled>Selecciona</option>
-                                            {motos.map((moto) => (
-                                                <option key={moto.id} value={moto.inciso}>{moto.inciso}</option>
-                                            ))}
-                                        </select>
+                                            options={opcionesVehiculos}
+                                            placeholder="SELECCIONA"
+                                            value={opcionesVehiculos.find((op) => op.value === formData.vehiculo)}
+                                            onChange={(selectedOption) => setFormData({ ...formData, vehiculo: selectedOption.value })}
+                                            styles={{
+                                                menuList: (provided) => ({
+                                                    ...provided,
+                                                    maxHeight: "100px", // Limita la altura del dropdown
+                                                    overflowY: "auto",  // Habilita scroll si hay muchos elementos
+                                                }),
+                                                control: (base) => ({
+                                                    ...base,
+                                                    minHeight: "45px",
+                                                    height: "45px",
+                                                }),
+                                            }}
+                                        />
+
                                         {errors.vehiculo && <div className="invalid-feedback">{errors.vehiculo}</div>}
                                     </div>
 
@@ -179,9 +193,9 @@ export const RealizarMantenimiento = ({ modalOpen, onClose }) => {
                                         <label className="form-label small">Servicio(s)</label>
                                         <Select
                                             name="servicio"
-                                            options={servicio}
+                                            options={[...servicio].sort((a, b) => a.label.localeCompare(b.label))}
                                             isMulti
-                                            classNamePrefix="select"
+                                            placeholder="SELECCIONA"
                                             value={formData.servicio.map((s) => ({ value: s, label: s, }))}
                                             onChange={handleSelectChange}
                                             styles={{
@@ -189,6 +203,11 @@ export const RealizarMantenimiento = ({ modalOpen, onClose }) => {
                                                     ...base,
                                                     minHeight: "45px",
                                                     height: "45px",
+                                                }),
+                                                menuList: (provided) => ({
+                                                    ...provided,
+                                                    maxHeight: "200px", // Limita la altura del dropdown
+                                                    overflowY: "auto",  // Habilita scroll si hay muchos elementos
                                                 }),
                                             }}
                                         />
@@ -206,9 +225,9 @@ export const RealizarMantenimiento = ({ modalOpen, onClose }) => {
                                     <table className="table">
                                         <thead>
                                             <tr>
-                                                <th>Producto</th>
                                                 <th>Cantidad</th>
                                                 <th>Precio Total</th>
+                                                <th>Producto</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -250,13 +269,12 @@ export const RealizarMantenimiento = ({ modalOpen, onClose }) => {
                                     <textarea name="comentario" className={`form-control form-control-sm`} value={formData.comentario} onChange={handleChange} />
                                 </div>
 
-                                {/* Botones de acción */}
-                                <div className="modal-footer ">
-                                    <Button type="submit" style={{ backgroundColor: "#0091ea", color: "white", padding: "10px 20px", }} onClick={handleSubmit} >
+                                <div className="modal-footer">
+                                    <Button type="submit" style={{ backgroundColor: "#f1c40f", color: "white" }} onClick={handleSubmit}>
                                         Guardar
                                     </Button>
 
-                                    <Button type="button" style={{ backgroundColor: "#85929e", color: "white", padding: "10px 20px", margin: 20 }} onClick={onClose}>
+                                    <Button type="button" style={{ backgroundColor: "#7f8c8d", color: "white", marginLeft: 7 }} onClick={onClose}>
                                         Cancelar
                                     </Button>
                                 </div>

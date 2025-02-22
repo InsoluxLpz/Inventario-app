@@ -2,6 +2,7 @@
 import { Button } from "@mui/material";
 import { obtenerProductos } from "../../api/productosApi";
 import { useEffect, useState } from "react";
+import Select from "react-select";
 
 export const AgregarRefaccionesModal = ({ onClose, modalOpen, agregarProductoATabla }) => {
     if (!modalOpen) return null;
@@ -52,6 +53,13 @@ export const AgregarRefaccionesModal = ({ onClose, modalOpen, agregarProductoATa
         setErrors((prev) => ({ ...prev, [name]: "" }));
     };
 
+    const opcionesProductos = [...refacciones]
+        .sort((a, b) => a.nombre.localeCompare(b.nombre)) // Orden alfabético
+        .map((prod) => ({
+            value: prod.nombre,
+            label: `${prod.nombre} - $${prod.precio}` // Muestra el nombre y el precio
+        }));
+
     const validateForm = () => {
         const newErrors = {};
         if (!formData.producto) newErrors.producto = "Elige un producto";
@@ -81,10 +89,10 @@ export const AgregarRefaccionesModal = ({ onClose, modalOpen, agregarProductoATa
     return (
         <div className="modal-backdrop">
             <div className="modal fade show" style={{ display: "block" }} aria-labelledby="exampleModalLabel" tabIndex="-1" role="dialog">
-                <div className="modal-dialog" role="document" style={{ maxWidth: "20vw", marginTop: 100 }}>
-                    <div className="modal-content " style={{ maxWidth: "60vw" }}>
-                        <div className="modal-header" style={{ backgroundColor: '#a93226' }}>
-                            <h5 className="modal-title" style={{ color: 'white' }}>Agregar Partes/Refacciones</h5>
+                <div className="modal-dialog" role="document" style={{ maxWidth: "60vw", marginTop: 90 }}>
+                    <div className="modal-content w-100" style={{ maxWidth: "60vw" }}>
+                        <div className="modal-header" style={{ backgroundColor: '#1f618d' }}>
+                            <h5 className="modal-title" style={{ color: 'white' }}>Agregar Mantenimiento</h5>
                         </div>
                         <form onSubmit={handleSubmit}>
                             <div className="modal-body">
@@ -92,14 +100,27 @@ export const AgregarRefaccionesModal = ({ onClose, modalOpen, agregarProductoATa
                                     {/* Selección de Producto */}
                                     <div className="col-md-12 mb-3">
                                         <label className="form-label">Artículo del almacén</label>
-                                        <select name="producto" className={`form-control ${errors.producto ? "is-invalid" : ""}`} onChange={handleChange} value={formData.producto}>
-                                            <option value="" disabled>SELECCIONA</option>
-                                            {refacciones.map((prod) => (
-                                                <option key={prod.id} value={prod.nombre}>
-                                                    {prod.nombre} - ${prod.precio}
-                                                </option>
-                                            ))}
-                                        </select>
+                                        <Select
+                                            name="producto"
+                                            classNamePrefix="select"
+                                            options={opcionesProductos}
+                                            value={opcionesProductos.find((op) => op.value === formData.producto)} // Selección actual
+                                            onChange={(selectedOption) => setFormData({ ...formData, producto: selectedOption.value })}
+                                            isSearchable={true} // Permite buscar
+                                            placeholder="SELECCIONA"
+                                            styles={{
+                                                menuList: (provided) => ({
+                                                    ...provided,
+                                                    maxHeight: "130px", // Limita la altura del dropdow
+                                                    overflowY: "auto",  // Habilita scroll si hay muchos elementos
+                                                }),
+                                                control: (base) => ({
+                                                    ...base,
+                                                    minHeight: "45px",
+                                                    height: "45px",
+                                                }),
+                                            }}
+                                        />
                                         {errors.producto && <div className="invalid-feedback">{errors.producto}</div>}
                                     </div>
 
@@ -118,8 +139,13 @@ export const AgregarRefaccionesModal = ({ onClose, modalOpen, agregarProductoATa
                                 </div>
                             </div>
                             <div className="modal-footer">
-                                <Button type="button" style={{ backgroundColor: '#a93226', color: 'white' }} onClick={onClose}>Cancelar</Button>
-                                <Button type="submit" style={{ backgroundColor: '#f5b041', marginLeft: 5, color: 'white' }}>Guardar</Button>
+                                <Button type="submit" style={{ backgroundColor: "#f1c40f", color: "white" }} onClick={handleSubmit}>
+                                    Guardar
+                                </Button>
+
+                                <Button type="button" style={{ backgroundColor: "#7f8c8d", color: "white", marginLeft: 7 }} onClick={onClose}>
+                                    Cancelar
+                                </Button>
                             </div>
                         </form>
                     </div>

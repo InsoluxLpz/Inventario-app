@@ -30,6 +30,7 @@ export const MarcasModal = ({ onClose, modalOpen }) => {
     };
 
     const handleSubmit = async (e) => {
+        e.preventDefault(); ss
 
         if (!validateForm()) return; // Si hay errores, no se envía el formulario
 
@@ -42,9 +43,9 @@ export const MarcasModal = ({ onClose, modalOpen }) => {
     return (
         <div className="modal-backdrop">
             <div className="modal fade show" style={{ display: "block" }} aria-labelledby="exampleModalLabel" tabIndex="-1" role="dialog">
-                <div className="modal-dialog" role="document" style={{ maxWidth: "20vw", marginTop: 100 }}>
-                    <div className="modal-content " style={{ maxWidth: "60vw" }}>
-                        <div className="modal-header" style={{ backgroundColor: '#a93226' }}>
+                <div className="modal-dialog" role="document" style={{ maxWidth: "60vw", marginTop: 90 }}>
+                    <div className="modal-content w-100" style={{ maxWidth: "60vw" }}>
+                        <div className="modal-header" style={{ backgroundColor: '#1f618d' }}>
                             <h5 className="modal-title" style={{ color: 'white' }}>Agregar Marca</h5>
                         </div>
                         <form onSubmit={handleSubmit}>
@@ -64,8 +65,8 @@ export const MarcasModal = ({ onClose, modalOpen }) => {
                                 </div>
                             </div>
                             <div className="modal-footer">
-                                < Button type="button" style={{ backgroundColor: '#a93226', color: 'white' }} onClick={onClose}>Cancelar</Button>
-                                <Button type="submit" style={{ backgroundColor: '#f5b041  ', marginLeft: 5, color: 'white' }} >Guardar</Button>
+                                < Button type="button" style={{ backgroundColor: '#f1c40f', color: 'white' }} onClick={onClose}>Cancelar</Button>
+                                <Button type="submit" style={{ backgroundColor: '#7f8c8d  ', marginLeft: 5, color: 'white' }} >Guardar</Button>
                             </div>
                         </form>
                     </div>

@@ -137,54 +137,49 @@ export const MotosTable = () => {
         Agregar Motos
       </Button>
 
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          width: "90%",
-          maxWidth: 1400,
-          margin: "0 auto",
-          marginTop: 4
-        }}
-      >
-        {/* Contenedor con Header */}
-        <Paper
-          sx={{
-            width: "100%",
-            p: 3,
-            boxShadow: 3,
-            borderRadius: 2,
-            backgroundColor: "#f4f6f7",
-          }}
+      {/* <IconButton
+          sx={{ color: "black" }}
+          onClick={() => handleOpenModalMarcas()}
         >
-          <Typography
-            variant="h5"
-            sx={{ fontWeight: "bold", color: "#a93226", textAlign: "center" }}
-          >
+          <AddCircleOutlineIcon />
+          <Typography variant="body1" sx={{ ml: 1 }}>
+            Agregar Marca
+          </Typography>
+        </IconButton>
+
+
+        <FormControlLabel
+          control={
+            <Switch
+              checked={showInactive}
+              onChange={(e) => setShowInactive(e.target.checked)}
+              color="default"
+            />
+          }
+          label="Mostrar inactivas"
+        /> */}
+
+
+      <Box width="90%" maxWidth={2000} margin="0 auto" mt={4}>
+        {/* Header alineado a la izquierda con fondo */}
+        <Box sx={{ backgroundColor: "#1f618d", padding: "10px 20px", borderRadius: "8px 8px 0 0" }}>
+          <Typography variant="h5" fontWeight="bold" color="white">
             Lista de Motos
           </Typography>
+        </Box>
 
-          {/* Controles: Botón + Switch */}
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
+        <Box sx={{ display: "flex", justifyContent: "flex-end", marginBottom: 1, marginTop: 1 }}>
+          <IconButton
+            sx={{ color: "black" }}
+            onClick={() => handleOpenModalMarcas()}
           >
-            {/* Botón Agregar Marca */}
-            <IconButton
-              sx={{ color: "black" }}
-              onClick={() => handleOpenModalMarcas()}
-            >
-              <AddCircleOutlineIcon />
-              <Typography variant="body1" sx={{ ml: 1 }}>
-                Agregar Marca
-              </Typography>
-            </IconButton>
+            <AddCircleOutlineIcon />
+            <Typography variant="body1" sx={{ ml: 1 }}>
+              Agregar Marca
+            </Typography>
+          </IconButton>
 
-            {/* Switch Mostrar Inactivas */}
+          <Box sx={{ display: "flex", justifyContent: "flex-end", marginBottom: 1, marginTop: 1 }}>
             <FormControlLabel
               control={
                 <Switch
@@ -196,6 +191,10 @@ export const MotosTable = () => {
               label="Mostrar inactivas"
             />
           </Box>
+        </Box>
+
+        {/* Contenedor de la tabla */}
+        <Paper sx={{ width: "100%" }}>
           <TableContainer sx={{ maxHeight: 800, backgroundColor: "#f4f6f7 " }}>
             <Table stickyHeader aria-label="sticky table">
               <TableHead>
@@ -204,8 +203,8 @@ export const MotosTable = () => {
                     align="center"
                     sx={{
                       fontWeight: "bold",
-                      backgroundColor: "#a93226",
-                      color: "white",
+                      backgroundColor: "#d5dbdb",
+                      color: "black",
                       padding: "8px",
                     }}
                   >
@@ -215,8 +214,8 @@ export const MotosTable = () => {
                     align="center"
                     sx={{
                       fontWeight: "bold",
-                      backgroundColor: "#a93226",
-                      color: "white",
+                      backgroundColor: "#d5dbdb",
+                      color: "black",
                       padding: "8px",
                     }}
                   >
@@ -226,8 +225,8 @@ export const MotosTable = () => {
                     align="center"
                     sx={{
                       fontWeight: "bold",
-                      backgroundColor: "#a93226",
-                      color: "white",
+                      backgroundColor: "#d5dbdb",
+                      color: "black",
                       padding: "8px",
                     }}
                   >
@@ -237,8 +236,8 @@ export const MotosTable = () => {
                     align="center"
                     sx={{
                       fontWeight: "bold",
-                      backgroundColor: "#a93226",
-                      color: "white",
+                      backgroundColor: "#d5dbdb",
+                      color: "black",
                       padding: "8px",
                     }}
                   >
@@ -248,8 +247,8 @@ export const MotosTable = () => {
                     align="center"
                     sx={{
                       fontWeight: "bold",
-                      backgroundColor: "#a93226",
-                      color: "white",
+                      backgroundColor: "#d5dbdb",
+                      color: "black",
                       padding: "8px",
                     }}
                   >
@@ -259,8 +258,8 @@ export const MotosTable = () => {
                     align="center"
                     sx={{
                       fontWeight: "bold",
-                      backgroundColor: "#a93226",
-                      color: "white",
+                      backgroundColor: "#d5dbdb",
+                      color: "black",
                       padding: "8px",
                     }}
                   >
@@ -270,8 +269,8 @@ export const MotosTable = () => {
                     align="center"
                     sx={{
                       fontWeight: "bold",
-                      backgroundColor: "#a93226",
-                      color: "white",
+                      backgroundColor: "#d5dbdb",
+                      color: "black",
                       padding: "8px",
                     }}
                   >
@@ -306,16 +305,10 @@ export const MotosTable = () => {
                     <TableCell align="center" sx={{ fontWeight: "bold" }}>
                       <IconButton
                         variant="contained"
-                        sx={{
-                          backgroundColor: "#f39c12 ",
-                          ":hover": {
-                            backgroundColor: "#f8c471 ",
-                            opacity: 0.7,
-                          },
-                        }}
+                        sx={{ color: 'black' }}
                         onClick={() => handleOpenModalEdit(moto)}
                       >
-                        <EditIcon />
+                        <EditIcon sx={{ fontSize: 20 }} />
                       </IconButton>
                       <IconButton
                         variant="contained"
@@ -323,7 +316,7 @@ export const MotosTable = () => {
                         style={{ marginLeft: "10px" }}
                         onClick={() => handleActualizarStatus(moto.id)}
                       >
-                        <InventoryIcon sx={{ fontSize: 35 }} />
+                        <InventoryIcon sx={{ fontSize: 20 }} />
                       </IconButton>
                     </TableCell>
                   </TableRow>
@@ -331,27 +324,26 @@ export const MotosTable = () => {
               </TableBody>
             </Table>
           </TableContainer>
+
+          <EditarModal
+            onClose={handleCloseModalEdit}
+            modalOpen={openModalEditar}
+            moto={motoSeleccionada}
+            actualizarLista={actualizarLista}
+            listaMarcas={marcas}
+          />
+          <AgregarModal
+            onClose={handleCloseModalAdd}
+            modalOpen={openModalAgregar}
+            agregarMotoLista={agregarMotoLista}
+            listaMarcas={marcas}
+          />
+          <MarcasModal
+            onClose={handleCloseModalMarcas}
+            modalOpen={openModalMarcas}
+          />
         </Paper>
-
       </Box>
-
-      <EditarModal
-        onClose={handleCloseModalEdit}
-        modalOpen={openModalEditar}
-        moto={motoSeleccionada}
-        actualizarLista={actualizarLista}
-        listaMarcas={marcas}
-      />
-      <AgregarModal
-        onClose={handleCloseModalAdd}
-        modalOpen={openModalAgregar}
-        agregarMotoLista={agregarMotoLista}
-        listaMarcas={marcas}
-      />
-      <MarcasModal
-        onClose={handleCloseModalMarcas}
-        modalOpen={openModalMarcas}
-      />
     </>
   );
 };

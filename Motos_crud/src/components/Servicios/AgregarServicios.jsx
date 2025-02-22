@@ -1,12 +1,7 @@
 import React, { useState, useEffect } from "react";
-import Paper from "@mui/material/Paper";
-import { Box, Button, IconButton, TextField, Typography } from "@mui/material";
-import { NavBar } from "../NavBar";
+import { Box, Button } from "@mui/material";
 import { AgregarServicio } from "../../api/ServiciosApi";
 import { useNavigate } from "react-router";
-import AddIcon from "@mui/icons-material/Add";
-import HomeIcon from '@mui/icons-material/Home';
-import HomeRepairServiceIcon from '@mui/icons-material/HomeRepairService';
 
 export const AgregarServicios = ({ modalOpen, onClose }) => {
     if (!modalOpen) return null;
@@ -66,9 +61,6 @@ export const AgregarServicios = ({ modalOpen, onClose }) => {
 
     return (
         <>
-            <NavBar />
-
-
             <div className="modal-backdrop">
                 <div className="modal fade show" style={{ display: "block" }} aria-labelledby="exampleModalLabel" tabIndex="-1" role="dialog">
                     <div className="modal-dialog" role="document" style={{ maxWidth: "60vw", marginTop: 90 }}>
@@ -111,14 +103,15 @@ export const AgregarServicios = ({ modalOpen, onClose }) => {
                                     </div>
 
                                 </Box>
-                                <Box display="flex" gap={2}>
-                                    <Button type="submit" style={{ backgroundColor: "#0091ea", color: "white" }}>
+                                <div className="modal-footer">
+                                    <Button type="submit" style={{ backgroundColor: "#f1c40f", color: "white" }} onClick={handleSubmit}>
                                         Guardar
                                     </Button>
-                                    <Button type="button" style={{ backgroundColor: "#85929e", color: "white", }} onClick={onClose}>
+
+                                    <Button type="button" style={{ backgroundColor: "#7f8c8d", color: "white", marginLeft: 7 }} onClick={onClose}>
                                         Cancelar
                                     </Button>
-                                </Box>
+                                </div>
                             </form>
                         </div>
                     </div>

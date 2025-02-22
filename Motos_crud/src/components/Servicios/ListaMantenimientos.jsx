@@ -65,97 +65,101 @@ export const ListaMantenimientos = () => {
             <Box display="flex" justifyContent="space-between" alignItems="center" sx={{ marginTop: 4 }}>
             </Box>
 
-            <Box width="100%" maxWidth={1700} margin="0 auto">
-                <Box sx={{ backgroundColor: "#1f618d", padding: 1.5, borderRadius: "5px 5px 0 0" }}>
-                    <Typography variant="h6" color="white">
-                        LISTA DE MANTENIMIENTOS
+            <Box width="90%" maxWidth={2000} margin="0 auto" mt={4}>
+                {/* Header alineado a la izquierda con fondo */}
+                <Box sx={{ backgroundColor: "#1f618d", padding: "10px 20px", borderRadius: "8px 8px 0 0" }}>
+                    <Typography variant="h5" fontWeight="bold" color="white">
+                        Lista de Mantenimientos
                     </Typography>
                 </Box>
-                <TableContainer sx={{ maxHeight: 800, backgroundColor: "#f4f6f7 " }}>
-                    <Table stickyHeader aria-label="sticky table">
-                        <TableHead>
-                            <TableRow>
-                                <TableCell
-                                    align="center"
-                                    sx={{ fontWeight: "bold", color: "black", padding: "8px", }}>
-                                    Vehiculo
-                                </TableCell>
-                                <TableCell
-                                    align="center"
-                                    sx={{ fontWeight: "bold", color: "black", padding: "8px", }}>
-                                    Servicios(s)
-                                </TableCell>
-                                <TableCell
-                                    align="center"
-                                    sx={{ fontWeight: "bold", color: "black", padding: "8px", }}>
-                                    Refacciones de almacen
-                                </TableCell>
-                                <TableCell
-                                    align="center"
-                                    sx={{ fontWeight: "bold", color: "black", padding: "8px", }}>
-                                    Fecha Inicio
-                                </TableCell>
-                                <TableCell
-                                    align="center"
-                                    sx={{ fontWeight: "bold", color: "black", padding: "8px", }}>
-                                    Comentario
-                                </TableCell>
-                                <TableCell
-                                    align="center"
-                                    sx={{ fontWeight: "bold", color: "black", padding: "8px", }}>
-                                    Costo Partes/Refacciones
-                                </TableCell>
-                                <TableCell
-                                    align="center"
-                                    sx={{ fontWeight: "bold", color: "black", padding: "8px", }}>
-                                    Costo Total
-                                </TableCell>
-                                <TableCell
-                                    align="center"
-                                    sx={{ fontWeight: "bold", color: "black", padding: "8px", }}>
-                                    Opciones
-                                </TableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {mantenimientos.length > 0 ? (
-                                mantenimientos.map((mantenimiento) => (
-                                    <TableRow key={mantenimiento.id}>
-                                        <TableCell align="center">{mantenimiento.vehiculo}</TableCell>
-                                        <TableCell align="center">{mantenimiento.servicio}</TableCell>
-                                        <TableCell align="center">{mantenimiento.refacciones_almacen}</TableCell>
-                                        <TableCell align="center">{mantenimiento.fecha_inicio}</TableCell>
-                                        <TableCell align="center">{mantenimiento.comentario}</TableCell>
-                                        <TableCell align="center">{mantenimiento.costo_refacciones}</TableCell>
-                                        <TableCell align="center">{mantenimiento.costo_total}</TableCell>
-                                        <TableCell align="center">
-                                            <IconButton sx={{ color: 'black' }}>
-                                                <EditIcon />
-                                            </IconButton>
-                                            <IconButton
-                                                variant="contained"
-                                                color="error"
-                                                style={{ marginLeft: "10px" }}
-                                                onClick={() => handleEliminarMantenimiento(mantenimiento.id)}
-                                            >
-                                                <DeleteIcon sx={{ fontSize: 35 }} />
-                                            </IconButton>
-                                        </TableCell>
-                                    </TableRow>
-                                ))
-                            ) : (
+
+                {/* Contenedor de la tabla */}
+                <Paper sx={{ width: "100%" }}>
+                    <TableContainer sx={{ maxHeight: 800, backgroundColor: "#f4f6f7 " }}>
+                        <Table stickyHeader aria-label="sticky table">
+                            <TableHead>
                                 <TableRow>
-                                    <TableCell colSpan={8} align="center">
-                                        No hay mantenimientos disponibles
+                                    <TableCell
+                                        align="center"
+                                        sx={{ fontWeight: "bold", color: "black", padding: "8px", }}>
+                                        Vehiculo
+                                    </TableCell>
+                                    <TableCell
+                                        align="center"
+                                        sx={{ fontWeight: "bold", color: "black", padding: "8px", }}>
+                                        Servicios(s)
+                                    </TableCell>
+                                    <TableCell
+                                        align="center"
+                                        sx={{ fontWeight: "bold", color: "black", padding: "8px", }}>
+                                        Refacciones de almacen
+                                    </TableCell>
+                                    <TableCell
+                                        align="center"
+                                        sx={{ fontWeight: "bold", color: "black", padding: "8px", }}>
+                                        Fecha Inicio
+                                    </TableCell>
+                                    <TableCell
+                                        align="center"
+                                        sx={{ fontWeight: "bold", color: "black", padding: "8px", }}>
+                                        Comentario
+                                    </TableCell>
+                                    <TableCell
+                                        align="center"
+                                        sx={{ fontWeight: "bold", color: "black", padding: "8px", }}>
+                                        Costo Partes/Refacciones
+                                    </TableCell>
+                                    <TableCell
+                                        align="center"
+                                        sx={{ fontWeight: "bold", color: "black", padding: "8px", }}>
+                                        Costo Total
+                                    </TableCell>
+                                    <TableCell
+                                        align="center"
+                                        sx={{ fontWeight: "bold", color: "black", padding: "8px", }}>
+                                        Opciones
                                     </TableCell>
                                 </TableRow>
-                            )}
-                        </TableBody>
+                            </TableHead>
+                            <TableBody>
+                                {mantenimientos.length > 0 ? (
+                                    mantenimientos.map((mantenimiento) => (
+                                        <TableRow key={mantenimiento.id}>
+                                            <TableCell align="center">{mantenimiento.vehiculo}</TableCell>
+                                            <TableCell align="center">{mantenimiento.servicio}</TableCell>
+                                            <TableCell align="center">{mantenimiento.refacciones_almacen}</TableCell>
+                                            <TableCell align="center">{mantenimiento.fecha_inicio}</TableCell>
+                                            <TableCell align="center">{mantenimiento.comentario}</TableCell>
+                                            <TableCell align="center">{mantenimiento.costo_refacciones}</TableCell>
+                                            <TableCell align="center">{mantenimiento.costo_total}</TableCell>
+                                            <TableCell align="center">
+                                                <IconButton variant="contained" sx={{ color: 'black' }}>
+                                                    <EditIcon sx={{ fontSize: 20 }} />
+                                                </IconButton>
+                                                <IconButton
+                                                    variant="contained"
+                                                    color="error"
+                                                    style={{ marginLeft: "10px" }}
+                                                    onClick={() => handleEliminarMantenimiento(mantenimiento.id)}
+                                                >
+                                                    <DeleteIcon sx={{ fontSize: 20 }} />
+                                                </IconButton>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))
+                                ) : (
+                                    <TableRow>
+                                        <TableCell colSpan={8} align="center">
+                                            No hay mantenimientos disponibles
+                                        </TableCell>
+                                    </TableRow>
+                                )}
+                            </TableBody>
 
-                    </Table>
-                </TableContainer>
-                <RealizarMantenimiento modalOpen={openModalAgregar} onClose={handleCloseModalAgregar} />
-
+                        </Table>
+                    </TableContainer>
+                    <RealizarMantenimiento modalOpen={openModalAgregar} onClose={handleCloseModalAgregar} />
+                </Paper>
             </Box>
         </>
     );

@@ -83,6 +83,15 @@ export const ProveedoresTable = () => {
     return matchesSearchTerm && matchesStatus;
   });
 
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 0:
+        return "#5d6d7e"; // Amarillo claro para "inactiva"
+      default:
+        return "transparent"; // Fondo transparente si no coincide
+    }
+  };
+
   return (
     <>
       <NavBar onSearch={setSearchTerm} />
@@ -95,46 +104,29 @@ export const ProveedoresTable = () => {
         Agregar Proveedores
       </Button>
 
-      <Box
-        sx={{ display: "flex", justifyContent: "flex-end", marginBottom: 2, marginTop: 2 }}
-      >
-        <FormControlLabel
-          control={
-            <Switch
-              checked={showInactive}
-              onChange={(e) => setShowInactive(e.target.checked)}
-              color="default"
-            />
-          }
-          label="Mostrar inactivas"
-        />
-      </Box>
-
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          width: "90%",
-          maxWidth: 1400,
-          margin: "0 auto",
-        }}
-      >
-        <Paper
-          sx={{
-            width: "100%",
-            p: 3,
-            boxShadow: 3,
-            borderRadius: 2,
-            backgroundColor: "#f4f6f7",
-          }}
-        >
-          <Typography
-            variant="h5"
-            sx={{ fontWeight: "bold", color: "#a93226", textAlign: "center" }}
-          >
-            Lista de Proveedores
+      <Box width="90%" maxWidth={2000} margin="0 auto" mt={4}>
+        {/* Header alineado a la izquierda con fondo */}
+        <Box sx={{ backgroundColor: "#1f618d", padding: "10px 20px", borderRadius: "8px 8px 0 0" }}>
+          <Typography variant="h5" fontWeight="bold" color="white">
+            Proveedores
           </Typography>
+        </Box>
+
+        <Box sx={{ display: "flex", justifyContent: "flex-end", marginBottom: 1, marginTop: 1 }}>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={showInactive}
+                onChange={(e) => setShowInactive(e.target.checked)}
+                color="default"
+              />
+            }
+            label="Mostrar inactivas"
+          />
+        </Box>
+
+        {/* Contenedor de la tabla */}
+        <Paper sx={{ width: "100%" }}>
           <TableContainer sx={{ maxHeight: 800, backgroundColor: "#f4f6f7" }}>
             <Table stickyHeader aria-label="sticky table">
               <TableHead>
@@ -142,8 +134,17 @@ export const ProveedoresTable = () => {
                   <TableCell
                     sx={{
                       fontWeight: "bold",
-                      backgroundColor: "#a93226",
-                      color: "white",
+                      backgroundColor: "#d5dbdb",
+                      color: "black",
+                    }}
+                  >
+                    Empresa
+                  </TableCell>
+                  <TableCell
+                    sx={{
+                      fontWeight: "bold",
+                      backgroundColor: "#d5dbdb",
+                      color: "black",
                     }}
                   >
                     Nombre
@@ -151,8 +152,8 @@ export const ProveedoresTable = () => {
                   <TableCell
                     sx={{
                       fontWeight: "bold",
-                      backgroundColor: "#a93226",
-                      color: "white",
+                      backgroundColor: "#d5dbdb",
+                      color: "black",
                     }}
                   >
                     Teléfono Contacto
@@ -160,8 +161,8 @@ export const ProveedoresTable = () => {
                   <TableCell
                     sx={{
                       fontWeight: "bold",
-                      backgroundColor: "#a93226",
-                      color: "white",
+                      backgroundColor: "#d5dbdb",
+                      color: "black",
                     }}
                   >
                     RFC
@@ -169,8 +170,8 @@ export const ProveedoresTable = () => {
                   <TableCell
                     sx={{
                       fontWeight: "bold",
-                      backgroundColor: "#a93226",
-                      color: "white",
+                      backgroundColor: "#d5dbdb",
+                      color: "black",
                     }}
                   >
                     Teléfono Empresa
@@ -178,8 +179,8 @@ export const ProveedoresTable = () => {
                   <TableCell
                     sx={{
                       fontWeight: "bold",
-                      backgroundColor: "#a93226",
-                      color: "white",
+                      backgroundColor: "#d5dbdb",
+                      color: "black",
                     }}
                   >
                     Acciones
@@ -188,7 +189,8 @@ export const ProveedoresTable = () => {
               </TableHead>
               <TableBody>
                 {filteredProveedores.map((proveedor) => (
-                  <TableRow key={proveedor.id}>
+                  <TableRow key={proveedor.id} sx={{ backgroundColor: getStatusColor(proveedor.status) }}>
+                    <TableCell>{proveedor.nombre_empresa}</TableCell>
                     <TableCell>{proveedor.nombreProveedor}</TableCell>
                     <TableCell>{proveedor.telefonoContacto}</TableCell>
                     <TableCell>{proveedor.rfc}</TableCell>
@@ -196,16 +198,10 @@ export const ProveedoresTable = () => {
                     <TableCell>
                       <IconButton
                         variant="contained"
-                        sx={{
-                          backgroundColor: "#f39c12 ",
-                          ":hover": {
-                            backgroundColor: "#f8c471 ",
-                            opacity: 0.7,
-                          },
-                        }}
+                        sx={{ color: 'black' }}
                         onClick={() => handleOpenModalEditar(proveedor)}
                       >
-                        <EditIcon />
+                        <EditIcon sx={{ fontSize: 20 }} />
                       </IconButton>
                       <IconButton
                         variant="contained"
@@ -213,7 +209,7 @@ export const ProveedoresTable = () => {
                         style={{ marginLeft: "10px" }}
                         onClick={() => handleActualizarStatus(proveedor.id)}
                       >
-                        <InventoryIcon sx={{ fontSize: 35 }} />
+                        <InventoryIcon sx={{ fontSize: 20 }} />
                       </IconButton>
                     </TableCell>
                   </TableRow>

@@ -35,17 +35,29 @@ export const EditarProductoModal = ({ onClose, modalOpen, producto, actualizarLi
 
   useEffect(() => {
     if (producto) {
-      setFormData({
+      console.log("Producto cargado:", producto); // Verifica si producto se carga correctamente
+
+      // Asegurar que `producto.proveedores` es un array válido
+      const proveedoresArray = producto.proveedores
+        ? typeof producto.proveedores === "string"
+          ? producto.proveedores.split(", ").map((p) => ({ value: p, label: p }))
+          : producto.proveedores.map((p) => ({ value: p, label: p }))
+        : [];
+
+      setFormData((prev) => ({
+        ...prev,
         codigo: producto.codigo || "",
         nombre: producto.nombre || "",
         grupo: producto.grupo || "",
         unidad_medida: producto.unidad_medida || "",
         precio: producto.precio || "",
         descripcion: producto.descripcion || "",
-        proveedores: Array.isArray(producto.proveedores) ? producto.proveedores : [],
-      });
+        proveedores: proveedoresArray, // Actualizar con los proveedores correctos
+      }));
     }
-  }, [producto]);
+  }, [producto]); // Agregar `producto.proveedores` puede ayudar si se actualiza en el padre
+
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -56,10 +68,11 @@ export const EditarProductoModal = ({ onClose, modalOpen, producto, actualizarLi
   const handleSelectChange = (selectedOptions) => {
     setFormData((prev) => ({
       ...prev,
-      proveedores: selectedOptions ? selectedOptions.map(option => option.value) : [],
+      proveedores: selectedOptions || [], // Guardar la estructura { value, label }
     }));
     setErrors((prev) => ({ ...prev, proveedores: "" }));
   };
+
 
   const validateForm = () => {
     const newErrors = {};
@@ -79,7 +92,6 @@ export const EditarProductoModal = ({ onClose, modalOpen, producto, actualizarLi
 
     try {
       const updatedProducto = await actualizarProductos(producto.id, formData);
-      console.log("updatedProducto", updatedProducto)
       if (updatedProducto?.error) {
         setErrors({ general: "Error al actualizar el producto" });
         return;
@@ -87,207 +99,167 @@ export const EditarProductoModal = ({ onClose, modalOpen, producto, actualizarLi
 
       Swal.fire("Éxito", "Producto actualizado correctamente.", "success");
 
-      // Actualizar la lista de productos en el padre
       actualizarLista(updatedProducto);
-      onClose();
+
+      // 🔹 Forzar actualización del modal antes de cerrarlo
+      setTimeout(() => onClose(), 300);
+
     } catch (error) {
       console.error("Error al actualizar:", error);
       setErrors({ general: "Error al conectar con el servidor" });
     }
   };
 
+
   return (
     <>
-      {modalOpen && <div className="modal-backdrop"></div>}
-      <div
-        className={`modal fade ${modalOpen ? "show d-block" : ""}`}
-        tabIndex="-1"
-        role="dialog"
-      >
-        <div
-          className="modal-dialog modal-dialog-centered mx-auto"
-          role="document"
-          style={{ maxWidth: "30vw" }}
-        >
-          <div className="modal-content w-100" style={{ maxWidth: "60vw" }}>
-            <div
-              className="modal-header"
-              style={{ backgroundColor: "#1f618d" }}
-            >
-              <h5 className="modal-title text-white">Editar Producto</h5>
-              <button
-                type="button"
-                className="btn-close"
-                onClick={onClose}
-              ></button>
-            </div>
-            <form onSubmit={handleSubmit}>
-              <div className="modal-body">
-                <div className="row">
-                  <div className="col-md-4 mb-3">
-                    <label className="form-label">Código</label>
-                    <input
-                      type="text"
-                      name="codigo"
-                      className={`form-control ${errors.codigo ? "is-invalid" : ""
-                        }`}
-                      value={formData.codigo}
-                      onChange={handleChange}
-                    />
-                    {errors.codigo && (
-                      <div className="invalid-feedback">{errors.codigo}</div>
-                    )}
-                  </div>
-                  <div className="col-md-4 mb-3">
-                    <label className="form-label">Nombre</label>
-                    <input
-                      type="text"
-                      name="nombre"
-                      className={`form-control ${errors.nombre ? "is-invalid" : ""
-                        }`}
-                      value={formData.nombre}
-                      onChange={handleChange}
-                    />
-                    {errors.nombre && (
-                      <div className="invalid-feedback">{errors.nombre}</div>
-                    )}
-                  </div>
-                  <div className="col-md-4 mb-3">
-                    <label className="form-label">Grupo</label>
-                    <select
-                      name="grupo"
-                      className={`form-control ${errors.grupo ? "is-invalid" : ""
-                        }`}
-                      value={formData.grupo}
-                      onChange={handleChange}
-                    >
-                      <option value="" disabled>
-                        Selecciona un grupo
-                      </option>
-                      <option>FRENOS</option>
-                      <option>LLANTAS</option>
-                      <option>ACEITE</option>
-                      {grupos.map((grupo, index) => (
-                        <option key={index} value={grupo}>
-                          {grupo}
-                        </option>
-                      ))}
-                    </select>
-                    {errors.grupo && (
-                      <div className="invalid-feedback">{errors.grupo}</div>
-                    )}
-                  </div>
-                </div>
-                <div className="row">
-                  <div className="col-md-6 mb-3">
-                    <label className="form-label">Unidad de Medida</label>
-                    <select
-                      name="unidad_medida"
-                      className={`form-control ${errors.unidad_medida ? "is-invalid" : ""
-                        }`}
-                      value={formData.unidad_medida}
-                      onChange={handleChange}
-                    >
-                      <option value="" disabled>
-                        SELECCIONA
-                      </option>
-                      <option>PIEZAS</option>
-                      <option>CAJAS</option>
-                      <option>LITROS</option>
-                    </select>
-                    {errors.unidad_medida && (
-                      <div className="invalid-feedback">
-                        {errors.unidad_medida}
-                      </div>
-                    )}
-                  </div>
-                  <div className="col-md-6 mb-3">
-                    <label className="form-label">Precio</label>
-                    <div className="input-group">
-                      <span className="input-group-text" style={{ height: 47 }}>
-                        $
-                      </span>
+      <div className="modal-backdrop">
+        <div className="modal fade show" style={{ display: "block" }} aria-labelledby="exampleModalLabel" tabIndex="-1" role="dialog">
+          <div className="modal-dialog" role="document" style={{ maxWidth: "60vw", marginTop: 90 }}>
+            <div className="modal-content w-100" style={{ maxWidth: "60vw" }}>
+              <div className="modal-header" style={{ backgroundColor: '#1f618d' }}>
+                <h5 className="modal-title" style={{ color: 'white' }}>Agregar Producto</h5>
+              </div>
+
+              <form onSubmit={handleSubmit} style={{ padding: "20px", maxHeight: "300vh" }}>
+                <div className="modal-body">
+                  <div className="row">
+                    <div className="col-md-6 mb-3">
+                      <label className="form-label">Código</label>
                       <input
-                        type="number"
-                        name="precio"
-                        className={`form-control ${errors.precio ? "is-invalid" : ""
-                          }`}
-                        value={formData.precio}
+                        type="text"
+                        name="codigo"
+                        className={`form-control ${errors.codigo ? "is-invalid" : ""}`}
+                        value={formData.codigo}
                         onChange={handleChange}
                       />
+                      {errors.codigo && (
+                        <div className="invalid-feedback">{errors.codigo}</div>
+                      )}
                     </div>
-                    {errors.precio && (
-                      <div className="invalid-feedback">{errors.precio}</div>
-                    )}
-                  </div>
-
-                  <div className="col-md-6 mb-3">
-                    <label className="form-label">Proveedor</label>
-                    <Select
-                      name="proveedores"
-                      options={proveedores}
-                      isMulti
-                      classNamePrefix="select"
-                      value={formData.proveedores.map((p) => ({ value: p, label: p }))}
-                      onChange={handleSelectChange}
-                      styles={{
-                        control: (base) => ({
-                          ...base,
-                          minHeight: "45px", // Aumenta la altura del select
-                          height: "45px",
-                        }),
-                      }}
-                    />
-
-                    {errors.proveedores && <div className="text-danger small">{errors.proveedores}</div>}
-                  </div>
-
-                  <div className="col-md-12 mb-3">
-                    <label className="form-label">Descripción</label>
-                    <textarea
-                      name="descripcion"
-                      className={`form-control ${errors.descripcion ? "is-invalid" : ""
-                        }`}
-                      value={formData.descripcion}
-                      onChange={handleChange}
-                    ></textarea>
-                    {errors.descripcion && (
-                      <div className="invalid-feedback">
-                        {errors.descripcion}
+                    <div className="col-md-6 mb-3">
+                      <label className="form-label">Nombre</label>
+                      <input
+                        type="text"
+                        name="nombre"
+                        className={`form-control ${errors.nombre ? "is-invalid" : ""}`}
+                        value={formData.nombre}
+                        onChange={handleChange}
+                      />
+                      {errors.nombre && (
+                        <div className="invalid-feedback">{errors.nombre}</div>
+                      )}
+                    </div>
+                    <div className="col-md-6 mb-3">
+                      <label className="form-label">Grupo</label>
+                      <select
+                        name="grupo"
+                        className={`form-control ${errors.grupo ? "is-invalid" : ""}`}
+                        value={formData.grupo}
+                        onChange={handleChange}
+                      >
+                        <option value="" disabled>
+                          SELECCIONA
+                        </option>
+                        <option>ACEITE</option>
+                        <option>FRENOS</option>
+                        <option>LLANTAS</option>
+                      </select>
+                      {errors.grupo && (
+                        <div className="invalid-feedback">{errors.grupo}</div>
+                      )}
+                    </div>
+                    <div className="col-md-6 mb-3">
+                      <label className="form-label">Precio</label>
+                      <div className="input-group">
+                        <span className="input-group-text" style={{ height: 47 }}>
+                          $
+                        </span>
+                        <input
+                          type="number"
+                          name="precio"
+                          className={`form-control ${errors.precio ? "is-invalid" : ""}`}
+                          value={formData.precio}
+                          onChange={handleChange}
+                        />
                       </div>
-                    )}
+                      {errors.precio && (
+                        <div className="invalid-feedback">{errors.precio}</div>
+                      )}
+                    </div>
+
+                    <div className="col-md-12 mb-3">
+                      <label className="form-label">Descripción</label>
+                      <textarea
+                        name="descripcion"
+                        className={`form-control ${errors.descripcion ? "is-valid" : ""
+                          }`}
+                        value={formData.descripcion}
+                        onChange={handleChange}
+                      ></textarea>
+                    </div>
+                    <div className="col-md-6 mb-3">
+                      <label className="form-label">Unidad de Medida</label>
+                      <select
+                        name="unidad_medida"
+                        className={`form-control ${errors.unidad_medida ? "is-invalid" : ""
+                          }`}
+                        value={formData.unidad_medida}
+                        onChange={handleChange}
+                      >
+                        <option value="" disabled>
+                          SELECCIONA
+                        </option>
+                        <option>CAJAS</option>
+                        <option>LITROS</option>
+                        <option>PIEZAS</option>
+                      </select>
+                      {errors.unidad_medida && (
+                        <div className="invalid-feedback">{errors.unidad_medida}</div>
+                      )}
+                    </div>
+
+                    <div className="col-md-6 mb-3">
+                      <label className="form-label">Proveedor</label>
+                      <Select
+                        name="proveedores"
+                        options={proveedores.sort((a, b) => a.label.localeCompare(b.label))}
+                        isMulti
+                        classNamePrefix="select"
+                        value={formData.proveedores} // Se asegura que sean { value, label }
+                        onChange={handleSelectChange}
+                        styles={{
+                          control: (base) => ({
+                            ...base,
+                            minHeight: "45px",
+                            height: "45px",
+                          }),
+                        }}
+                      />
+
+
+                      {errors.proveedores && (
+                        <div className="text-danger small">{errors.proveedores}</div>
+                      )}
+                    </div>
                   </div>
                 </div>
-                {errors.general && (
-                  <p className="text-danger">{errors.general}</p>
-                )}
-              </div>
-              <div className="modal-footer">
-                <Button
-                  type="button"
-                  style={{
-                    backgroundColor: "#85929e",
-                    color: "white",
-                    padding: "10px 20px",
-                    margin: 20
-                  }}
-                  onClick={onClose}
-                >
-                  Cancelar
-                </Button>
-                <Button type="submit" style={{
-                  backgroundColor: "#0091ea",
-                  color: "white",
-                  padding: "10px 20px",
-                }}>
-                  Guardar
-                </Button>
-              </div>
-            </form>
+
+                {/* Botones */}
+                <div className="modal-footer">
+                  <Button type="submit" style={{ backgroundColor: "#f1c40f", color: "white" }} onClick={handleSubmit}>
+                    Guardar
+                  </Button>
+
+                  <Button type="button" style={{ backgroundColor: "#7f8c8d", color: "white", marginLeft: 7 }} onClick={onClose}>
+                    Cancelar
+                  </Button>
+                </div>
+              </form>
+            </div>
           </div>
         </div>
       </div>
-
     </>
   );
 };

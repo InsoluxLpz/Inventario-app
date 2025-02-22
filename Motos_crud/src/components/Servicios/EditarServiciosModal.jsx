@@ -60,10 +60,10 @@ export const EditarServiciosModal = ({ onClose, modalOpen, servicio, actualizarL
     return (
         <div className="modal-backdrop">
             <div className="modal fade show" style={{ display: "block" }} aria-labelledby="exampleModalLabel" tabIndex="-1" role="dialog">
-                <div className="modal-dialog" role="document" style={{ maxWidth: "20vw", marginTop: 100 }}>
-                    <div className="modal-content " style={{ maxWidth: "60vw" }}>
-                        <div className="modal-header" style={{ backgroundColor: '#a93226' }}>
-                            <h5 className="modal-title" style={{ color: 'white' }}>Edtar Servicio</h5>
+                <div className="modal-dialog" role="document" style={{ maxWidth: "60vw", marginTop: 90 }}>
+                    <div className="modal-content w-100" style={{ maxWidth: "60vw" }}>
+                        <div className="modal-header" style={{ backgroundColor: '#1f618d' }}>
+                            <h5 className="modal-title" style={{ color: 'white' }}>Editar Servicio</h5>
                         </div>
                         <form onSubmit={handleSubmit}>
                             <div className="modal-body">
@@ -82,8 +82,13 @@ export const EditarServiciosModal = ({ onClose, modalOpen, servicio, actualizarL
                                 </div>
                             </div>
                             <div className="modal-footer">
-                                < Button type="button" style={{ backgroundColor: '#a93226', color: 'white' }} onClick={onClose}>Cancelar</Button>
-                                <Button type="submit" style={{ backgroundColor: '#f5b041  ', marginLeft: 5, color: 'white' }}  >Guardar</Button>
+                                <Button type="submit" style={{ backgroundColor: "#f1c40f", color: "white" }} onClick={handleSubmit}>
+                                    Guardar
+                                </Button>
+
+                                <Button type="button" style={{ backgroundColor: "#7f8c8d", color: "white", marginLeft: 7 }} onClick={onClose}>
+                                    Cancelar
+                                </Button>
                             </div>
                         </form>
                     </div>
