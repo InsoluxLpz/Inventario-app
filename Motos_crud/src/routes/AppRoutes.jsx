@@ -15,6 +15,7 @@ import { AgregarServicios } from '../components/Servicios/AgregarServicios';
 import { ListaMantenimientos } from '../components/Servicios/ListaMantenimientos';
 import { RealizarMantenimiento } from '../components/Servicios/RealizarMantenimiento';
 import { ProveedoresTable } from '../components/relacionProveedores/ProveedoresTable';
+import { ProductoAlmacenTable } from '../components/entradas/ProductoAlmacenTable';
 
 
 
@@ -38,8 +39,9 @@ export const AppRoutes = () => {
                 <Route path="/servicios/RealizarMantenimiento" element={<RealizarMantenimiento />} />
                 <Route path="/servicios/CatalogoServicios" element={<CatalogoServicios />} />
                 <Route path="/servicios/AgregarServicios" element={<AgregarServicios />} />
-                <Route path="/almacen/Entradas" element={<EntradasAlmacenModal />} />
                 <Route path="/Proveedores" element={<ProveedoresTable />} />
+                <Route path="/almacen/Entradas" element={<EntradasAlmacenModal />} />
+                <Route path="/almacen/ProductoAlmacenTable" element={<ProductoAlmacenTable />} />
             </Route>
         </Routes>
 

@@ -4,6 +4,8 @@ import {
   Box, AppBar as MuiAppBar, Toolbar, Typography, IconButton, InputBase, Switch, FormControlLabel, Drawer,
   Divider, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Collapse
 } from "@mui/material";
+import ConnectWthoutContactIcon from '@mui/icons-material/ConnectWithoutContact'; 
+import WarehouseIcon from '@mui/icons-material/Warehouse';
 import MenuIcon from "@mui/icons-material/Menu";
 import SearchIcon from "@mui/icons-material/Search";
 import TwoWheelerIcon from "@mui/icons-material/TwoWheeler";
@@ -172,7 +174,8 @@ export const NavBar = ({ onSearch }) => {
     "/motos": "Administración de Motos",
     "/productos": "Productos",
     "/servicios/RealizarServicio": "Servicios",
-    "/servicios/ListaServicios": "Servicios"
+    "/servicios/ListaServicios": "Servicios",
+    "/almacen/ProductoAlmacenTable": "Bodega de productos"
   };
 
   // Obtén el título según la ruta actual
@@ -199,19 +202,6 @@ export const NavBar = ({ onSearch }) => {
           <Typography variant="h6" style={{ flexGrow: 1 }}>
             {currentTitle}
           </Typography>
-
-          {/* Switch para mostrar inactivas
-                  <FormControlLabel
-                      control={
-                          <Switch
-                              checked={showInactive}
-                              onChange={(e) => setShowInactive(e.target.checked)}
-                              color="default"
-                          />
-                      }
-                      label="Mostrar inactivas"
-                      sx={{ color: 'white' }}
-                  /> */}
 
           {/* Barra de búsqueda */}
           <Search>
@@ -264,7 +254,7 @@ export const NavBar = ({ onSearch }) => {
             selected={selectedItem === "/Proveedores"}
             onClick={() => handleNavigate("/Proveedores")}
           >
-            <ListItemIcon sx={{ minWidth: 32 }}><HomeIcon /></ListItemIcon>
+            <ListItemIcon sx={{ minWidth: 32 }}><ConnectWthoutContactIcon /></ListItemIcon>
             <ListItemText primary="Proveedores" />
           </ListItem>
 
@@ -380,6 +370,24 @@ export const NavBar = ({ onSearch }) => {
                   primary={
                     <Typography variant="body2" sx={{ fontSize: "0.875rem" }}>
                       Entradas
+                    </Typography>
+                  }
+                />
+              </ListItem>
+              <ListItem
+                button
+                selected={selectedItem === "/almacen/ProductoAlmacenTable"}
+                onClick={() => handleNavigate("/almacen/ProductoAlmacenTable")}
+                sx={{ paddingLeft: 4 }}
+              >
+                <ListItemIcon sx={{ minWidth: 32 }}>
+                  <WarehouseIcon sx={{ fontSize: 18 }} />
+                </ListItemIcon>
+
+                <ListItemText
+                  primary={
+                    <Typography variant="body2" sx={{ fontSize: "0.875rem" }}>
+                      Bodega de productos
                     </Typography>
                   }
                 />

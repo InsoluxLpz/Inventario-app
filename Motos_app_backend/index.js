@@ -4,6 +4,7 @@ const motosCrud = require('./src/routes/motosCrud')
 const productosCrud = require('./src/routes/productosCrud')
 const servicios = require('./src/routes/servicios')
 const proveedoresCrud = require('./src/routes/proveedoresCrud')
+const entradaProductosCrud = require('./src/routes/entradaProductosCrud')
 const cors = require('cors')
 require('dotenv').config()
 
@@ -18,6 +19,7 @@ app.use('/', motosCrud);
 app.use('/productos', productosCrud);
 app.use('/servicios', servicios);
 app.use('/proveedores', proveedoresCrud);
+app.use('/entrada', entradaProductosCrud);
 
 
 app.listen(process.env.PORT, () => {

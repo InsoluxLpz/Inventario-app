@@ -169,7 +169,7 @@ export const EditarProductoModal = ({ onClose, modalOpen, producto, actualizarLi
                         <div className="invalid-feedback">{errors.grupo}</div>
                       )}
                     </div>
-                    <div className="col-md-6 mb-3">
+                    {/* <div className="col-md-6 mb-3">
                       <label className="form-label">Precio</label>
                       <div className="input-group">
                         <span className="input-group-text" style={{ height: 47 }}>
@@ -186,7 +186,7 @@ export const EditarProductoModal = ({ onClose, modalOpen, producto, actualizarLi
                       {errors.precio && (
                         <div className="invalid-feedback">{errors.precio}</div>
                       )}
-                    </div>
+                    </div> */}
 
                     <div className="col-md-12 mb-3">
                       <label className="form-label">Descripción</label>
