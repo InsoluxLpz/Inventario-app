@@ -28,7 +28,6 @@ export const obtenerProductos = async () => {
 
 export const agregarProductos = async (productoData) => {
     try {
-
         const response = await fetch(`${API_URL}/productos/agregar_producto`, {
             method: "POST",
             headers: {
@@ -37,19 +36,20 @@ export const agregarProductos = async (productoData) => {
             body: JSON.stringify(productoData),
         });
 
-        const data = await response.json();
-
         if (response.ok) {
+            const data = await response.json();
             Swal.fire({
                 title: 'Éxito',
                 text: 'Producto agregado correctamente.',
                 icon: 'success',
                 confirmButtonText: 'Aceptar'
             });
+
             return data;
         } else {
+            const data = await response.json();
             Swal.fire('Error', data.message || 'Hubo un problema al agregar el producto.', 'error');
-            return { error: data.message || 'Hubo un problema al agregar la moto.' };
+            return { error: data.message || 'Hubo un problema al agregar el producto.' };
         }
     } catch (error) {
         console.error('Error al realizar la solicitud:', error);
@@ -57,6 +57,7 @@ export const agregarProductos = async (productoData) => {
         return null;
     }
 };
+
 
 export const actualizarProductos = async (id, productoData) => {
     try {
@@ -183,3 +184,44 @@ export const agregarEntradas = async (entradaData) => {
     }
 };
 
+export const obtenerGrupos = async () => {
+    try {
+        const response = await fetch(`${API_URL}/productos/obtener_grupos`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+        });
+
+        if (response.ok) {
+            const data = await response.json()
+            return data;
+        }
+
+    } catch (error) {
+        console.error('Error al realizar la solicitud:', error);
+        Swal.fire('Error', 'Hubo un problema al conectar con el servidor.', 'error');
+        return null;
+    }
+};
+
+export const obtenerUnidadMedidas = async () => {
+    try {
+        const response = await fetch(`${API_URL}/productos/obtener_unidad_medida`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+        });
+
+        if (response.ok) {
+            const data = await response.json()
+            return data;
+        }
+
+    } catch (error) {
+        console.error('Error al realizar la solicitud:', error);
+        Swal.fire('Error', 'Hubo un problema al conectar con el servidor.', 'error');
+        return null;
+    }
+};

@@ -6,121 +6,168 @@ const db = dbConexion();
 router.post('/agregar_producto', async (req, res) => {
     console.log("Datos recibidos en el backend:", req.body);
 
-    const { codigo, nombre, grupo, unidad_medida, precio, descripcion, proveedores } = req.body;
+    const { codigo, nombre, precio, descripcion, grupo, unidad_medida, proveedores } = req.body;
+
 
     if (!codigo || !nombre || !grupo || !unidad_medida || !precio || !proveedores) {
-        return res.status(400).json({ message: 'Hacen falta parámetros para guardar en la tabla' });
+        return res.status(400).json({ message: 'Faltan parámetros para guardar en la base de datos' });
     }
 
+    const connection = await db.getConnection();
     try {
-        const existeQuery = `SELECT codigo FROM cat_productos_prueba WHERE codigo = ?`
-        const [existe] = await db.query(existeQuery, [codigo]);
+        await connection.beginTransaction(); // Iniciar transacción
 
-        if (existe.length > 0) {
-            return res.status(400).json({ message: 'El código ya está registrado en la base de datos' });
+        const grupoQuery = `SELECT 1 FROM cat_grupos_prueba WHERE id = ? LIMIT 1`;
+        const [grupoExists] = await connection.query(grupoQuery, [grupo]);
+
+        // Verifica si el resultado contiene al menos un objeto, no importa el valor
+        if (!grupoExists || grupoExists.length === 0) {
+            return res.status(400).json({ message: 'El grupo no existe' });
         }
 
-        const query = `
-            INSERT INTO cat_productos_prueba (codigo, nombre, grupo, unidad_medida, precio, descripcion, proveedores) VALUES (?,?,?,?,?,?,?)`
 
-        const values = [codigo, nombre, grupo, unidad_medida, precio, descripcion, proveedores.join(", ")];
+        // Validar que el idUnidadMedida existe en la tabla cat_unidad_medida
+        const unidadMedidaQuery = `SELECT 1 FROM cat_unidad_medida WHERE id = ? LIMIT 1`;
+        const [unidadMedidaExists] = await connection.query(unidadMedidaQuery, [unidad_medida]);
+        if (unidadMedidaExists.length === 0) {
+            return res.status(400).json({ message: 'La unidad de medida no existe' });
+        }
 
+        // Insertar el producto
+        const insertProductoQuery = `
+            INSERT INTO cat_productos_prueba (codigo, nombre, precio, descripcion, idGrupo, idUnidadMedida) 
+            VALUES (?, ?, ?, ?, ?, ?)`;
+        const valuesProducto = [codigo, nombre, precio, descripcion, grupo, unidad_medida];
 
-        await db.query(query, values);
+        const [productoResult] = await connection.query(insertProductoQuery, valuesProducto);
+        const idProducto = productoResult.insertId; // Obtener el ID del nuevo producto
 
-        return res.status(200).json('Producto agregado correctamente')
+        console.log("idProducto:", idProducto); // Verificar si idProducto tiene un valor válido
+
+        // Verificar que los proveedores sean válidos
+        for (let id of proveedores) {
+            const proveedorQuery = `SELECT 1 FROM cat_proveedores_prueba WHERE id = ? LIMIT 1`;
+            const [proveedorExists] = await connection.query(proveedorQuery, [id]);
+
+            if (proveedorExists.length === 0) {
+                return res.status(400).json({ message: `El proveedor con ID ${id} no existe` });
+            }
+        }
+
+        // Insertar los proveedores
+        const valuesProveedores = proveedores.map(idProveedor => [idProducto, idProveedor]);
+        const insertProveedorQuery = `INSERT INTO cat_productos_proveedor (idProducto, idProveedor) VALUES ?`;
+        await connection.query(insertProveedorQuery, [valuesProveedores]);
+
+        await connection.commit(); // Confirmar transacción
+        return res.status(200).json({ message: 'Producto agregado correctamente', idProducto });
 
     } catch (error) {
-        console.error('Error al agregar el producto:', error);
-        return res.status(500).json({ message: 'Error al agregar el producto' });
+        await connection.rollback(); // Revertir cambios si hay error
+        console.error('Error al agregar el producto:', error.message);
+        return res.status(500).json({ message: error.message || 'Error al agregar el producto' });
+    } finally {
+        connection.release(); // Liberar conexión
     }
 });
 
-router.get('/obtener_productos', async (req, res) => {
 
-    const query = `SELECT * FROM cat_productos_prueba`
+
+router.get('/obtener_productos', async (req, res) => {
+    console.log(req.body)
+    const query = `
+SELECT 
+    p.*, 
+    g.nombre AS grupo,
+    u.nombre AS unidad_medida,
+    GROUP_CONCAT(pr.nombreProveedor) AS proveedores
+FROM 
+    cat_productos_prueba p
+JOIN 
+    cat_grupos_prueba g ON p.idGrupo = g.id  -- Relación entre productos y grupos
+JOIN 
+    cat_unidad_medida u ON p.idUnidadMedida = u.id  -- Relación entre productos y unidad de medida
+LEFT JOIN 
+    cat_productos_proveedor pp ON p.id = pp.idProducto  -- Relación con la tabla intermedia
+LEFT JOIN 
+    cat_proveedores_prueba pr ON pp.idProveedor = pr.id  
+GROUP BY 
+    p.id;  -- Agrupamos por el id del producto para obtener todos los proveedores asociados
+
+    `;
 
     try {
-
         const [results] = await db.query(query);
 
         if (results.length === 0) {
-            return res.status(404).json('No se encontraron valores a mostrar en la tabla')
+            return res.status(404).json('No se encontraron productos con los datos solicitados');
         }
 
-        return res.status(200).json(results)
-
+        return res.status(200).json(results);
     } catch (error) {
-        console.error('Error al obtener los prodructos:', error);
+        console.error('Error al obtener los productos:', error);
         return res.status(500).json({ message: 'Error al obtener los productos' });
     }
-
 });
 
 router.put('/actualizar_producto/:id', async (req, res) => {
-    const { id } = req.params;
-    const { codigo, nombre, grupo, unidad_medida, precio, descripcion } = req.body;
+    console.log("Datos recibidos en el backend para actualizar producto:", req.body);
 
-    if (!codigo || !nombre || !grupo || !unidad_medida || !precio) {
-        return res.status(400).json({ message: 'Faltan parametros en la petición' })
+    const { nombre, precio, descripcion, grupo, unidad_medida, proveedores } = req.body;
+    const { id } = req.params; // ID del producto a actualizar
+
+    // Validar los parámetros
+    if (!nombre || !grupo || !unidad_medida || !precio || !proveedores) {
+        return res.status(400).json({ message: 'Faltan parámetros para actualizar el producto' });
     }
 
-    if (!id) {
-        return res.status(400).json({ message: 'No se encuentra id en la petición' })
-    }
-
+    const connection = await db.getConnection();
     try {
-
-        const query = `SELECT * FROM cat_productos_prueba WHERE id = ?`
-
-        const [existe] = await db.query(query, [id]);
-
-        if (existe.length === 0) {
-            return res.status(400).json({ message: 'No existe ningun producto con ese id' })
-        };
-
-        const updateQuery = `
-            UPDATE cat_productos_prueba SET codigo = ?, nombre = ?, grupo = ?, unidad_medida = ?, precio = ?, descripcion = ? WHERE id = ?`
-
-        const values = [codigo, nombre, grupo, unidad_medida, precio, descripcion, id]
-
-        await db.query(updateQuery, values);
-
-        const [updateProducto] = await db.query('SELECT * FROM cat_productos_prueba WHERE id = ?', [id]);
+        await connection.beginTransaction(); // Iniciar transacción
 
 
-        return res.status(200).json(updateProducto[0]);
+        // Actualizar el producto
+        const updateProductoQuery = `
+            UPDATE cat_productos_prueba 
+            SET nombre = ?, precio = ?, descripcion = ?, idGrupo = ?, idUnidadMedida = ? 
+            WHERE id = ?`;
+        const valuesProducto = [nombre, precio, descripcion, grupo, unidad_medida, id];
+        await connection.query(updateProductoQuery, valuesProducto);
+
+        // Verificar que los proveedores sean válidos
+        for (let idProveedor of proveedores) {
+            const proveedorQuery = `SELECT 1 FROM cat_proveedores_prueba WHERE id = ? LIMIT 1`;
+            const [proveedorExists] = await connection.query(proveedorQuery, [idProveedor]);
+
+            if (proveedorExists.length === 0) {
+                return res.status(400).json({ message: `El proveedor con ID ${idProveedor} no existe` });
+            }
+        }
+
+        // Eliminar los proveedores antiguos
+        const deleteProveedoresQuery = `DELETE FROM cat_productos_proveedor WHERE idProducto = ?`;
+        await connection.query(deleteProveedoresQuery, [id]);
+
+        // Insertar los nuevos proveedores
+        const valuesProveedores = proveedores.map(idProveedor => [id, idProveedor]);
+        const insertProveedorQuery = `INSERT INTO cat_productos_proveedor (idProducto, idProveedor) VALUES ?`;
+        await connection.query(insertProveedorQuery, [valuesProveedores]);
+
+        await connection.commit(); // Confirmar transacción
+        return res.status(200).json({ message: 'Producto actualizado correctamente' });
 
     } catch (error) {
-        console.error('Error al actualizar el producto:', error);
-        res.status(500).json({ error: 'Error interno del servidor' });
+        await connection.rollback(); // Revertir cambios si hay error
+        console.error('Error al actualizar el producto:', error.message);
+        return res.status(500).json({ message: error.message || 'Error al actualizar el producto' });
+    } finally {
+        connection.release(); // Liberar conexión
     }
 });
 
-// * actualizar status en la tabla de productos
-router.put('/actualizar_status_productos/:id', async (req, res) => {
-    const { id } = req.params
 
-    if (!id) {
-        return res.status(400).json('Faltan parametros para actualizar el campo');
-    }
 
-    const query = `UPDATE cat_productos_prueba SET status = 0 WHERE id = ?`
 
-    try {
-        const [results] = await db.query(query, [id]);
-
-        if (results.length === 0) {
-            return res.status(404).json('No hay datos en la tabla');
-        }
-        return res.status(200).json(results);
-
-    } catch (err) {
-        console.error('Error al obtener el crédito:', err);
-        return res.status(500).json({ errors: ['Error en el servidor'] });
-    }
-
-});
 
 router.delete('/eliminar_producto/:id', async (req, res) => {
 
@@ -165,6 +212,48 @@ router.get('/obtener_entradas', async (req, res) => {
         console.error('Error al obtener los prodructos:', error);
         return res.status(500).json({ message: 'Error al obtener los productos' });
     }
+});
+
+router.get('/obtener_grupos', async (req, res) => {
+
+    const query = `SELECT * FROM cat_grupos_prueba`
+
+    try {
+
+        const [results] = await db.query(query);
+
+        if (results.length === 0) {
+            return res.status(404).json('No se encontraron valores a mostrar en la tabla')
+        }
+
+        return res.status(200).json(results)
+
+    } catch (error) {
+        console.error('Error al obtener los prodructos:', error);
+        return res.status(500).json({ message: 'Error al obtener los productos' });
+    }
+
+});
+
+router.get('/obtener_unidad_medida', async (req, res) => {
+
+    const query = `SELECT * FROM cat_unidad_medida`
+
+    try {
+
+        const [results] = await db.query(query);
+
+        if (results.length === 0) {
+            return res.status(404).json('No se encontraron valores a mostrar en la tabla')
+        }
+
+        return res.status(200).json(results)
+
+    } catch (error) {
+        console.error('Error al obtener los prodructos:', error);
+        return res.status(500).json({ message: 'Error al obtener los productos' });
+    }
+
 });
 
 module.exports = router;

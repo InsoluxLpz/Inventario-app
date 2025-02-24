@@ -136,6 +136,7 @@ export const ProveedoresTable = () => {
                       fontWeight: "bold",
                       backgroundColor: "#d5dbdb",
                       color: "black",
+                      textAlign: "right"
                     }}
                   >
                     Empresa
@@ -145,6 +146,7 @@ export const ProveedoresTable = () => {
                       fontWeight: "bold",
                       backgroundColor: "#d5dbdb",
                       color: "black",
+                      textAlign: "right"
                     }}
                   >
                     Nombre
@@ -154,6 +156,7 @@ export const ProveedoresTable = () => {
                       fontWeight: "bold",
                       backgroundColor: "#d5dbdb",
                       color: "black",
+                      textAlign: "right"
                     }}
                   >
                     Teléfono Contacto
@@ -163,6 +166,7 @@ export const ProveedoresTable = () => {
                       fontWeight: "bold",
                       backgroundColor: "#d5dbdb",
                       color: "black",
+                      textAlign: "right"
                     }}
                   >
                     RFC
@@ -172,6 +176,7 @@ export const ProveedoresTable = () => {
                       fontWeight: "bold",
                       backgroundColor: "#d5dbdb",
                       color: "black",
+                      textAlign: "right"
                     }}
                   >
                     Teléfono Empresa
@@ -181,6 +186,7 @@ export const ProveedoresTable = () => {
                       fontWeight: "bold",
                       backgroundColor: "#d5dbdb",
                       color: "black",
+                      textAlign: "right"
                     }}
                   >
                     Acciones
@@ -190,15 +196,15 @@ export const ProveedoresTable = () => {
               <TableBody>
                 {filteredProveedores.map((proveedor) => (
                   <TableRow key={proveedor.id} sx={{ backgroundColor: getStatusColor(proveedor.status) }}>
-                    <TableCell>{proveedor.nombre_empresa}</TableCell>
-                    <TableCell>{proveedor.nombreProveedor}</TableCell>
-                    <TableCell>{proveedor.telefonoContacto}</TableCell>
-                    <TableCell>{proveedor.rfc}</TableCell>
-                    <TableCell>{proveedor.telefonoEmpresa}</TableCell>
-                    <TableCell>
+                    <TableCell sx={{ textAlign: "right" }}>{proveedor.nombre_empresa}</TableCell>
+                    <TableCell sx={{ textAlign: "right" }}>{proveedor.nombreProveedor}</TableCell>
+                    <TableCell sx={{ textAlign: "right" }}>{proveedor.telefonoContacto}</TableCell>
+                    <TableCell sx={{ textAlign: "right" }}>{proveedor.rfc}</TableCell>
+                    <TableCell sx={{ textAlign: "right" }}>{proveedor.telefonoEmpresa}</TableCell>
+                    <TableCell sx={{ textAlign: "right" }}>
                       <IconButton
                         variant="contained"
-                        sx={{ color: 'black' }}
+                        sx={{ color: 'black', }}
                         onClick={() => handleOpenModalEditar(proveedor)}
                       >
                         <EditIcon sx={{ fontSize: 20 }} />
@@ -208,6 +214,7 @@ export const ProveedoresTable = () => {
                         color="error"
                         style={{ marginLeft: "10px" }}
                         onClick={() => handleActualizarStatus(proveedor.id)}
+
                       >
                         <InventoryIcon sx={{ fontSize: 20 }} />
                       </IconButton>

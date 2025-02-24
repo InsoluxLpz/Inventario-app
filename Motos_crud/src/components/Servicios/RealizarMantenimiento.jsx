@@ -150,7 +150,7 @@ export const RealizarMantenimiento = ({ modalOpen, onClose }) => {
                             <form onSubmit={handleSubmit} style={{ marginTop: 3 }}>
                                 <div className="row">
                                     <div className="col-md-3 mb-2">
-                                        <label className="form-label small">Fecha de inicio</label>
+                                        <label className="form-label">Fecha de inicio</label>
                                         <input name="fecha_inicio" type='date' className={`form-control form-control-sm ${errors.fecha_inicio ? "is-invalid" : ""}`} value={formData.fecha_inicio} onChange={handleChange} />
                                         {errors.fecha_inicio && <div className="invalid-feedback">{errors.fecha_inicio}</div>}
                                     </div>
@@ -181,7 +181,7 @@ export const RealizarMantenimiento = ({ modalOpen, onClose }) => {
                                     </div>
 
                                     <div className="col-md-4 mb-2">
-                                        <label className="form-label small">Odómetro/Horómetro</label>
+                                        <label className="form-label">Odómetro/Horómetro</label>
                                         <input type="text" name="odometro" className={`form-control form-control-sm ${errors.odometro ? "is-invalid" : ""}`} value={formData.odometro} onChange={handleChange} />
                                         {errors.odometro && <div className="invalid-feedback">{errors.odometro}</div>}
                                     </div>
@@ -190,7 +190,7 @@ export const RealizarMantenimiento = ({ modalOpen, onClose }) => {
                                 {/* Segunda fila */}
                                 <div className="row">
                                     <div className="col-md-10 mb-2">
-                                        <label className="form-label small">Servicio(s)</label>
+                                        <label className="form-label">Servicio(s)</label>
                                         <Select
                                             name="servicio"
                                             options={[...servicio].sort((a, b) => a.label.localeCompare(b.label))}
@@ -212,13 +212,19 @@ export const RealizarMantenimiento = ({ modalOpen, onClose }) => {
                                             }}
                                         />
                                         {errors.servicio && (
-                                            <div className="text-danger small">{errors.servicio}</div>
+                                            <div className="text-danger">{errors.servicio}</div>
                                         )}
                                     </div>
                                 </div>
 
                                 {/* Línea divisoria */}
                                 <hr />
+                                {/* Botón para agregar refacciones */}
+                                <div className="d-flex justify-content-end mb-3">
+                                    <Button variant="contained" color="primary" size="small" onClick={handleOpenModal}>
+                                        Agregar Refacción
+                                    </Button>
+                                </div>
 
                                 <h6 className="mb-2">Desglose de Partes/Refacciones de Almacén</h6>
                                 <div className="table-responsive">
@@ -242,30 +248,21 @@ export const RealizarMantenimiento = ({ modalOpen, onClose }) => {
                                     </table>
                                 </div>
 
-                                {/* Botón para agregar refacciones */}
-                                <div className="d-flex justify-content-start mb-3">
-                                    <Button variant="contained" color="primary" size="small" onClick={handleOpenModal}>
-                                        Agregar Refacción
-                                    </Button>
-                                </div>
+
 
                                 {/* Totales */}
                                 <div className="row">
                                     <div className="col-md-6 mb-2">
-                                        <label className="form-label small">Costo Partes/Refacciones</label>
+                                        <label className="form-label">Costo Partes/Refacciones</label>
                                         <input type="number" name="costo_refacciones" className={`form-control form-control-sm ${errors.costo_refacciones ? "is-invalid" : ""}`} value={formData.costo_refacciones} onChange={handleChange} />
                                         {errors.costo_refacciones && <div className="invalid-feedback">{errors.costo_refacciones}</div>}
                                     </div>
-                                    <div className="col-md-6 mb-2">
-                                        <label className="form-label small">Costo Total</label>
-                                        <input type="number" name="costo_total" className={`form-control form-control-sm ${errors.costo_total ? "is-invalid" : ""}`} value={formData.costo_total} onChange={handleChange} />
-                                        {errors.costo_total && <div className="invalid-feedback">{errors.costo_total}</div>}
-                                    </div>
+
                                 </div>
 
                                 {/* Comentarios */}
                                 <div className="col-md-12 mb-2">
-                                    <label className="form-label small">Comentario</label>
+                                    <label className="form-label">Comentario</label>
                                     <textarea name="comentario" className={`form-control form-control-sm`} value={formData.comentario} onChange={handleChange} />
                                 </div>
 

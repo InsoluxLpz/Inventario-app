@@ -95,19 +95,19 @@ export const CatalogoServicios = () => {
                         <Table stickyHeader>
                             <TableHead>
                                 <TableRow>
-                                    <TableCell align="center" sx={{ fontWeight: "bold", color: "black" }}>Id</TableCell>
-                                    <TableCell align="center" sx={{ fontWeight: "bold", color: "black" }}>Nombre</TableCell>
-                                    <TableCell align="center" sx={{ fontWeight: "bold", color: "black" }}>Descripción</TableCell>
-                                    <TableCell align="center" sx={{ fontWeight: "bold", color: "black" }}>Opciones</TableCell>
+                                    <TableCell align="center" sx={{ fontWeight: "bold", color: "black", textAlign: "right" }}>Id</TableCell>
+                                    <TableCell align="center" sx={{ fontWeight: "bold", color: "black", textAlign: "right" }}>Nombre</TableCell>
+                                    <TableCell align="center" sx={{ fontWeight: "bold", color: "black", textAlign: "right" }}>Descripción</TableCell>
+                                    <TableCell align="center" sx={{ fontWeight: "bold", color: "black", textAlign: "right" }}>Opciones</TableCell>
                                 </TableRow>
                             </TableHead>
                             <TableBody>
                                 {servicios.map((servicio) => (
                                     <TableRow key={servicio.id}>
-                                        <TableCell align="center">{servicio.id}</TableCell>
-                                        <TableCell align="center">{servicio.nombre}</TableCell>
-                                        <TableCell align="center">{servicio.descripcion}</TableCell>
-                                        <TableCell align="center">
+                                        <TableCell align="center" sx={{ textAlign: "right" }}>{servicio.id}</TableCell>
+                                        <TableCell align="center" sx={{ textAlign: "right" }}>{servicio.nombre}</TableCell>
+                                        <TableCell align="center" sx={{ textAlign: "right" }}>{servicio.descripcion}</TableCell>
+                                        <TableCell align="center" sx={{ textAlign: "right" }}>
                                             <IconButton sx={{ color: 'black' }} onClick={() => handleOpenModalEdit(servicio)}>
                                                 <EditIcon sx={{ fontSize: 20 }} />
                                             </IconButton>

@@ -195,83 +195,83 @@ export const MotosTable = () => {
 
         {/* Contenedor de la tabla */}
         <Paper sx={{ width: "100%" }}>
-          <TableContainer sx={{ maxHeight: 800, backgroundColor: "#f4f6f7 " }}>
+          <TableContainer sx={{ maxHeight: 800, backgroundColor: "#f4f6f7" }}>
             <Table stickyHeader aria-label="sticky table">
               <TableHead>
                 <TableRow>
                   <TableCell
-                    align="center"
+
                     sx={{
-                      fontWeight: "bold",
+
                       backgroundColor: "#d5dbdb",
                       color: "black",
-                      padding: "8px",
+                      textAlign: "right"
                     }}
                   >
                     Inciso
                   </TableCell>
                   <TableCell
-                    align="center"
+
                     sx={{
-                      fontWeight: "bold",
+
                       backgroundColor: "#d5dbdb",
                       color: "black",
-                      padding: "8px",
+                      textAlign: "right"
                     }}
                   >
                     Modelo
                   </TableCell>
                   <TableCell
-                    align="center"
+
                     sx={{
-                      fontWeight: "bold",
+
                       backgroundColor: "#d5dbdb",
                       color: "black",
-                      padding: "8px",
+                      textAlign: "right"
                     }}
                   >
                     N.Serie
                   </TableCell>
                   <TableCell
-                    align="center"
+
                     sx={{
-                      fontWeight: "bold",
+
                       backgroundColor: "#d5dbdb",
                       color: "black",
-                      padding: "8px",
+                      textAlign: "right"
                     }}
                   >
                     Placa
                   </TableCell>
                   <TableCell
-                    align="center"
+
                     sx={{
-                      fontWeight: "bold",
+
                       backgroundColor: "#d5dbdb",
                       color: "black",
-                      padding: "8px",
+                      textAlign: "right"
                     }}
                   >
                     Propietario
                   </TableCell>
                   <TableCell
-                    align="center"
+
                     sx={{
-                      fontWeight: "bold",
+
                       backgroundColor: "#d5dbdb",
                       color: "black",
-                      padding: "8px",
+                      textAlign: "right"
                     }}
                   >
                     Nota
                   </TableCell>
                   <TableCell
-                    align="center"
+
                     sx={{
-                      fontWeight: "bold",
+
                       backgroundColor: "#d5dbdb",
                       color: "black",
-                      padding: "8px",
+                      textAlign: "right"
                     }}
                   >
                     Acciones
@@ -284,25 +284,25 @@ export const MotosTable = () => {
                     key={moto.id}
                     sx={{ backgroundColor: getStatusColor(moto.status) }}
                   >
-                    <TableCell align="center" sx={{ fontWeight: "bold" }}>
+                    <TableCell sx={{ textAlign: "right" }}>
                       {moto.inciso}
                     </TableCell>
-                    <TableCell align="center" sx={{ fontWeight: "bold" }}>
+                    <TableCell sx={{ textAlign: "right" }}>
                       {moto.modelo}
                     </TableCell>
-                    <TableCell align="center" sx={{ fontWeight: "bold" }}>
+                    <TableCell sx={{ textAlign: "right" }}>
                       {moto.no_serie}
                     </TableCell>
-                    <TableCell align="center" sx={{ fontWeight: "bold" }}>
+                    <TableCell sx={{ textAlign: "right" }}>
                       {moto.placa}
                     </TableCell>
-                    <TableCell align="center" sx={{ fontWeight: "bold" }}>
+                    <TableCell sx={{ textAlign: "right" }}>
                       {moto.propietario}
                     </TableCell>
-                    <TableCell align="center" sx={{ fontWeight: "bold" }}>
+                    <TableCell sx={{ textAlign: "right" }}>
                       {moto.nota}
                     </TableCell>
-                    <TableCell align="center" sx={{ fontWeight: "bold" }}>
+                    <TableCell sx={{ textAlign: "right" }}>
                       <IconButton
                         variant="contained"
                         sx={{ color: 'black' }}

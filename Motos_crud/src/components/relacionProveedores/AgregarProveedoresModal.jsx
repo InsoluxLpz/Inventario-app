@@ -98,7 +98,7 @@ export const AgregarProveedoresModal = ({ onClose, modalOpen, agregarProveedorHa
                   <div className="col-md-6 mb-3">
                     <label className="form-label">Teléfono de Contacto</label>
                     <input
-                      type="text"
+                      type="number"
                       name="telefonoContacto"
                       className={`form-control ${errors.telefonoContacto ? "is-invalid" : ""
                         }`}
@@ -130,7 +130,7 @@ export const AgregarProveedoresModal = ({ onClose, modalOpen, agregarProveedorHa
                   <div className="col-md-6 mb-3">
                     <label className="form-label">Teléfono de la Empresa</label>
                     <input
-                      type="text"
+                      type="number"
                       name="telefonoEmpresa"
                       className={`form-control ${errors.telefonoEmpresa ? "is-invalid" : ""
                         }`}

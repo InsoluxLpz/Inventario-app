@@ -10,7 +10,7 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import { Box, Button, FormControlLabel, IconButton, Switch, Typography } from "@mui/material";
 import { NavBar } from "../NavBar";
-import { obtenerProductos, ActualizarStatus } from "../../api/productosApi";
+import { obtenerProductos, ActualizarStatus, obtenerUnidadMedidas, obtenerGrupos } from "../../api/productosApi";
 import { EditarProductoModal } from "../relacionProductos/EditarProductoModal";
 import { useNavigate } from "react-router";
 import { AgregarProductoModal } from "./AgregarProductoModal";
@@ -25,33 +25,46 @@ export const ProductoTable = () => {
   const [productoSeleccionado, setProductoSeleccionado] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [showInactive, setShowInactive] = useState(false);
-  const navigate = useNavigate();
 
-  useEffect(() => {
-    fetchProductos();
-  }, []);
+  const [grupos, setGrupos] = useState([]);  // Estado para los grupos
+  const [unidadMedida, setUnidadMedida] = useState([]);  // Estado para las unidades de medida
 
   const fetchProductos = async () => {
     try {
       const data = await obtenerProductos();
       if (data) {
-        setProductos(data);
+        setProductos(data);  // Los productos contienen los datos necesarios
       }
     } catch (error) {
       console.error("Error en la petición al obtener Productos");
     }
   };
 
+  const fetchGrupos = async () => {
+    const data = await obtenerGrupos();
+    if (data) {
+      setGrupos(data);
+    }
+  };
+
+  const fetchUnidadMedida = async () => {
+    const data = await obtenerUnidadMedidas();
+    if (data) {
+      setUnidadMedida(data);
+    }
+  };
+
   const handleModalAgregar = () => {
     setOpenModalAgregar(true);
   };
+
   const handleCloseModalAgregar = () => {
     setOpenModalAgregar(false);
   };
 
   const actualizarLista = (productoActualizado) => {
     setProductos((prevProductos) =>
-      prevProductos.map((m) => (m.id === productoActualizado.id ? productoActualizado : m))
+      prevProductos.map((m) => (m.idProducto === productoActualizado.idProducto ? productoActualizado : m))
     );
   };
 
@@ -59,7 +72,7 @@ export const ProductoTable = () => {
     ActualizarStatus(id, (idActualizado) => {
       setProductos((productosActuales) =>
         productosActuales.map((producto) =>
-          producto.id === idActualizado ? { ...producto, status: 0 } : producto
+          producto.idProducto === idActualizado ? { ...producto, status: 0 } : producto
         )
       );
     });
@@ -74,23 +87,41 @@ export const ProductoTable = () => {
     return showInactive ? matchesSearch : matchesSearch && producto.status !== 0;
   });
 
-   //   * formato de dinero 
-   const formatearDinero = (valor) => {
+  // * formato de dinero 
+  const formatearDinero = (valor) => {
     return new Intl.NumberFormat("es-MX", {
       style: "currency",
       currency: "MXN",
     }).format(valor);
   };
 
-  
+  useEffect(() => {
+    fetchProductos();
+    fetchGrupos();
+    fetchUnidadMedida();
+  }, []);
+
   return (
     <>
       <NavBar onSearch={setSearchTerm} />
 
       <Button
         variant="contained"
-        sx={{ backgroundColor: "#1f618d", color: "white", ":hover": { opacity: 0.7 }, position: "fixed", right: 50, top: 80, borderRadius: "8px", padding: "10px 20px", display: "flex", alignItems: "center", gap: "8px", }}
-        onClick={handleModalAgregar}>
+        sx={{
+          backgroundColor: "#1f618d",
+          color: "white",
+          ":hover": { opacity: 0.7 },
+          position: "fixed",
+          right: 50,
+          top: 80,
+          borderRadius: "8px",
+          padding: "10px 20px",
+          display: "flex",
+          alignItems: "center",
+          gap: "8px",
+        }}
+        onClick={handleModalAgregar}
+      >
         <AddchartIcon sx={{ fontSize: 24 }} />
         Agregar Productos
       </Button>
@@ -109,8 +140,8 @@ export const ProductoTable = () => {
             <Table stickyHeader>
               <TableHead>
                 <TableRow>
-                  {["Código", "Nombre", "Grupo", "Unidad de medida", "Precio", "Descripción", "Acciones"].map((header) => (
-                    <TableCell key={header} align="center" sx={{ fontWeight: "bold", backgroundColor: "#f4f6f7", color: "black" }}>
+                  {["Código", "Nombre", "Grupo", "Unidad de medida", "Proveedor", "Precio", "Descripción", "Acciones"].map((header) => (
+                    <TableCell key={header} align="center" sx={{ fontWeight: "bold", backgroundColor: "#f4f6f7", color: "black", textAlign: "right" }}>
                       {header}
                     </TableCell>
                   ))}
@@ -118,14 +149,29 @@ export const ProductoTable = () => {
               </TableHead>
               <TableBody>
                 {filteredProductos.map((producto) => (
-                  <TableRow key={producto.id}>
-                    <TableCell align="center">{producto.codigo}</TableCell>
-                    <TableCell align="center">{producto.nombre}</TableCell>
-                    <TableCell align="center">{producto.grupo}</TableCell>
-                    <TableCell align="center">{producto.unidad_medida}</TableCell>
-                    <TableCell align="center">{formatearDinero(producto.precio)}</TableCell>
-                    <TableCell align="center">{producto.descripcion}</TableCell>
-                    <TableCell align="center">
+                  <TableRow key={producto.idProducto}>
+                    <TableCell align="center" sx={{ textAlign: "right" }}>
+                      {producto.codigo}
+                    </TableCell>
+                    <TableCell align="center" sx={{ textAlign: "right" }}>
+                      {producto.nombre}
+                    </TableCell>
+                    <TableCell align="center" sx={{ textAlign: "right" }}>
+                      {producto.grupo} {/* Mostrar el nombre del grupo */}
+                    </TableCell>
+                    <TableCell align="center" sx={{ textAlign: "right" }}>
+                      {producto.unidad_medida} {/* Mostrar la unidad de medida */}
+                    </TableCell>
+                    <TableCell align="center" sx={{ textAlign: "right" }}>
+                      {producto.proveedores} {/* Mostrar el nombre del proveedor */}
+                    </TableCell>
+                    <TableCell align="center" sx={{ textAlign: "right" }}>
+                      {formatearDinero(producto.precio)}
+                    </TableCell>
+                    <TableCell align="center" sx={{ textAlign: "right" }}>
+                      {producto.descripcion}
+                    </TableCell>
+                    <TableCell align="center" sx={{ textAlign: "right" }}>
                       <IconButton
                         sx={{ color: 'black' }}
                         onClick={() => {
@@ -140,7 +186,7 @@ export const ProductoTable = () => {
                         variant="contained"
                         color="error"
                         style={{ marginLeft: "10px" }}
-                        onClick={() => handleActualizarStatus(producto.id)}
+                        onClick={() => handleActualizarStatus(producto.idProducto)}
                       >
                         <InventoryIcon sx={{ fontSize: 20 }} />
                       </IconButton>
@@ -153,10 +199,21 @@ export const ProductoTable = () => {
         </Paper>
       </Box>
 
-      <EditarProductoModal modalOpen={openModalEditar} onClose={() => setOpenModalEditar(false)} producto={productoSeleccionado} actualizarLista={actualizarLista} />
+      <EditarProductoModal
+        modalOpen={openModalEditar}
+        onClose={() => setOpenModalEditar(false)}
+        producto={productoSeleccionado}
+        actualizarLista={actualizarLista}
+        listagrupos={grupos}  // Pasar los grupos al modal de edición
+        unidadMedida={unidadMedida}  // Pasar las unidades de medida al modal de edición
+      />
 
-      <AgregarProductoModal modalOpen={openModalAgregar} onClose={handleCloseModalAgregar} />
-
+      <AgregarProductoModal
+        modalOpen={openModalAgregar}
+        onClose={handleCloseModalAgregar}
+        grupos={grupos}  // Pasar los grupos al modal de agregar
+        unidadMedida={unidadMedida}  // Pasar las unidades de medida al modal de agregar
+      />
     </>
   );
 };

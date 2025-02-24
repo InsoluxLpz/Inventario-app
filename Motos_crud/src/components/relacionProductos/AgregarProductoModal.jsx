@@ -6,8 +6,11 @@ import { agregarProductos } from '../../api/productosApi';
 import { obtenerProveedores } from '../../api/proveedoresApi';
 
 
-export const AgregarProductoModal = ({ modalOpen, onClose }) => {
+export const AgregarProductoModal = ({ modalOpen, onClose, grupos, unidadMedida }) => {
     if (!modalOpen) return null;
+
+    const Grupos = grupos;
+    const unidad = unidadMedida
 
     const [formData, setFormData] = useState({
         codigo: "",
@@ -29,14 +32,23 @@ export const AgregarProductoModal = ({ modalOpen, onClose }) => {
             if (data) {
                 const proveedoresFiltrados = data.filter(prov => prov.status !== 0);
                 setProveedores(proveedoresFiltrados.map((prov) => ({
-                    value: prov.nombreProveedor,
-                    label: prov.nombreProveedor,
+                    value: prov.id, // Aquí se usa el ID
+                    label: prov.nombreProveedor, // El nombre sigue siendo el label
                 })));
             }
         };
 
         cargarProveedores();
     }, []);
+
+
+    const opcionesGrupos = [...Grupos]
+        .sort((a, b) => a.nombre.localeCompare(b.nombre))
+        .map((grupo) => ({ value: grupo.id, label: grupo.nombre }));
+
+    const opcionesUnidad = [...unidad]
+        .sort((a, b) => a.nombre.localeCompare(b.nombre))
+        .map((uni) => ({ value: uni.id, label: uni.nombre }));
 
 
     const handleChange = (e) => {
@@ -48,10 +60,11 @@ export const AgregarProductoModal = ({ modalOpen, onClose }) => {
     const handleSelectChange = (selectedOptions) => {
         setFormData((prev) => ({
             ...prev,
-            proveedores: selectedOptions ? selectedOptions.map(option => option.value) : [],
+            proveedores: selectedOptions ? selectedOptions.map(option => option.value) : [], // Enviar el id
         }));
         setErrors((prev) => ({ ...prev, proveedores: "" }));
     };
+
 
     const validateForm = () => {
         const newErrors = {};
@@ -62,7 +75,9 @@ export const AgregarProductoModal = ({ modalOpen, onClose }) => {
                     if (formData[key].length === 0) {
                         newErrors[key] = "Este campo es obligatorio";
                     }
-                } else if (!formData[key].trim()) {
+                } else if (typeof formData[key] === "string" && !formData[key].trim()) { // Solo llamar a .trim() si es un string
+                    newErrors[key] = "Este campo es obligatorio";
+                } else if (formData[key] == null || formData[key] === "") {
                     newErrors[key] = "Este campo es obligatorio";
                 }
             }
@@ -72,14 +87,21 @@ export const AgregarProductoModal = ({ modalOpen, onClose }) => {
         return Object.keys(newErrors).length === 0;
     };
 
+
     const handleSubmit = async (e) => {
         e.preventDefault();
 
+        // Elimina el símbolo de dólar y convierte a número
+        const precioNumerico = parseFloat(formData.precio.replace(/[^\d.-]/g, ''));
+
         if (!validateForm()) return;
-        const nuevoProducto = await agregarProductos(formData);
+
+        // Asegúrate de que el precio esté en formato numérico
+        const formDataConPrecio = { ...formData, precio: precioNumerico };
+
+        const nuevoProducto = await agregarProductos(formDataConPrecio);
 
         if (nuevoProducto && !nuevoProducto.error) {
-            console.log(nuevoProducto);
             setFormData({
                 codigo: "",
                 nombre: "",
@@ -90,11 +112,27 @@ export const AgregarProductoModal = ({ modalOpen, onClose }) => {
                 proveedores: [],
             });
             setErrors({});
-            onClose()
+            onClose();
         } else if (nuevoProducto?.error) {
             setErrors((prev) => ({ ...prev, codigo: nuevoProducto.error }));
         }
     };
+
+
+    const handlePriceChange = (e) => {
+        let value = e.target.value.replace(/[^0-9.]/g, ""); // Permite solo números y punto decimal
+        setFormData((prev) => ({ ...prev, precio: value }));
+    };
+
+    const formatearDinero = (value) => {
+        if (!value) return "";
+        return new Intl.NumberFormat("es-MX", {
+            style: "currency",
+            currency: "MXN",
+            minimumFractionDigits: 2,
+        }).format(value);
+    };
+
 
     return (
         <div className="modal-backdrop">
@@ -135,17 +173,26 @@ export const AgregarProductoModal = ({ modalOpen, onClose }) => {
                                 <div className="row">
                                     <div className="col-md-6 mb-3">
                                         <label className="form-label">Grupo</label>
-                                        <select
+                                        <Select
                                             name="grupo"
-                                            className={`form-control ${errors.grupo ? "is-invalid" : ""}`}
-                                            value={formData.grupo}
-                                            onChange={handleChange}
-                                        >
-                                            <option value="" disabled>SELECCIONA</option>
-                                            <option>ACEITE</option>
-                                            <option>FRENOS</option>
-                                            <option>LLANTAS</option>
-                                        </select>
+                                            options={opcionesGrupos}
+                                            placeholder="SELECCIONA"
+                                            value={opcionesGrupos.find((gr) => gr.value === formData.grupo)}
+                                            isSearchable={true}
+                                            onChange={(selectedOption) => setFormData({ ...formData, grupo: selectedOption.value })}
+                                            styles={{
+                                                menuList: (provided) => ({
+                                                    ...provided,
+                                                    maxHeight: "200px", // Limita la altura del dropdown
+                                                    overflowY: "auto",  // Habilita scroll si hay muchos elementos
+                                                }),
+                                                control: (base) => ({
+                                                    ...base,
+                                                    minHeight: "45px",
+                                                    height: "45px",
+                                                }),
+                                            }}
+                                        />
                                         {errors.grupo && <div className="invalid-feedback">{errors.grupo}</div>}
                                     </div>
 
@@ -154,31 +201,43 @@ export const AgregarProductoModal = ({ modalOpen, onClose }) => {
                                         <div className="input-group">
                                             <span className="input-group-text" style={{ height: 47 }}>$</span>
                                             <input
-                                                type="number"
+                                                type="text"
                                                 name="precio"
                                                 className={`form-control ${errors.precio ? "is-invalid" : ""}`}
                                                 value={formData.precio}
-                                                onChange={handleChange}
+                                                onChange={handlePriceChange}
+                                                onBlur={() => setFormData((prev) => ({ ...prev, precio: formatearDinero(prev.precio) }))}
+                                                onFocus={() => setFormData((prev) => ({ ...prev, precio: prev.precio.replace(/[^0-9.]/g, "") }))}
                                             />
                                         </div>
                                         {errors.precio && <div className="invalid-feedback">{errors.precio}</div>}
                                     </div>
+
                                 </div>
 
                                 <div className="row">
                                     <div className="col-md-6 mb-3">
                                         <label className="form-label">Unidad de Medida</label>
-                                        <select
+                                        <Select
                                             name="unidad_medida"
-                                            className={`form-control ${errors.unidad_medida ? "is-invalid" : ""}`}
-                                            value={formData.unidad_medida}
-                                            onChange={handleChange}
-                                        >
-                                            <option value="" disabled>SELECCIONA</option>
-                                            <option>CAJAS</option>
-                                            <option>LITROS</option>
-                                            <option>PIEZAS</option>
-                                        </select>
+                                            options={opcionesUnidad}
+                                            placeholder="SELECCIONA"
+                                            value={opcionesUnidad.find((um) => um.value === formData.unidad_medida)}
+                                            isSearchable={true}
+                                            onChange={(selectedOption) => setFormData({ ...formData, unidad_medida: selectedOption.value })}
+                                            styles={{
+                                                menuList: (provided) => ({
+                                                    ...provided,
+                                                    maxHeight: "200px", // Limita la altura del dropdown
+                                                    overflowY: "auto",  // Habilita scroll si hay muchos elementos
+                                                }),
+                                                control: (base) => ({
+                                                    ...base,
+                                                    minHeight: "45px",
+                                                    height: "45px",
+                                                }),
+                                            }}
+                                        />
                                         {errors.unidad_medida && <div className="invalid-feedback">{errors.unidad_medida}</div>}
                                     </div>
 

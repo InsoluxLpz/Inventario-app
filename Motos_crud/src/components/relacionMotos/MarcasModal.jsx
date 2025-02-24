@@ -20,7 +20,6 @@ export const MarcasModal = ({ onClose, modalOpen }) => {
     const validateForm = () => {
         const newErrors = {};
         Object.keys(formData).forEach((key) => {
-            // Excluir "nota" de la validación de campos vacíos
             if (key !== "nota" && !formData[key].trim()) {
                 newErrors[key] = "Este campo es obligatorio";
             }
@@ -30,7 +29,7 @@ export const MarcasModal = ({ onClose, modalOpen }) => {
     };
 
     const handleSubmit = async (e) => {
-        e.preventDefault(); ss
+        e.preventDefault();
 
         if (!validateForm()) return; // Si hay errores, no se envía el formulario
 
