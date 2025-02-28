@@ -72,6 +72,7 @@ router.get('/obtener_productos', async (req, res) => {
 
     `;
 
+
     try {
         const [results] = await db.query(query);
 

@@ -5,11 +5,14 @@ import { obtenerProveedores } from "../../api/proveedoresApi";
 import Select from "react-select";
 import Swal from "sweetalert2";
 
-export const EditarProductoModal = ({ onClose, modalOpen, producto, actualizarLista, listagrupos, unidadMedida }) => {
+export const EditarProductoModal = ({ onClose, modalOpen, producto, actualizarLista, listagrupos, unidadMedida, ListaProveedores }) => {
   if (!modalOpen) return null;
 
   const grupos = listagrupos;
   const unidad = unidadMedida;
+  const Proveedor = ListaProveedores;
+
+  console.log(Proveedor)
 
   const [formData, setFormData] = useState({
     codigo: "",
@@ -22,18 +25,16 @@ export const EditarProductoModal = ({ onClose, modalOpen, producto, actualizarLi
   });
 
   const [errors, setErrors] = useState({});
-  const [proveedores, setProveedores] = useState([]);
-
   useEffect(() => {
     if (producto) {
-      console.log("Producto cargado:", producto); // Verifica si producto se carga correctamente
+      console.log("Producto cargado:", producto);
 
       // Asegurar que `producto.proveedores` es un array de objetos con value: id y label: nombre
       const proveedoresArray = producto.proveedores
         ? producto.proveedores.split(", ").map((p) => {
-            const [id, nombre] = p.split(":"); // Dividir el ID y el nombre (asumiendo el formato 'id:nombre')
-            return { value: id, label: nombre }; // Crear un objeto con el ID y el nombre
-          })
+          const [id, nombre] = p.split(":"); // Dividir el ID y el nombre (asumiendo el formato 'id:nombre')
+          return { value: id, label: nombre }; // Crear un objeto con el ID y el nombre
+        })
         : [];
 
       setFormData((prev) => ({
@@ -44,11 +45,16 @@ export const EditarProductoModal = ({ onClose, modalOpen, producto, actualizarLi
         unidad_medida: producto.idUnidadMedida || "",
         precio: producto.precio || "",
         descripcion: producto.descripcion || "",
-        proveedores: proveedoresArray, // Actualizar con los proveedores correctos
+        proveedores: producto.proveedores
+          ? producto.proveedores.map(prov => ({ value: prov.id, label: prov.nombre }))
+          : [],
+
       }));
     }
   }, [producto]);
-  // Agregar `producto.proveedores` puede ayudar si se actualiza en el padre
+
+
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -83,11 +89,24 @@ export const EditarProductoModal = ({ onClose, modalOpen, producto, actualizarLi
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
     if (!validateForm()) return;
 
+    const idUsuario = parseInt(localStorage.getItem('idUsuario'), 10);
+
+    if (isNaN(idUsuario)) {
+      setErrors((prev) => ({ ...prev, general: "Error: Usuario no identificado" }));
+      return;
+    }
+
+    // Transformar proveedores para solo enviar los IDs
+    const formDataProcessed = {
+      ...formData,
+      idUsuario,
+      proveedores: formData.proveedores.map(proveedor => proveedor.value) // Solo los IDs
+    };
+
     try {
-      const updatedProducto = await actualizarProductos(producto.id, formData);
+      const updatedProducto = await actualizarProductos(producto.id, formDataProcessed);
       if (updatedProducto?.error) {
         setErrors({ general: "Error al actualizar el producto" });
         return;
@@ -111,6 +130,9 @@ export const EditarProductoModal = ({ onClose, modalOpen, producto, actualizarLi
   const opcionesUnidad = [...unidad]
     .sort((a, b) => a.nombre.localeCompare(b.nombre))
     .map((uni) => ({ value: uni.id, label: uni.nombre }));
+
+  const opcioneProveedor = [...Proveedor]
+    .map((prov) => ({ value: prov.id, label: prov.nombre_proveedor }));
 
   return (
     <>
@@ -148,9 +170,8 @@ export const EditarProductoModal = ({ onClose, modalOpen, producto, actualizarLi
                       <input
                         type="text"
                         name="codigo"
-                        className={`form-control ${
-                          errors.codigo ? "is-invalid" : ""
-                        }`}
+                        className={`form-control ${errors.codigo ? "is-invalid" : ""
+                          }`}
                         value={formData.codigo}
                         onChange={handleChange}
                       />
@@ -163,9 +184,8 @@ export const EditarProductoModal = ({ onClose, modalOpen, producto, actualizarLi
                       <input
                         type="text"
                         name="nombre"
-                        className={`form-control ${
-                          errors.nombre ? "is-invalid" : ""
-                        }`}
+                        className={`form-control ${errors.nombre ? "is-invalid" : ""
+                          }`}
                         value={formData.nombre}
                         onChange={handleChange}
                       />
@@ -219,9 +239,8 @@ export const EditarProductoModal = ({ onClose, modalOpen, producto, actualizarLi
                           type="number"
                           name="precio"
                           readOnly
-                          className={`form-control ${
-                            errors.precio ? "is-invalid" : ""
-                          }`}
+                          className={`form-control ${errors.precio ? "is-invalid" : ""
+                            }`}
                           value={formData.precio}
                           onChange={handleChange}
                         />
@@ -235,9 +254,8 @@ export const EditarProductoModal = ({ onClose, modalOpen, producto, actualizarLi
                       <label className="form-label">Descripción</label>
                       <textarea
                         name="descripcion"
-                        className={`form-control ${
-                          errors.descripcion ? "is-valid" : ""
-                        }`}
+                        className={`form-control ${errors.descripcion ? "is-valid" : ""
+                          }`}
                         value={formData.descripcion}
                         onChange={handleChange}
                       ></textarea>
@@ -282,7 +300,8 @@ export const EditarProductoModal = ({ onClose, modalOpen, producto, actualizarLi
                       <label className="form-label">Proveedor</label>
                       <Select
                         name="proveedores"
-                        options={proveedores}
+                        options={opcioneProveedor}
+                        placeholder="SELECCIONA"
                         isMulti
                         classNamePrefix="select"
                         value={formData.proveedores.map(
@@ -304,6 +323,17 @@ export const EditarProductoModal = ({ onClose, modalOpen, producto, actualizarLi
                         </div>
                       )}
                     </div>
+                  </div>
+
+                  <div className="col-md-12 mb-3">
+                    <label className="form-label">Descripción</label>
+                    <textarea
+                      name="descripcion"
+                      className={`form-control ${errors.descripcion ? "is-valid" : ""
+                        }`}
+                      value={formData.descripcion}
+                      onChange={handleChange}
+                    ></textarea>
                   </div>
                 </div>
 

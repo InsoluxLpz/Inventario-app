@@ -74,8 +74,18 @@ export const AgregarRefaccionesModal = ({ onClose, modalOpen, agregarProductoATa
 
         if (!validateForm()) return;
 
-        // Llamar a la función que agrega a la tabla
-        agregarProductoATabla(formData);
+        const productoSeleccionado = refacciones.find((p) => p.nombre === formData.producto);
+        if (!productoSeleccionado) return;
+
+        const productoData = {
+            id: productoSeleccionado.id,  // Asegura que se pasa el ID
+            producto: formData.producto,
+            cantidad: Number(formData.cantidad),
+            costo_unitario: productoSeleccionado.precio,
+            subtotal: productoSeleccionado.precio * Number(formData.cantidad),
+        };
+
+        agregarProductoATabla(productoData);
 
         setFormData({
             producto: "",
@@ -85,6 +95,8 @@ export const AgregarRefaccionesModal = ({ onClose, modalOpen, agregarProductoATa
 
         onClose();
     };
+
+
 
     return (
         <div className="modal-backdrop">
@@ -131,11 +143,7 @@ export const AgregarRefaccionesModal = ({ onClose, modalOpen, agregarProductoATa
                                         {errors.cantidad && <div className="invalid-feedback">{errors.cantidad}</div>}
                                     </div>
 
-                                    {/* Precio Total */}
-                                    <div className="col-md-12 mb-3">
-                                        <label className="form-label">Precio Total</label>
-                                        <input type="text" className="form-control" value={`$${formData.precioTotal}`} disabled />
-                                    </div>
+
                                 </div>
                             </div>
                             <div className="modal-footer">

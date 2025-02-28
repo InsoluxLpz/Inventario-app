@@ -9,10 +9,10 @@ export const EditarProveedoresModal = ({ onClose, modalOpen, proveedor, actualiz
 
   const [formData, setFormData] = useState({
     nombre_empresa: proveedor.nombre_empresa,
-    nombreProveedor: proveedor.nombreProveedor,
-    telefonoContacto: proveedor.telefonoContacto,
+    nombre_proveedor: proveedor.nombre_proveedor,
     rfc: proveedor.rfc,
-    telefonoEmpresa: proveedor.telefonoEmpresa,
+    telefono_contacto: proveedor.telefono_contacto,
+    telefono_empresa: proveedor.telefono_empresa,
   });
 
   const [errors, setErrors] = useState({});
@@ -21,10 +21,10 @@ export const EditarProveedoresModal = ({ onClose, modalOpen, proveedor, actualiz
     if (proveedor) {
       setFormData({
         nombre_empresa: proveedor.nombre_empresa || "",
-        nombreProveedor: proveedor.nombreProveedor || "",
-        telefonoContacto: proveedor.telefonoContacto || "",
+        nombre_proveedor: proveedor.nombre_proveedor || "",
         rfc: proveedor.rfc || "",
-        telefonoEmpresa: proveedor.telefonoEmpresa || "",
+        telefono_contacto: proveedor.telefono_contacto || "",
+        telefono_empresa: proveedor.telefono_empresa || "",
       });
     }
   }, [proveedor]);
@@ -99,18 +99,18 @@ export const EditarProveedoresModal = ({ onClose, modalOpen, proveedor, actualiz
                     )}
                   </div>
                   <div className="col-md-6 mb-3">
-                    <label className="form-label">Nombre del Proveedor</label>
+                    <label className="form-label">Nombre Proveedor</label>
                     <input
                       type="text"
-                      name="nombreProveedor"
-                      className={`form-control ${errors.nombreProveedor ? "is-invalid" : ""
+                      name="nombre_proveedor"
+                      className={`form-control ${errors.nombre_proveedor ? "is-invalid" : ""
                         }`}
-                      value={formData.nombreProveedor}
+                      value={formData.nombre_proveedor}
                       onChange={handleChange}
                     />
-                    {errors.nombreProveedor && (
+                    {errors.nombre_proveedor && (
                       <div className="invalid-feedback">
-                        {errors.nombreProveedor}
+                        {errors.nombre_proveedor}
                       </div>
                     )}
                   </div>
@@ -122,15 +122,15 @@ export const EditarProveedoresModal = ({ onClose, modalOpen, proveedor, actualiz
                     <label className="form-label">Teléfono de Contacto</label>
                     <input
                       type="text"
-                      name="telefonoContacto"
-                      className={`form-control ${errors.telefonoContacto ? "is-invalid" : ""
+                      name="telefono_contacto"
+                      className={`form-control ${errors.telefono_contacto ? "is-invalid" : ""
                         }`}
-                      value={formData.telefonoContacto}
+                      value={formData.telefono_contacto}
                       onChange={handleChange}
                     />
-                    {errors.telefonoContacto && (
+                    {errors.telefono_contacto && (
                       <div className="invalid-feedback">
-                        {errors.telefonoContacto}
+                        {errors.telefono_contacto}
                       </div>
                     )}
                   </div>
@@ -154,15 +154,15 @@ export const EditarProveedoresModal = ({ onClose, modalOpen, proveedor, actualiz
                     <label className="form-label">Teléfono de la Empresa</label>
                     <input
                       type="text"
-                      name="telefonoEmpresa"
-                      className={`form-control ${errors.telefonoEmpresa ? "is-invalid" : ""
+                      name="telefono_empresa"
+                      className={`form-control ${errors.telefono_empresa ? "is-invalid" : ""
                         }`}
-                      value={formData.telefonoEmpresa}
+                      value={formData.telefono_empresa}
                       onChange={handleChange}
                     />
-                    {errors.telefonoEmpresa && (
+                    {errors.telefono_empresa && (
                       <div className="invalid-feedback">
-                        {errors.telefonoEmpresa}
+                        {errors.telefono_empresa}
                       </div>
                     )}
                   </div>

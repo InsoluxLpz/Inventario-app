@@ -7,11 +7,11 @@ export const AgregarProveedoresModal = ({ onClose, modalOpen, agregarProveedorHa
   if (!modalOpen) return null;
 
   const [formData, setFormData] = useState({
-    nombreProveedor: "",
-    telefonoContacto: "",
-    rfc: "",
-    telefonoEmpresa: "",
     nombre_empresa: "",
+    nombre_proveedor: "",
+    rfc: "",
+    telefono_contacto: "",
+    telefono_empresa: "",
   });
 
   const [errors, setErrors] = useState({});
@@ -40,7 +40,7 @@ export const AgregarProveedoresModal = ({ onClose, modalOpen, agregarProveedorHa
 
     const result = await agregarProveedor(formData);
     if (result && result.error) {
-      setErrors({ nombreProveedor: "Error al agregar proveedor" });
+      setErrors({ nombre_proveedor: "Error al agregar proveedor" });
       return;
     }
     agregarProveedorHandler(formData);
@@ -76,18 +76,18 @@ export const AgregarProveedoresModal = ({ onClose, modalOpen, agregarProveedorHa
                     )}
                   </div>
                   <div className="col-md-6 mb-3">
-                    <label className="form-label">Nombre del Proveedor</label>
+                    <label className="form-label">Nombre Proveedor</label>
                     <input
                       type="text"
-                      name="nombreProveedor"
-                      className={`form-control ${errors.nombreProveedor ? "is-invalid" : ""
+                      name="nombre_proveedor"
+                      className={`form-control ${errors.nombre_proveedor ? "is-invalid" : ""
                         }`}
-                      value={formData.nombreProveedor}
+                      value={formData.nombre_proveedor}
                       onChange={handleChange}
                     />
-                    {errors.nombreProveedor && (
+                    {errors.nombre_proveedor && (
                       <div className="invalid-feedback">
-                        {errors.nombreProveedor}
+                        {errors.nombre_proveedor}
                       </div>
                     )}
                   </div>
@@ -99,15 +99,15 @@ export const AgregarProveedoresModal = ({ onClose, modalOpen, agregarProveedorHa
                     <label className="form-label">Teléfono de Contacto</label>
                     <input
                       type="number"
-                      name="telefonoContacto"
-                      className={`form-control ${errors.telefonoContacto ? "is-invalid" : ""
+                      name="telefono_contacto"
+                      className={`form-control ${errors.telefono_contacto ? "is-invalid" : ""
                         }`}
-                      value={formData.telefonoContacto}
+                      value={formData.telefono_contacto}
                       onChange={handleChange}
                     />
-                    {errors.telefonoContacto && (
+                    {errors.telefono_contacto && (
                       <div className="invalid-feedback">
-                        {errors.telefonoContacto}
+                        {errors.telefono_contacto}
                       </div>
                     )}
                   </div>
@@ -131,15 +131,15 @@ export const AgregarProveedoresModal = ({ onClose, modalOpen, agregarProveedorHa
                     <label className="form-label">Teléfono de la Empresa</label>
                     <input
                       type="number"
-                      name="telefonoEmpresa"
-                      className={`form-control ${errors.telefonoEmpresa ? "is-invalid" : ""
+                      name="telefono_empresa"
+                      className={`form-control ${errors.telefono_empresa ? "is-invalid" : ""
                         }`}
-                      value={formData.telefonoEmpresa}
+                      value={formData.telefono_empresa}
                       onChange={handleChange}
                     />
-                    {errors.telefonoEmpresa && (
+                    {errors.telefono_empresa && (
                       <div className="invalid-feedback">
-                        {errors.telefonoEmpresa}
+                        {errors.telefono_empresa}
                       </div>
                     )}
                   </div>

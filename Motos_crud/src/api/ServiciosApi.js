@@ -5,7 +5,7 @@ const API_URL = import.meta.env.VITE_API_URL;
 
 export const ObtenerServicios = async () => {
     try {
-        const response = await fetch(`${API_URL}/servicios/obtener_servicios`, {
+        const response = await fetch(`${API_URL}/servicios/obtener_servicio`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json'
@@ -133,7 +133,7 @@ export const EliminarServicio = async (id, actualizarLista) => {
 
 export const ObtenerMantenimientos = async () => {
     try {
-        const response = await fetch(`${API_URL}/servicios/obtener_mantenimientos`, {
+        const response = await fetch(`${API_URL}/servicios/obtener_servicios`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json'
@@ -156,7 +156,7 @@ export const ObtenerMantenimientos = async () => {
 export const AgregarMantenimiento = async (mantenimientoData) => {
     try {
 
-        const response = await fetch(`${API_URL}/servicios/agregar_mantenimiento`, {
+        const response = await fetch(`${API_URL}/servicios/agregar_servicio`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",

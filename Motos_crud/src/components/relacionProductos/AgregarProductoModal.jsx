@@ -9,9 +9,6 @@ import { obtenerProveedores } from '../../api/proveedoresApi';
 export const AgregarProductoModal = ({ modalOpen, onClose, grupos, unidadMedida }) => {
     if (!modalOpen) return null;
 
-    const Grupos = grupos;
-    const unidad = unidadMedida
-
     const [formData, setFormData] = useState({
         codigo: "",
         nombre: "",
@@ -27,79 +24,69 @@ export const AgregarProductoModal = ({ modalOpen, onClose, grupos, unidadMedida 
 
     useEffect(() => {
         const cargarProveedores = async () => {
-            const data = await obtenerProveedores(); // Asumo que `obtenerProveedores` te devuelve los proveedores
-
+            const data = await obtenerProveedores();
             if (data) {
                 const proveedoresFiltrados = data.filter(prov => prov.status !== 0);
-                setProveedores(proveedoresFiltrados.map((prov) => ({
-                    value: prov.id, // Aquí se usa el ID
-                    label: prov.nombreProveedor, // El nombre sigue siendo el label
+                setProveedores(proveedoresFiltrados.map(prov => ({
+                    value: prov.id,
+                    label: prov.nombre_proveedor,
                 })));
             }
         };
-
         cargarProveedores();
     }, []);
 
-
-    const opcionesGrupos = [...Grupos]
-        .sort((a, b) => a.nombre.localeCompare(b.nombre))
-        .map((grupo) => ({ value: grupo.id, label: grupo.nombre }));
-
-    const opcionesUnidad = [...unidad]
-        .sort((a, b) => a.nombre.localeCompare(b.nombre))
-        .map((uni) => ({ value: uni.id, label: uni.nombre }));
-
+    const opcionesGrupos = grupos.map(grupo => ({ value: grupo.id, label: grupo.nombre }));
+    const opcionesUnidad = unidadMedida.map(uni => ({ value: uni.id, label: uni.nombre }));
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData((prev) => ({ ...prev, [name]: value }));
-        setErrors((prev) => ({ ...prev, [name]: "" }));
+        setFormData(prev => ({ ...prev, [name]: value }));
+        setErrors(prev => ({ ...prev, [name]: "" }));
     };
 
     const handleSelectChange = (selectedOptions) => {
-        setFormData((prev) => ({
+        setFormData(prev => ({
             ...prev,
-            proveedores: selectedOptions ? selectedOptions.map(option => option.value) : [], // Enviar el id
+            proveedores: selectedOptions ? selectedOptions.map(option => option.value) : [],
         }));
-        setErrors((prev) => ({ ...prev, proveedores: "" }));
+        setErrors(prev => ({ ...prev, proveedores: "" }));
     };
-
 
     const validateForm = () => {
         const newErrors = {};
-
-        Object.keys(formData).forEach((key) => {
-            if (key !== "descripcion") {
-                if (Array.isArray(formData[key])) {
-                    if (formData[key].length === 0) {
-                        newErrors[key] = "Este campo es obligatorio";
-                    }
-                } else if (typeof formData[key] === "string" && !formData[key].trim()) { // Solo llamar a .trim() si es un string
-                    newErrors[key] = "Este campo es obligatorio";
-                } else if (formData[key] == null || formData[key] === "") {
-                    newErrors[key] = "Este campo es obligatorio";
-                }
+        Object.keys(formData).forEach(key => {
+            if (key !== "descripcion" && !formData[key]) {
+                newErrors[key] = "Este campo es obligatorio";
             }
         });
-
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
 
-
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // Elimina el símbolo de dólar y convierte a número
         const precioNumerico = parseFloat(formData.precio.replace(/[^\d.-]/g, ''));
 
         if (!validateForm()) return;
 
-        // Asegúrate de que el precio esté en formato numérico
-        const formDataConPrecio = { ...formData, precio: precioNumerico };
+        // Obtener idUsuario desde el localStorage y convertirlo a número
+        const idUsuario = parseInt(localStorage.getItem('idUsuario'), 10);
 
-        const nuevoProducto = await agregarProductos(formDataConPrecio);
+        if (isNaN(idUsuario)) {
+            setErrors((prev) => ({ ...prev, general: "Error: Usuario no identificado" }));
+            return;
+        }
+
+        // Agregar idUsuario a los datos del producto
+        const formDataConUsuario = {
+            ...formData,
+            precio: precioNumerico,
+            idUsuario
+        };
+
+        const nuevoProducto = await agregarProductos(formDataConUsuario);
 
         if (nuevoProducto && !nuevoProducto.error) {
             setFormData({
@@ -118,20 +105,6 @@ export const AgregarProductoModal = ({ modalOpen, onClose, grupos, unidadMedida 
         }
     };
 
-
-    const handlePriceChange = (e) => {
-        let value = e.target.value.replace(/[^0-9.]/g, ""); // Permite solo números y punto decimal
-        setFormData((prev) => ({ ...prev, precio: value }));
-    };
-
-    const formatearDinero = (value) => {
-        if (!value) return "";
-        return new Intl.NumberFormat("es-MX", {
-            style: "currency",
-            currency: "MXN",
-            minimumFractionDigits: 2,
-        }).format(value);
-    };
 
 
     return (
@@ -157,6 +130,7 @@ export const AgregarProductoModal = ({ modalOpen, onClose, grupos, unidadMedida 
                                         />
                                         {errors.codigo && <div className="invalid-feedback">{errors.codigo}</div>}
                                     </div>
+
                                     <div className="col-md-6 mb-3">
                                         <label className="form-label">Nombre</label>
                                         <input
@@ -174,98 +148,48 @@ export const AgregarProductoModal = ({ modalOpen, onClose, grupos, unidadMedida 
                                     <div className="col-md-6 mb-3">
                                         <label className="form-label">Grupo</label>
                                         <Select
-                                            name="grupo"
                                             options={opcionesGrupos}
                                             placeholder="SELECCIONA"
-                                            value={opcionesGrupos.find((gr) => gr.value === formData.grupo)}
-                                            isSearchable={true}
+                                            value={opcionesGrupos.find(gr => gr.value === formData.grupo)}
                                             onChange={(selectedOption) => setFormData({ ...formData, grupo: selectedOption.value })}
-                                            styles={{
-                                                menuList: (provided) => ({
-                                                    ...provided,
-                                                    maxHeight: "200px", // Limita la altura del dropdown
-                                                    overflowY: "auto",  // Habilita scroll si hay muchos elementos
-                                                }),
-                                                control: (base) => ({
-                                                    ...base,
-                                                    minHeight: "45px",
-                                                    height: "45px",
-                                                }),
-                                            }}
                                         />
-                                        {errors.grupo && <div className="invalid-feedback">{errors.grupo}</div>}
+                                        {errors.grupo && <div className="text-danger small">{errors.grupo}</div>}
                                     </div>
 
                                     <div className="col-md-6 mb-3">
                                         <label className="form-label">Precio</label>
-                                        <div className="input-group">
-                                            <span className="input-group-text" style={{ height: 47 }}>$</span>
-                                            <input
-                                                type="text"
-                                                name="precio"
-                                                className={`form-control ${errors.precio ? "is-invalid" : ""}`}
-                                                value={formData.precio}
-                                                onChange={handlePriceChange}
-                                                onBlur={() => setFormData((prev) => ({ ...prev, precio: formatearDinero(prev.precio) }))}
-                                                onFocus={() => setFormData((prev) => ({ ...prev, precio: prev.precio.replace(/[^0-9.]/g, "") }))}
-                                            />
-                                        </div>
+                                        <input
+                                            type="text"
+                                            name="precio"
+                                            className={`form-control ${errors.precio ? "is-invalid" : ""}`}
+                                            value={formData.precio}
+                                            onChange={(e) => setFormData({ ...formData, precio: e.target.value })}
+                                        />
                                         {errors.precio && <div className="invalid-feedback">{errors.precio}</div>}
                                     </div>
-
                                 </div>
 
                                 <div className="row">
                                     <div className="col-md-6 mb-3">
                                         <label className="form-label">Unidad de Medida</label>
                                         <Select
-                                            name="unidad_medida"
                                             options={opcionesUnidad}
                                             placeholder="SELECCIONA"
-                                            value={opcionesUnidad.find((um) => um.value === formData.unidad_medida)}
-                                            isSearchable={true}
+                                            value={opcionesUnidad.find(um => um.value === formData.unidad_medida)}
                                             onChange={(selectedOption) => setFormData({ ...formData, unidad_medida: selectedOption.value })}
-                                            styles={{
-                                                menuList: (provided) => ({
-                                                    ...provided,
-                                                    maxHeight: "200px", // Limita la altura del dropdown
-                                                    overflowY: "auto",  // Habilita scroll si hay muchos elementos
-                                                }),
-                                                control: (base) => ({
-                                                    ...base,
-                                                    minHeight: "45px",
-                                                    height: "45px",
-                                                }),
-                                            }}
                                         />
-                                        {errors.unidad_medida && <div className="invalid-feedback">{errors.unidad_medida}</div>}
+                                        {errors.unidad_medida && <div className="text-danger small">{errors.unidad_medida}</div>}
                                     </div>
 
                                     <div className="col-md-6 mb-3">
-                                        <label className="form-label">Proveedor</label>
+                                        <label className="form-label">Proveedores</label>
                                         <Select
-                                            name="proveedores"
-                                            options={proveedores.sort((a, b) => a.label.localeCompare(b.label))} // Ordenar alfabéticamente
+                                            options={proveedores}
                                             isMulti
-                                            classNamePrefix="select"
-                                            value={formData.proveedores.map((p) => ({ value: p, label: p }))} // Mantiene el formato esperado
-                                            onChange={handleSelectChange}
-                                            isSearchable={true}
                                             placeholder="SELECCIONA"
-                                            styles={{
-                                                control: (base) => ({
-                                                    ...base,
-                                                    minHeight: "45px",
-                                                    height: "45px",
-                                                }),
-                                                menuList: (provided) => ({
-                                                    ...provided,
-                                                    maxHeight: "130px", // Limita la altura del dropdown
-                                                    overflowY: "auto",  // Habilita scroll si hay muchos elementos
-                                                }),
-                                            }}
+                                            value={proveedores.filter(p => formData.proveedores.includes(p.value))}
+                                            onChange={handleSelectChange}
                                         />
-
                                         {errors.proveedores && <div className="text-danger small">{errors.proveedores}</div>}
                                     </div>
                                 </div>
@@ -275,7 +199,7 @@ export const AgregarProductoModal = ({ modalOpen, onClose, grupos, unidadMedida 
                                         <label className="form-label">Descripción</label>
                                         <textarea
                                             name="descripcion"
-                                            className={`form-control ${errors.descripcion ? "is-valid" : ""}`}
+                                            className="form-control"
                                             value={formData.descripcion}
                                             onChange={handleChange}
                                         ></textarea>
@@ -283,17 +207,11 @@ export const AgregarProductoModal = ({ modalOpen, onClose, grupos, unidadMedida 
                                 </div>
                             </div>
 
-                            {/* Botones */}
                             <div className="modal-footer">
                                 <Button type="submit" style={{ backgroundColor: "#f1c40f", color: "white" }}>
                                     Guardar
                                 </Button>
-
-                                <Button
-                                    type="button"
-                                    style={{ backgroundColor: "#7f8c8d", color: "white", marginLeft: 7 }}
-                                    onClick={onClose}
-                                >
+                                <Button type="button" style={{ backgroundColor: "#7f8c8d", color: "white", marginLeft: 7 }} onClick={onClose}>
                                     Cancelar
                                 </Button>
                             </div>

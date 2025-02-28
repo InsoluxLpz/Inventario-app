@@ -3,28 +3,28 @@ const { dbConexion } = require('../database/config');
 const router = express.Router();
 const db = dbConexion();
 
-router.post('/agregar_servicio', async (req, res) => {
-    const { nombre, descripcion } = req.body;
+// router.post('/agregar_servicios', async (req, res) => {
+//     const { nombre, descripcion } = req.body;
 
-    if (!nombre) {
-        return res.status(404).json({ message: 'Faltan parametros para guardar en la tabla' });
-    }
+//     if (!nombre) {
+//         return res.status(404).json({ message: 'Faltan parametros para guardar en la tabla' });
+//     }
 
-    try {
-        const query = `INSERT INTO cat_servicios (nombre,descripcion) VALUES (?,?)`;
+//     try {
+//         const query = `INSERT INTO cat_servicios (nombre,descripcion) VALUES (?,?)`;
 
-        const values = [nombre, descripcion];
+//         const values = [nombre, descripcion];
 
-        await db.query(query, values);
+//         await db.query(query, values);
 
-        return res.status(200).json({ message: 'Entrada agregada correctamente' });
-    } catch (error) {
-        console.error('Error al agregar el producto:', error);
-        return res.status(500).json({ message: 'Error al agregar el producto' });
-    }
-});
+//         return res.status(200).json({ message: 'Entrada agregada correctamente' });
+//     } catch (error) {
+//         console.error('Error al agregar el producto:', error);
+//         return res.status(500).json({ message: 'Error al agregar el producto' });
+//     }
+// });
 
-router.get('/obtener_servicios', async (req, res) => {
+router.get('/obtener_servicio', async (req, res) => {
 
     try {
         const query = `SELECT * FROM cat_servicios`;
@@ -82,69 +82,154 @@ router.delete('/eliminar_servicio/:id', async (req, res) => {
 
 //* <============================== mantenimientos-motos======================================>
 
-router.post('/agregar_mantenimiento', async (req, res) => {
-    const { fecha_inicio, vehiculo, odometro, servicio, refacciones_almacen, costo_refacciones, costo_total, comentario, status } = req.body;
+router.post('/agregar_servicio', async (req, res) => {
+    console.log("Datos recibidos en el backend:", req.body);
 
-    if (!fecha_inicio || !vehiculo || !servicio || !refacciones_almacen || !costo_refacciones || !costo_total) {
-        return res.status(404).json({ message: 'Faltan parametros en la consulta' });
+    const { fecha_inicio, moto, odometro, costo, comentario, idUsuario, idCancelo, fecha_cancelacion, servicios, productos } = req.body;
+
+    if (!fecha_inicio || !moto || !odometro || !costo || !idUsuario) {
+        return res.status(400).json({ error: "Faltan datos obligatorios" });
     }
 
+    const connection = await db.getConnection();
     try {
-        const query = `INSERT INTO servicio_motos (fecha_inicio, vehiculo, odometro, servicio, refacciones_almacen, costo_refacciones, costo_total, comentario, status) VALUES (?,?,?,?,?,?,?,?,?)`
+        await connection.beginTransaction();
 
-        const results = [fecha_inicio, vehiculo, odometro, servicio.join(", "), refacciones_almacen, costo_refacciones, costo_total, comentario, status];
+        const [existingService] = await connection.query(
+            "SELECT id FROM servicios WHERE idMoto = ? LIMIT 1",
+            [moto]
+        );
 
-        await db.query(query, results);
-
-        return res.status(200).json({ message: 'servicio de moto agregado correctamente' });
-
-    } catch (error) {
-        console.error('Error al obtener los prodructos:', error);
-        return res.status(500).json({ message: 'Error al obtener los productos' });
-    }
-
-});
-
-router.get('/obtener_mantenimientos', async (req, res) => {
-
-    try {
-        const query = `SELECT * FROM servicio_motos`
-
-        const [results] = await db.query(query);
-
-        if (results.length === 0) {
-            return res.status(404).json({ message: 'no existe ningun servicio en la tabla' })
+        if (existingService.length > 0) {
+            await connection.rollback();
+            return res.status(400).json({ error: "Ya existe un servicio registrado para esta moto" });
         }
 
-        return res.status(200).json(results)
+        // 🔽 Insertar nuevo servicio si no existe
+        const [servicioResult] = await connection.query(
+            "INSERT INTO servicios (fecha_inicio, idMoto, odometro, costo_total, comentario, idUsuario, idCancelo, fecha_cancelacion) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            [fecha_inicio, moto, odometro, costo, comentario, idUsuario, idCancelo, fecha_cancelacion]
+        );
+        const idServicio = servicioResult.insertId;
+
+        // Insertar en servicio_servicios si hay servicios
+        if (servicios && servicios.length > 0) {
+            const servicioValues = servicios.map(servicio => [idServicio, servicio]);
+            await connection.query(
+                "INSERT INTO servicio_servicios (idServicio, idCatServicios) VALUES ?",
+                [servicioValues]
+            );
+        }
+
+        // Insertar en servicios_detalles si hay productos
+        if (productos && productos.length > 0) {
+            const productoValues = productos.map(producto => [
+                idServicio,
+                producto.idProducto,
+                producto.cantidad,
+                producto.costo,
+                producto.subtotal
+            ]);
+
+            await connection.query(
+                "INSERT INTO servicios_detalles (idServicio, idProducto, cantidad, costo, subtotal) VALUES ?",
+                [productoValues]
+            );
+        }
+
+        await connection.commit();
+        res.json({ message: "Servicio agregado correctamente", idServicio });
 
     } catch (error) {
-        console.error('Error al obtener los prodructos:', error);
-        return res.status(500).json({ message: 'Error al obtener los productos' });
+        await connection.rollback();
+        console.error("Error al agregar servicio:", error);
+        res.status(500).json({ error: "Error al agregar servicio" });
+    } finally {
+        connection.release();
     }
 });
 
 
-router.put('/actualizar_mantenimiento/:id', async (req, res) => {
-    const { id } = req.params;
-    const { fecha_inicio, vehiculo, odometro, servicio, refacciones_almacen, costo_refacciones, costo_total, comentario, status } = req.body;
-
-    if (!id || !fecha_inicio || !vehiculo || !servicio || !refacciones_almacen || !costo_refacciones || !costo_total) {
-        return res.status(400).json({ message: 'No se encuentra id en la petición' })
-    }
-
+router.get('/obtener_servicios', async (req, res) => {
+    const connection = await db.getConnection();
     try {
-        const query = `UPDATE servicio_motos SET fecha_inicio = ? vehiculo = ? odometro = ? servicio = ? refacciones_almacen = ? costo_refacciones = ? costo_total = ? comentario = ? status id = ?`
+        const [rows] = await connection.query(`
+            SELECT 
+                s.id AS servicio_id,
+                s.fecha_inicio,
+                s.idMoto,
+                m.inciso AS moto_inciso,
+                s.odometro,
+                s.costo_total,
+                s.comentario,
+                s.idUsuario,
+                s.idCancelo,
+                s.fecha_cancelacion,
+                ss.idCatServicios AS servicio_aplicado_id,
+                cs.nombre AS servicio_aplicado_nombre,
+                sd.idProducto AS producto_id,
+                p.nombre AS producto_nombre,
+                sd.cantidad,
+                sd.costo,
+                sd.subtotal
+            FROM servicios s
+            JOIN cat_motocicletas_prueba m ON s.idMoto = m.id
+            LEFT JOIN servicio_servicios ss ON s.id = ss.idServicio
+            LEFT JOIN cat_servicios cs ON ss.idCatServicios = cs.id
+            LEFT JOIN servicios_detalles sd ON s.id = sd.idServicio
+            LEFT JOIN productos p ON sd.idProducto = p.id
+        `);
 
-        const values = [fecha_inicio, vehiculo, odometro, servicio, refacciones_almacen, costo_refacciones, costo_total, comentario, status, id]
+        // Agrupar datos por servicio
+        const serviciosMap = new Map();
 
-        await db.query(query, values);
+        rows.forEach(row => {
+            if (!serviciosMap.has(row.servicio_id)) {
+                serviciosMap.set(row.servicio_id, {
+                    id: row.servicio_id,
+                    fecha_inicio: row.fecha_inicio,
+                    idMoto: row.idMoto,
+                    moto_inciso: row.moto_inciso,
+                    odometro: row.odometro,
+                    costo_total: row.costo_total,
+                    comentario: row.comentario,
+                    idUsuario: row.idUsuario,
+                    idCancelo: row.idCancelo,
+                    fecha_cancelacion: row.fecha_cancelacion,
+                    servicios: [],
+                    productos: []
+                });
+            }
 
-        return res.status(200).json({ message: 'Mantenimiento actualizado correctamente' })
+            const servicio = serviciosMap.get(row.servicio_id);
+
+            // Agregar los servicios aplicados sin duplicados
+            if (row.servicio_aplicado_id && !servicio.servicios.some(s => s.id === row.servicio_aplicado_id)) {
+                servicio.servicios.push({
+                    id: row.servicio_aplicado_id,
+                    nombre: row.servicio_aplicado_nombre
+                });
+            }
+
+            // Agregar los productos sin duplicados
+            if (row.producto_id && !servicio.productos.some(p => p.id === row.producto_id)) {
+                servicio.productos.push({
+                    id: row.producto_id,
+                    nombre: row.producto_nombre,
+                    cantidad: row.cantidad,
+                    costo: row.costo,
+                    subtotal: row.subtotal
+                });
+            }
+        });
+
+        res.json(Array.from(serviciosMap.values()));
 
     } catch (error) {
-        console.error('Error al actualizar el producto:', error);
-        res.status(500).json({ error: 'Error interno del servidor' });
+        console.error("Error al obtener servicios:", error);
+        res.status(500).json({ error: "Error al obtener servicios" });
+    } finally {
+        connection.release();
     }
 });
 

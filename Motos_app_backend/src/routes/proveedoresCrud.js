@@ -5,17 +5,17 @@ const db = dbConexion();
 
 // * Agregar proveedor
 router.post('/agregar_proveedor', async (req, res) => {
-    const { nombreProveedor, telefonoContacto, rfc, telefonoEmpresa, nombre_empresa } = req.body;
+    const { nombre_empresa, nombre_proveedor, rfc, telefono_contacto, telefono_empresa } = req.body;
     console.log("llego la peticion");
 
-    if (!nombreProveedor) {
+    if (!nombre_empresa || !nombre_proveedor || !rfc) {
         return res.status(400).json({ message: 'El nombre del proveedor es obligatorio' });
     }
 
     try {
         const query = `INSERT INTO proveedores (nombreProveedor, telefonoContacto, rfc, telefonoEmpresa, nombre_empresa) VALUES (?, ?, ?, ?, ?)`;
 
-        const values = [nombreProveedor, telefonoContacto, rfc, telefonoEmpresa, nombre_empresa];
+        const values = [nombre_empresa, nombre_proveedor, rfc, telefono_contacto, telefono_empresa];
 
         await db.query(query, values);
 
@@ -46,9 +46,9 @@ router.get('/obtener_proveedores', async (req, res) => {
 // * Actualizar proveedor
 router.put('/actualizar_proveedor/:id', async (req, res) => {
     const { id } = req.params;
-    const { nombreProveedor, telefonoContacto, rfc, telefonoEmpresa, nombre_empresa } = req.body;
+    const { nombre_empresa, nombre_proveedor, rfc, telefono_contacto, telefono_empresa } = req.body;
 
-    if (!nombreProveedor) {
+    if (!nombre_empresa || !nombre_proveedor || !rfc) {
         return res.status(400).json({ message: 'El nombre del proveedor es obligatorio' });
     }
 

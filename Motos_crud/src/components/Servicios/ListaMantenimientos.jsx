@@ -54,10 +54,20 @@ export const ListaMantenimientos = () => {
   const cargarMantenimientos = async () => {
     const data = await ObtenerMantenimientos();
     if (data) {
-      setMantenimientos(data);
-      console.log(data);
+      const mantenimientosAdaptados = data.map((servicio) => ({
+        id: servicio.id,
+        moto_inciso: servicio.moto_inciso || "Desconocido",
+        fecha_inicio: servicio.fecha_inicio,
+        comentario: servicio.comentario,
+        costo: parseFloat(servicio.costo_total) || 0, // Conversión segura a número
+        servicios: servicio.servicios || [],
+        productos: servicio.productos || [],
+      }));
+
+      setMantenimientos(mantenimientosAdaptados);
     }
   };
+
 
   useEffect(() => {
     cargarMantenimientos();
@@ -74,7 +84,7 @@ export const ListaMantenimientos = () => {
       (m.fecha_inicio || "").includes(filtro.fecha) &&
       (m.servicio?.toLowerCase() || "").includes(filtro.servicio.toLowerCase())
   );
-  
+
 
   //   * formato de dinero
   const formatearDinero = (valor) => {
@@ -108,7 +118,7 @@ export const ListaMantenimientos = () => {
         <AddchartIcon sx={{ fontSize: 24 }} />
         Agregar Mantenimiento
       </Button>
-      
+
       <Box display="flex" justifyContent="center" gap={2} my={2}>
         <TextField
           label="Vehículo"
@@ -159,84 +169,38 @@ export const ListaMantenimientos = () => {
             <Table stickyHeader aria-label="sticky table">
               <TableHead>
                 <TableRow>
-                  <TableCell
-                    align="center"
-                    sx={{ fontWeight: "bold", color: "black", padding: "8px", textAlign: "right" }}
-                  >
-                    Vehiculo
-                  </TableCell>
-                  <TableCell
-                    align="center"
-                    sx={{ fontWeight: "bold", color: "black", padding: "8px", textAlign: "right" }}
-                  >
-                    Servicios(s)
-                  </TableCell>
-                  <TableCell
-                    align="center"
-                    sx={{ fontWeight: "bold", color: "black", padding: "8px", textAlign: "right" }}
-                  >
-                    Refacciones de almacen
-                  </TableCell>
-                  <TableCell
-                    align="center"
-                    sx={{ fontWeight: "bold", color: "black", padding: "8px", textAlign: "right" }}
-                  >
-                    Fecha Inicio
-                  </TableCell>
-                  <TableCell
-                    align="center"
-                    sx={{ fontWeight: "bold", color: "black", padding: "8px", textAlign: "right" }}
-                  >
-                    Comentario
-                  </TableCell>
-                  <TableCell
-                    align="center"
-                    sx={{ fontWeight: "bold", color: "black", padding: "8px", textAlign: "right" }}
-                  >
-                    Costo Partes/Refacciones
-                  </TableCell>
-                  <TableCell
-                    align="center"
-                    sx={{ fontWeight: "bold", color: "black", padding: "8px", textAlign: "right" }}
-                  >
-                    Costo Total
-                  </TableCell>
-                  <TableCell
-                    align="center"
-                    sx={{ fontWeight: "bold", color: "black", padding: "8px", textAlign: "right" }}
-                  >
-                    Opciones
-                  </TableCell>
+                  {["Vehiculo", "Servicio(s)", "Refacciones Almacen", "Fecha de Inicio", "Comentario", "Costo Total", "Acciones"].map((header) => (
+                    <TableCell key={header} align="center" sx={{ fontWeight: "bold", backgroundColor: "#f4f6f7", color: "black", textAlign: "right" }}>
+                      {header}
+                    </TableCell>
+                  ))}
                 </TableRow>
               </TableHead>
               <TableBody>
-                {mantenimientosFiltrados.length > 0 ? (
-                  mantenimientosFiltrados.map((mantenimiento) => (
+                {mantenimientos.length > 0 ? (
+                  mantenimientos.map((mantenimiento) => (
                     <TableRow key={mantenimiento.id}>
                       <TableCell align="center" sx={{ textAlign: "right" }}>
-                        {mantenimiento.vehiculo}
+                        {mantenimiento.moto_inciso}
                       </TableCell>
                       <TableCell align="center" sx={{ textAlign: "right" }}>
-                        {mantenimiento.servicio}
+                        {mantenimiento.servicios.length > 0
+                          ? mantenimiento.servicios.map((s) => s.nombre).join(", ")
+                          : "N/A"}
                       </TableCell>
                       <TableCell align="center" sx={{ textAlign: "right" }}>
-                        {mantenimiento.refacciones_almacen}
+                        {mantenimiento.productos.length > 0
+                          ? mantenimiento.productos.map((p) => p.nombre).join(", ")
+                          : "N/A"}
                       </TableCell>
                       <TableCell align="center" sx={{ textAlign: "right" }}>
-                        {mantenimiento.fecha_inicio
-                          ? new Date(
-                            mantenimiento.fecha_inicio
-                          ).toLocaleDateString("es-MX")
-                          : "Fecha no disponible"}
+                        {new Date(mantenimiento.fecha_inicio).toLocaleDateString("es-MX")}
                       </TableCell>
                       <TableCell align="center" sx={{ textAlign: "right" }}>
                         {mantenimiento.comentario}
                       </TableCell>
                       <TableCell align="center" sx={{ textAlign: "right" }}>
-                        {formatearDinero(mantenimiento.costo_refacciones)}
-                      </TableCell>
-                      <TableCell align="center" sx={{ textAlign: "right" }}>
-                        {formatearDinero(mantenimiento.costo_total)}
+                        {formatearDinero(mantenimiento.costo)}
                       </TableCell>
                       <TableCell align="center" sx={{ textAlign: "right" }}>
                         <IconButton variant="contained" sx={{ color: "black" }}>
@@ -246,9 +210,7 @@ export const ListaMantenimientos = () => {
                           variant="contained"
                           color="error"
                           style={{ marginLeft: "10px" }}
-                          onClick={() =>
-                            handleEliminarMantenimiento(mantenimiento.id)
-                          }
+                          onClick={() => handleEliminarMantenimiento(mantenimiento.id)}
                         >
                           <DeleteIcon sx={{ fontSize: 20 }} />
                         </IconButton>
@@ -257,12 +219,13 @@ export const ListaMantenimientos = () => {
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={8} align="center">
+                    <TableCell colSpan={7} align="center">
                       No hay mantenimientos disponibles
                     </TableCell>
                   </TableRow>
                 )}
               </TableBody>
+
             </Table>
           </TableContainer>
           <RealizarMantenimiento

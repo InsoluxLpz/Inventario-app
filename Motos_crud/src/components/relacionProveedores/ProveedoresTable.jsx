@@ -75,7 +75,7 @@ export const ProveedoresTable = () => {
 
   // * buscador
   const filteredProveedores = proveedores.filter((proveedor) => {
-    const matchesSearchTerm = proveedor.nombreProveedor
+    const matchesSearchTerm = proveedor.nombre_proveedor
       ?.toLowerCase()
       .includes(searchTerm.toLowerCase());
     const matchesStatus = showInactive || proveedor.status !== 0;
@@ -197,10 +197,10 @@ export const ProveedoresTable = () => {
                 {filteredProveedores.map((proveedor) => (
                   <TableRow key={proveedor.id} sx={{ backgroundColor: getStatusColor(proveedor.status) }}>
                     <TableCell sx={{ textAlign: "right" }}>{proveedor.nombre_empresa}</TableCell>
-                    <TableCell sx={{ textAlign: "right" }}>{proveedor.nombreProveedor}</TableCell>
-                    <TableCell sx={{ textAlign: "right" }}>{proveedor.telefonoContacto}</TableCell>
+                    <TableCell sx={{ textAlign: "right" }}>{proveedor.nombre_proveedor}</TableCell>
+                    <TableCell sx={{ textAlign: "right" }}>{proveedor.telefono_contacto}</TableCell>
                     <TableCell sx={{ textAlign: "right" }}>{proveedor.rfc}</TableCell>
-                    <TableCell sx={{ textAlign: "right" }}>{proveedor.telefonoEmpresa}</TableCell>
+                    <TableCell sx={{ textAlign: "right" }}>{proveedor.telefono_empresa}</TableCell>
                     <TableCell sx={{ textAlign: "right" }}>
                       <IconButton
                         variant="contained"
