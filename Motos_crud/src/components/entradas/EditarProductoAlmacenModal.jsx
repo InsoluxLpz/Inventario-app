@@ -1,54 +1,35 @@
 import { useEffect, useState } from "react";
 import { actualizarProductos } from "../../api/productosApi";
 import { Button } from "@mui/material";
-import { obtenerProveedores } from "../../api/proveedoresApi";
-import Select from "react-select";
 import Swal from "sweetalert2";
+import Select from "react-select";
 
-export const EditarProductoModal = ({ onClose, modalOpen, producto, actualizarLista, listagrupos, unidadMedida }) => {
-  if (!modalOpen) return null;
-
-  const grupos = listagrupos;
-  const unidad = unidadMedida;
+export const EditarProductoAlmacenModal = ({ onClose, modalOpen, producto, actualizarLista}) => {
+    if (!modalOpen) return null;
 
   const [formData, setFormData] = useState({
     codigo: "",
     nombre: "",
     grupo: "",
     unidad_medida: "",
-    precio: "",
-    descripcion: "",
-    proveedores: [],
+    costo_unitario: "",
+    cantidad: "",
   });
 
   const [errors, setErrors] = useState({});
-  const [proveedores, setProveedores] = useState([]);
 
   useEffect(() => {
     if (producto) {
-      console.log("Producto cargado:", producto); // Verifica si producto se carga correctamente
-
-      // Asegurar que `producto.proveedores` es un array de objetos con value: id y label: nombre
-      const proveedoresArray = producto.proveedores
-        ? producto.proveedores.split(", ").map((p) => {
-            const [id, nombre] = p.split(":"); // Dividir el ID y el nombre (asumiendo el formato 'id:nombre')
-            return { value: id, label: nombre }; // Crear un objeto con el ID y el nombre
-          })
-        : [];
-
-      setFormData((prev) => ({
-        ...prev,
+      setFormData({
         codigo: producto.codigo || "",
         nombre: producto.nombre || "",
         grupo: producto.idGrupo || "",
         unidad_medida: producto.idUnidadMedida || "",
-        precio: producto.precio || "",
-        descripcion: producto.descripcion || "",
-        proveedores: proveedoresArray, // Actualizar con los proveedores correctos
-      }));
+        costo_unitario: producto.costo_unitario || "",
+        cantidad: producto.cantidad || "",
+      });
     }
   }, [producto]);
-  // Agregar `producto.proveedores` puede ayudar si se actualiza en el padre
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -56,28 +37,13 @@ export const EditarProductoModal = ({ onClose, modalOpen, producto, actualizarLi
     setErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
-  const handleSelectChange = (selectedOptions) => {
-    // Solo almacenamos los IDs de los proveedores seleccionados
-    setFormData((prev) => ({
-      ...prev,
-      proveedores: selectedOptions
-        ? selectedOptions.map((option) => option.value)
-        : [], // Guardamos solo los IDs
-    }));
-    setErrors((prev) => ({ ...prev, proveedores: "" }));
-  };
-
   const validateForm = () => {
     const newErrors = {};
-
     Object.keys(formData).forEach((key) => {
-      if (key !== "descripcion") {
-        if (!formData[key]?.toString().trim()) {
-          newErrors[key] = "Este campo es obligatorio";
-        }
+      if (!formData[key]?.toString().trim()) {
+        newErrors[key] = "Este campo es obligatorio";
       }
     });
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -89,18 +55,15 @@ export const EditarProductoModal = ({ onClose, modalOpen, producto, actualizarLi
     try {
       const updatedProducto = await actualizarProductos(producto.id, formData);
       if (updatedProducto?.error) {
-        setErrors({ general: "Error al actualizar el producto" });
+        Swal.fire("Error", updatedProducto.error, "error");
         return;
       }
-
-      Swal.fire("Éxito", "Producto actualizado correctamente.", "success");
-
       actualizarLista(updatedProducto);
+      Swal.fire("Éxito", "Producto actualizado correctamente", "success");
 
-      setTimeout(() => onClose(), 300);
+      onClose();
     } catch (error) {
-      console.error("Error al actualizar:", error);
-      setErrors({ general: "Error al conectar con el servidor" });
+      Swal.fire("Error", "No se pudo actualizar el producto", "error");
     }
   };
 
@@ -108,39 +71,18 @@ export const EditarProductoModal = ({ onClose, modalOpen, producto, actualizarLi
     .sort((a, b) => a.nombre.localeCompare(b.nombre))
     .map((grupo) => ({ value: grupo.id, label: grupo.nombre }));
 
-  const opcionesUnidad = [...unidad]
-    .sort((a, b) => a.nombre.localeCompare(b.nombre))
-    .map((uni) => ({ value: uni.id, label: uni.nombre }));
-
+    
   return (
     <>
       <div className="modal-backdrop">
-        <div
-          className="modal fade show"
-          style={{ display: "block" }}
-          aria-labelledby="exampleModalLabel"
-          tabIndex="-1"
-          role="dialog"
-        >
-          <div
-            className="modal-dialog"
-            role="document"
-            style={{ maxWidth: "60vw", marginTop: 90 }}
-          >
+        <div className="modal fade show" style={{ display: "block" }} aria-labelledby="exampleModalLabel" tabIndex="-1" role="dialog">
+          <div className="modal-dialog" role="document" style={{ maxWidth: "60vw", marginTop: 90 }}>
             <div className="modal-content w-100" style={{ maxWidth: "60vw" }}>
-              <div
-                className="modal-header"
-                style={{ backgroundColor: "#1f618d" }}
-              >
-                <h5 className="modal-title" style={{ color: "white" }}>
-                  Editar Producto
-                </h5>
+              <div className="modal-header" style={{ backgroundColor: '#1f618d' }}>
+                <h5 className="modal-title" style={{ color: 'white' }}>Editar Productos Almacen</h5>
               </div>
 
-              <form
-                onSubmit={handleSubmit}
-                style={{ padding: "20px", maxHeight: "300vh" }}
-              >
+              <form onSubmit={handleSubmit} style={{ padding: "20px", maxHeight: "300vh" }}>
                 <div className="modal-body">
                   <div className="row">
                     <div className="col-md-6 mb-3">
@@ -148,9 +90,7 @@ export const EditarProductoModal = ({ onClose, modalOpen, producto, actualizarLi
                       <input
                         type="text"
                         name="codigo"
-                        className={`form-control ${
-                          errors.codigo ? "is-invalid" : ""
-                        }`}
+                        className={`form-control ${errors.codigo ? "is-invalid" : ""}`}
                         value={formData.codigo}
                         onChange={handleChange}
                       />
@@ -163,9 +103,7 @@ export const EditarProductoModal = ({ onClose, modalOpen, producto, actualizarLi
                       <input
                         type="text"
                         name="nombre"
-                        className={`form-control ${
-                          errors.nombre ? "is-invalid" : ""
-                        }`}
+                        className={`form-control ${errors.nombre ? "is-invalid" : ""}`}
                         value={formData.nombre}
                         onChange={handleChange}
                       />
@@ -179,21 +117,14 @@ export const EditarProductoModal = ({ onClose, modalOpen, producto, actualizarLi
                         name="grupo"
                         options={opcionesGrupos}
                         placeholder="SELECCIONA"
-                        value={opcionesGrupos.find(
-                          (op) => op.value === formData.grupo
-                        )}
+                        value={opcionesGrupos.find((op) => op.value === formData.grupo)}
                         isSearchable={true}
-                        onChange={(selectedOption) =>
-                          setFormData({
-                            ...formData,
-                            grupo: selectedOption.value,
-                          })
-                        }
+                        onChange={(selectedOption) => setFormData({ ...formData, grupo: selectedOption.value })}
                         styles={{
                           menuList: (provided) => ({
                             ...provided,
                             maxHeight: "200px", // Limita la altura del dropdow
-                            overflowY: "auto", // Habilita scroll si hay muchos elementos
+                            overflowY: "auto",  // Habilita scroll si hay muchos elementos
                           }),
                           control: (base) => ({
                             ...base,
@@ -209,19 +140,14 @@ export const EditarProductoModal = ({ onClose, modalOpen, producto, actualizarLi
                     <div className="col-md-6 mb-3">
                       <label className="form-label">Precio</label>
                       <div className="input-group">
-                        <span
-                          className="input-group-text"
-                          style={{ height: 47 }}
-                        >
+                        <span className="input-group-text" style={{ height: 47 }}>
                           $
                         </span>
                         <input
                           type="number"
                           name="precio"
                           readOnly
-                          className={`form-control ${
-                            errors.precio ? "is-invalid" : ""
-                          }`}
+                          className={`form-control ${errors.precio ? "is-invalid" : ""}`}
                           value={formData.precio}
                           onChange={handleChange}
                         />
@@ -235,9 +161,8 @@ export const EditarProductoModal = ({ onClose, modalOpen, producto, actualizarLi
                       <label className="form-label">Descripción</label>
                       <textarea
                         name="descripcion"
-                        className={`form-control ${
-                          errors.descripcion ? "is-valid" : ""
-                        }`}
+                        className={`form-control ${errors.descripcion ? "is-valid" : ""
+                          }`}
                         value={formData.descripcion}
                         onChange={handleChange}
                       ></textarea>
@@ -248,21 +173,14 @@ export const EditarProductoModal = ({ onClose, modalOpen, producto, actualizarLi
                         name="unidad_medida"
                         options={opcionesUnidad}
                         placeholder="SELECCIONA"
-                        value={opcionesUnidad.find(
-                          (um) => um.value === formData.unidad_medida
-                        )}
+                        value={opcionesUnidad.find((um) => um.value === formData.unidad_medida)}
                         isSearchable={true}
-                        onChange={(selectedOption) =>
-                          setFormData({
-                            ...formData,
-                            unidad_medida: selectedOption.value,
-                          })
-                        }
+                        onChange={(selectedOption) => setFormData({ ...formData, unidad_medida: selectedOption.value })}
                         styles={{
                           menuList: (provided) => ({
                             ...provided,
                             maxHeight: "200px", // Limita la altura del dropdown
-                            overflowY: "auto", // Habilita scroll si hay muchos elementos
+                            overflowY: "auto",  // Habilita scroll si hay muchos elementos
                           }),
                           control: (base) => ({
                             ...base,
@@ -272,9 +190,7 @@ export const EditarProductoModal = ({ onClose, modalOpen, producto, actualizarLi
                         }}
                       />
                       {errors.unidad_medida && (
-                        <div className="invalid-feedback">
-                          {errors.unidad_medida}
-                        </div>
+                        <div className="invalid-feedback">{errors.unidad_medida}</div>
                       )}
                     </div>
 
@@ -285,8 +201,8 @@ export const EditarProductoModal = ({ onClose, modalOpen, producto, actualizarLi
                         options={proveedores}
                         isMulti
                         classNamePrefix="select"
-                        value={formData.proveedores.map(
-                          (p) => proveedores.find((prov) => prov.value === p) // Buscamos el objeto proveedor correspondiente
+                        value={formData.proveedores.map(p =>
+                          proveedores.find((prov) => prov.value === p) // Buscamos el objeto proveedor correspondiente
                         )}
                         onChange={handleSelectChange}
                         styles={{
@@ -298,10 +214,9 @@ export const EditarProductoModal = ({ onClose, modalOpen, producto, actualizarLi
                         }}
                       />
 
+
                       {errors.proveedores && (
-                        <div className="text-danger small">
-                          {errors.proveedores}
-                        </div>
+                        <div className="text-danger small">{errors.proveedores}</div>
                       )}
                     </div>
                   </div>
@@ -309,23 +224,11 @@ export const EditarProductoModal = ({ onClose, modalOpen, producto, actualizarLi
 
                 {/* Botones */}
                 <div className="modal-footer">
-                  <Button
-                    type="submit"
-                    style={{ backgroundColor: "#f1c40f", color: "white" }}
-                    onClick={handleSubmit}
-                  >
+                  <Button type="submit" style={{ backgroundColor: "#f1c40f", color: "white" }} onClick={handleSubmit}>
                     Guardar
                   </Button>
 
-                  <Button
-                    type="button"
-                    style={{
-                      backgroundColor: "#7f8c8d",
-                      color: "white",
-                      marginLeft: 7,
-                    }}
-                    onClick={onClose}
-                  >
+                  <Button type="button" style={{ backgroundColor: "#7f8c8d", color: "white", marginLeft: 7 }} onClick={onClose}>
                     Cancelar
                   </Button>
                 </div>

@@ -175,7 +175,7 @@ export const NavBar = ({ onSearch }) => {
     "/productos": "Productos",
     "/servicios/RealizarServicio": "Servicios",
     "/servicios/ListaServicios": "Servicios",
-    "/almacen/ProductoAlmacenTable": "Bodega de productos"
+    "/almacen/ProductoAlmacenTable": "Almacén de productos"
   };
 
   // Obtén el título según la ruta actual
@@ -387,7 +387,7 @@ export const NavBar = ({ onSearch }) => {
                 <ListItemText
                   primary={
                     <Typography variant="body2" sx={{ fontSize: "0.875rem" }}>
-                      Bodega de productos
+                      Almacén
                     </Typography>
                   }
                 />

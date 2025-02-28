@@ -11,20 +11,27 @@ import TableRow from "@mui/material/TableRow";
 import { Box, Button, Typography, IconButton } from "@mui/material";
 import { NavBar } from "../NavBar";
 import { obtenerInventario } from "../../api/almacenProductosApi";
-// import { EditarProductoAlmacenModal } from "../almacen/EditarProductoAlmacenModal";
-// import { AgregarProductoAlmacenModal } from "./AgregarProductoAlmacenModal";
-import AddchartIcon from '@mui/icons-material/Addchart';
+import AddchartIcon from "@mui/icons-material/Addchart";
 import InventoryIcon from "@mui/icons-material/Inventory";
-import { EntradasAlmacenModal } from "./EntradasAlmacenModal";
-
+import { EditarProductoAlmacenModal } from "./EditarProductoAlmacenModal";
+import { obtenerProductos } from "../../api/productosApi";
+import { obtenerProveedores } from "../../api/proveedoresApi";
+import { useNavigate } from "react-router";
 
 export const ProductoAlmacenTable = () => {
+  const navigate = useNavigate();
+
+
   const [openModalEditar, setOpenModalEditar] = useState(false);
   const [openModalAgregar, setOpenModalAgregar] = useState(false);
   const [inventario, setInventario] = useState([]);
   const [productoSeleccionado, setProductoSeleccionado] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [showInactive, setShowInactive] = useState(false);
+
+  // * estados para el modal dinamico 
+  const [productos, setProductos] = useState([]);  
+  const [proveedores, setProveedores] = useState([]);  
 
   useEffect(() => {
     fetchInventario();
@@ -33,6 +40,7 @@ export const ProductoAlmacenTable = () => {
   const fetchInventario = async () => {
     try {
       const data = await obtenerInventario(); // Modificar para que coincida con tu API de inventario
+      console.log("datos de la peticion inventario", data);
       if (data) {
         setInventario(data);
       }
@@ -41,16 +49,32 @@ export const ProductoAlmacenTable = () => {
     }
   };
 
-  const handleModalAgregar = () => {
-    setOpenModalAgregar(true);
+  // * necesito traer productos, tupo, autorizo y proveedores para reflejarlos en los campos
+  const fetchProductos = async () => {
+    const data = await obtenerProductos();
+    if(data) {
+      setProductos(data);
+    }
   };
-  const handleCloseModalAgregar = () => {
-    setOpenModalAgregar(false);
+
+  const fetchAutorizo = async () => {
+    const data = await obten
   };
+
+  const fetchProveedores = async () => {
+    const data = await obtenerProveedores();
+    if(data){
+      setProveedores(data)
+    }
+  };
+
+
 
   const actualizarLista = (productoActualizado) => {
     setInventario((prevInventario) =>
-      prevInventario.map((item) => (item.id === productoActualizado.id ? productoActualizado : item))
+      prevInventario.map((item) =>
+        item.id === productoActualizado.id ? productoActualizado : item
+      )
     );
   };
 
@@ -66,15 +90,21 @@ export const ProductoAlmacenTable = () => {
 
   const filteredInventario = inventario.filter((producto) => {
     const matchesSearch =
-      producto.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      producto.codigo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      producto.grupo.toLowerCase().includes(searchTerm.toLowerCase());
+      (producto.nombre?.toLowerCase() || "").includes(
+        searchTerm.toLowerCase()
+      ) ||
+      (producto.codigo?.toLowerCase() || "").includes(
+        searchTerm.toLowerCase()
+      ) ||
+      (producto.grupo?.toLowerCase() || "").includes(searchTerm.toLowerCase());
 
-    return showInactive ? matchesSearch : matchesSearch && producto.status !== 0;
+    return showInactive
+      ? matchesSearch
+      : matchesSearch && producto.status !== 0;
   });
 
-   //   * formato de dinero 
-   const formatearDinero = (valor) => {
+  //   * formato de dinero
+  const formatearDinero = (valor) => {
     return new Intl.NumberFormat("es-MX", {
       style: "currency",
       currency: "MXN",
@@ -87,16 +117,36 @@ export const ProductoAlmacenTable = () => {
 
       <Button
         variant="contained"
-        sx={{ backgroundColor: "#1f618d", color: "white", ":hover": { opacity: 0.7 }, position: "fixed", right: 50, top: 80, borderRadius: "8px", padding: "10px 20px", display: "flex", alignItems: "center", gap: "8px", }}
-        onClick={handleModalAgregar}>
+        sx={{
+          backgroundColor: "#1f618d",
+          color: "white",
+          ":hover": { opacity: 0.7 },
+          position: "fixed",
+          right: 50,
+          top: 80,
+          borderRadius: "8px",
+          padding: "10px 20px",
+          display: "flex",
+          alignItems: "center",
+          gap: "8px",
+        }}
+        // onClick={handleModalAgregar}
+        onClick={() => navigate("/almacen/Entradas")}
+      >
         <AddchartIcon sx={{ fontSize: 24 }} />
         Agregar Producto al Almacén
       </Button>
 
       <Box width="90%" maxWidth={2000} margin="0 auto" mt={4}>
-        <Box sx={{ backgroundColor: "#1f618d", padding: "10px 20px", borderRadius: "8px 8px 0 0" }}>
+        <Box
+          sx={{
+            backgroundColor: "#1f618d",
+            padding: "10px 20px",
+            borderRadius: "8px 8px 0 0",
+          }}
+        >
           <Typography variant="h5" fontWeight="bold" color="white">
-            Inventario del Almacén
+          Almacén
           </Typography>
         </Box>
 
@@ -105,25 +155,54 @@ export const ProductoAlmacenTable = () => {
             <Table stickyHeader>
               <TableHead>
                 <TableRow>
-                  {["Código", "Nombre", "Grupo", "Unidad de Medida", "Costo Unitario", "Cantidad", "Acciones"].map((header) => (
-                    <TableCell key={header} align="center" sx={{ fontWeight: "bold", backgroundColor: "#f4f6f7", color: "black" }}>
+                  {[
+                    "ID",
+                    "Proveedor",
+                    "Fecha",
+                    "Cantidad",
+                    "Costo Unitario",
+                    "Tipo",
+                    "Producto",
+                    "Autorizo",
+                    "acciones",
+                  ].map((header) => (
+                    <TableCell
+                      key={header}
+                      align="center"
+                      sx={{
+                        fontWeight: "bold",
+                        backgroundColor: "#f4f6f7",
+                        color: "black",
+                      }}
+                    >
                       {header}
                     </TableCell>
                   ))}
                 </TableRow>
               </TableHead>
+
               <TableBody>
                 {filteredInventario.map((producto) => (
                   <TableRow key={producto.id}>
-                    <TableCell align="center">{producto.codigo}</TableCell>
-                    <TableCell align="center">{producto.nombre}</TableCell>
-                    <TableCell align="center">{producto.grupo}</TableCell>
-                    <TableCell align="center">{producto.unidad_medida}</TableCell>
-                    <TableCell align="center">{formatearDinero(producto.costo_unitario)}</TableCell>
+                    <TableCell align="center">{producto.id}</TableCell>
+                    <TableCell align="center">{producto.proveedor}</TableCell>
+                    <TableCell align="center" sx={{ textAlign: "right" }}>
+                      {producto.fecha
+                        ? new Date(producto.fecha).toLocaleDateString(
+                            "es-MX"
+                          )
+                        : "Fecha no disponible"}
+                    </TableCell>
                     <TableCell align="center">{producto.cantidad}</TableCell>
                     <TableCell align="center">
+                      {formatearDinero(Number(producto.costo_unitario) || 0)}
+                    </TableCell>
+                    <TableCell align="center">{producto.tipo}</TableCell>
+                    <TableCell align="center">{producto.producto}</TableCell>
+                    <TableCell align="center">{producto.autorizo}</TableCell>
+                    <TableCell align="center">
                       <IconButton
-                        sx={{ color: 'black' }}
+                        sx={{ color: "black" }}
                         onClick={() => {
                           setProductoSeleccionado(producto);
                           setOpenModalEditar(true);
@@ -149,9 +228,12 @@ export const ProductoAlmacenTable = () => {
         </Paper>
       </Box>
 
-      {/* <EditarProductoAlmacenModal modalOpen={openModalEditar} onClose={() => setOpenModalEditar(false)} producto={productoSeleccionado} actualizarLista={actualizarLista} /> */}
-
-      {/* <EntradasAlmacenModal modalOpen={openModalAgregar} onClose={handleCloseModalAgregar} /> */}
+      <EditarProductoAlmacenModal
+        modalOpen={openModalEditar}
+        onClose={() => setOpenModalEditar(false)}
+        producto={productoSeleccionado}
+        actualizarLista={actualizarLista}
+      />
     </>
   );
 };

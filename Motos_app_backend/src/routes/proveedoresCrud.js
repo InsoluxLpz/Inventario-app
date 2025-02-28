@@ -13,7 +13,7 @@ router.post('/agregar_proveedor', async (req, res) => {
     }
 
     try {
-        const query = `INSERT INTO cat_proveedores_prueba (nombreProveedor, telefonoContacto, rfc, telefonoEmpresa, nombre_empresa) VALUES (?, ?, ?, ?, ?)`;
+        const query = `INSERT INTO proveedores (nombreProveedor, telefonoContacto, rfc, telefonoEmpresa, nombre_empresa) VALUES (?, ?, ?, ?, ?)`;
 
         const values = [nombreProveedor, telefonoContacto, rfc, telefonoEmpresa, nombre_empresa];
 
@@ -29,7 +29,7 @@ router.post('/agregar_proveedor', async (req, res) => {
 // * Obtener proveedores
 router.get('/obtener_proveedores', async (req, res) => {
     try {
-        const query = `SELECT * FROM cat_proveedores_prueba`;
+        const query = `SELECT * FROM proveedores`;
         const [results] = await db.query(query);
 
         if (results.length === 0) {
@@ -53,12 +53,12 @@ router.put('/actualizar_proveedor/:id', async (req, res) => {
     }
 
     try {
-        const query = `UPDATE cat_proveedores_prueba SET nombreProveedor = ?, telefonoContacto = ?, rfc = ?, telefonoEmpresa = ?, nombre_empresa = ? WHERE id = ?`;
+        const query = `UPDATE proveedores SET nombreProveedor = ?, telefonoContacto = ?, rfc = ?, telefonoEmpresa = ?, nombre_empresa = ? WHERE id = ?`;
         const values = [nombreProveedor, telefonoContacto, rfc, telefonoEmpresa, nombre_empresa, id];
 
         await db.query(query, values);
 
-        const [updateProveedor] = await db.query('SELECT * FROM cat_proveedores_prueba WHERE id = ?', [id]);
+        const [updateProveedor] = await db.query('SELECT * FROM proveedores WHERE id = ?', [id]);
 
 
         return res.status(200).json(updateProveedor[0]);
@@ -78,7 +78,7 @@ router.put('/actualizar_status_proveedores/:id', async (req, res) => {
 
     console.log("se hare la actualizacion del status prveedores")
 
-    const query = `UPDATE cat_proveedores_prueba SET status = 0 WHERE id = ?`
+    const query = `UPDATE proveedores SET status = 0 WHERE id = ?`
 
     try {
         const [results] = await db.query(query, [id]);
@@ -100,7 +100,7 @@ router.delete('/eliminar_proveedor/:id', async (req, res) => {
     const { id } = req.params;
 
     try {
-        const query = `DELETE FROM cat_proveedores_prueba WHERE id = ?`;
+        const query = `DELETE FROM proveedores WHERE id = ?`;
         const [result] = await db.query(query, [id]);
 
         if (result.affectedRows === 0) {

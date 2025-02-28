@@ -70,10 +70,11 @@ export const ListaMantenimientos = () => {
 
   const mantenimientosFiltrados = mantenimientos.filter(
     (m) =>
-      m.vehiculo.toLowerCase().includes(filtro.vehiculo.toLowerCase()) &&
-      m.fecha_inicio.includes(filtro.fecha) &&
-      m.servicio.toLowerCase().includes(filtro.servicio.toLowerCase())
+      (m.vehiculo?.toLowerCase() || "").includes(filtro.vehiculo.toLowerCase()) &&
+      (m.fecha_inicio || "").includes(filtro.fecha) &&
+      (m.servicio?.toLowerCase() || "").includes(filtro.servicio.toLowerCase())
   );
+  
 
   //   * formato de dinero
   const formatearDinero = (valor) => {
@@ -107,7 +108,7 @@ export const ListaMantenimientos = () => {
         <AddchartIcon sx={{ fontSize: 24 }} />
         Agregar Mantenimiento
       </Button>
-      {/* 
+      
       <Box display="flex" justifyContent="center" gap={2} my={2}>
         <TextField
           label="Vehículo"
@@ -129,14 +130,14 @@ export const ListaMantenimientos = () => {
           value={filtro.servicio}
           onChange={handleFiltroChange}
         />
-      </Box> */}
+      </Box>
 
-      {/* <Box
+      <Box
         display="flex"
         justifyContent="space-between"
         alignItems="center"
         sx={{ marginTop: 4 }}
-      ></Box> */}
+      ></Box>
 
       <Box width="90%" maxWidth={2000} margin="0 auto" mt={4}>
         {/* Header alineado a la izquierda con fondo */}

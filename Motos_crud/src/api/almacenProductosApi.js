@@ -5,7 +5,7 @@ const API_URL = import.meta.env.VITE_API_URL;
 
 export const obtenerInventario = async () => {
     try {
-        const response = await fetch(`${API_URL}/inventario/obtener_inventario`, {
+        const response = await fetch(`${API_URL}/entrada/obtener_inventario`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -25,29 +25,31 @@ export const obtenerInventario = async () => {
 };
 
 export const agregarInventario = async (inventarioData) => {
+    console.log("Datos enviados al backend desde api:", JSON.stringify(inventarioData, null, 2));
     try {
-        const response = await fetch(`${API_URL}/inventario/agregar_inventario`, {
+        const response = await fetch(`${API_URL}/entrada/agregar_inventario`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(inventarioData),
         });
-
-        const data = await response.json();
-
+        
+        let data;
+        try {
+            data = await response.json();
+        } catch (error) {
+            console.error('No se pudo parsear la respuesta JSON:', error);
+            data = { message: 'Respuesta inválida del servidor' };
+        }
+        
         if (response.ok) {
-            Swal.fire({
-                title: 'Éxito',
-                text: 'Inventario agregado correctamente.',
-                icon: 'success',
-                confirmButtonText: 'Aceptar',
-            });
+            Swal.fire('Éxito', 'Inventario agregado correctamente.', 'success');
             return data;
         } else {
+            console.error('Error en la respuesta del backend:', data);
             Swal.fire('Error', data.message || 'Hubo un problema al agregar el inventario.', 'error');
             return { error: data.message || 'Hubo un problema al agregar el inventario.' };
         }
+        
     } catch (error) {
         console.error('Error al realizar la solicitud:', error);
         Swal.fire('Error', 'Hubo un problema al conectar con el servidor.', 'error');
@@ -57,7 +59,7 @@ export const agregarInventario = async (inventarioData) => {
 
 export const actualizarInventario = async (id, inventarioData) => {
     try {
-        const response = await fetch(`${API_URL}/inventario/actualizar_inventario/${id}`, {
+        const response = await fetch(`${API_URL}/entrada/actualizar_inventario/${id}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -104,7 +106,7 @@ export const eliminarInventario = async (id, actualizarLista) => {
             return;
         }
 
-        const response = await fetch(`${API_URL}/inventario/eliminar_inventario/${id}`, {
+        const response = await fetch(`${API_URL}/entrada/eliminar_inventario/${id}`, {
             method: 'DELETE',
         });
 
@@ -126,3 +128,68 @@ export const eliminarInventario = async (id, actualizarLista) => {
         Swal.fire('Error', 'Hubo un problema al conectar con el servidor.', 'error');
     }
 };
+
+
+// * funcion para obtener los nombres de los que autorizan (autorizaciones)
+
+// export const obtenerAutorizaciones = async () => {
+//     try {
+//         const response = await fetch(`${API_URL}/entrada/obtener_autorizaciones`, { // <- corregir aquí
+//             method: "GET",
+//             headers: {
+//                 'Content-Type': 'application/json'
+//             },
+//         });
+//         if (response.ok) {
+//             const data = await response.json();
+//             return data;
+//         }
+//     } catch (error) {
+//         console.error('Error al realizar la solicitud', error);
+//         Swal.fire('Error', 'Hubo un problema al conectar con el servidor.', 'error');
+//         return null;
+//     }
+// };
+
+// // * funcion para obtener los nombres de los que autorizan (autorizaciones)
+
+// export const obtenerTipoEntradas = async () => {
+//     try {
+//         const response = await fetch(`${API_URL}/entrada/obtener_tipo_entradas`, {
+//             method: "GET",
+//             headers: {
+//                 'Content-Type': 'application/json'
+//             },
+//         });
+//         if (response.ok) {
+//             const data = await response.json();
+//             return data;
+//         }
+//     } catch (error) {
+//         console.error('Error al realizar la solicitud', error);
+//         Swal.fire('Error', 'Hubo un problema al conectar con el servidor.', 'error');
+//         return null;
+//     }
+// };
+
+
+// * funcion para obtener los nombres de los que autorizan (autorizaciones)
+export const cargarListasEntradas = async () => {
+    try {
+        const response = await fetch(`${API_URL}/entrada/obtener_listas`, {
+            method: "GET",
+            headers: {
+                'Content-Type': 'application/json'
+            },
+        });
+        if (response.ok) {
+            const data = await response.json();
+            return data;
+        }
+    } catch (error) {
+        console.error('Error al realizar la solicitud', error);
+        Swal.fire('Error', 'Hubo un problema al conectar con el servidor.', 'error');
+        return null;
+    }
+};
+

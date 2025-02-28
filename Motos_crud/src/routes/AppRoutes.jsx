@@ -9,13 +9,13 @@ import { AgregarProductosScreen } from '../screen/AgregarProductosScreen';
 import { HomeScreen } from '../screen/HomeScreen';
 import PrivateRoutes from '../routes/PrivateRoutes';
 import { ProductoTable } from '../components/relacionProductos/ProductoTable';
-import { EntradasAlmacenModal } from '../components/entradas/EntradasAlmacenModal';
 import { CatalogoServicios } from '../components/Servicios/CatalogoServicios';
 import { AgregarServicios } from '../components/Servicios/AgregarServicios';
 import { ListaMantenimientos } from '../components/Servicios/ListaMantenimientos';
 import { RealizarMantenimiento } from '../components/Servicios/RealizarMantenimiento';
 import { ProveedoresTable } from '../components/relacionProveedores/ProveedoresTable';
 import { ProductoAlmacenTable } from '../components/entradas/ProductoAlmacenTable';
+import { AgregarProductosAlmacen } from '../components/entradas/AgregarProductosAlmacen';
 
 
 
@@ -40,7 +40,7 @@ export const AppRoutes = () => {
                 <Route path="/servicios/CatalogoServicios" element={<CatalogoServicios />} />
                 <Route path="/servicios/AgregarServicios" element={<AgregarServicios />} />
                 <Route path="/Proveedores" element={<ProveedoresTable />} />
-                <Route path="/almacen/Entradas" element={<EntradasAlmacenModal />} />
+                <Route path="/almacen/Entradas" element={<AgregarProductosAlmacen />} />
                 <Route path="/almacen/ProductoAlmacenTable" element={<ProductoAlmacenTable />} />
             </Route>
         </Routes>
