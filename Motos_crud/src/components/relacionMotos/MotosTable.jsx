@@ -127,17 +127,18 @@ export const MotosTable = () => {
 
   return (
     <>
-      <NavBar onSearch={setSearchTerm} />
+      <Box sx={{ backgroundColor: "#d6dbdf", minHeight: "100vh" }}>
+        <NavBar onSearch={setSearchTerm} />
 
-      <Button
-        variant="contained"
-        sx={{ backgroundColor: "#1f618d", color: "white", ":hover": { opacity: 0.7 }, position: "fixed", right: 50, top: 80, borderRadius: "8px", padding: "10px 20px", display: "flex", alignItems: "center", gap: "8px", }}
-        onClick={handleOpenModalAdd}>
-        <AddchartIcon sx={{ fontSize: 24 }} />
-        Agregar Motos
-      </Button>
+        <Button
+          variant="contained"
+          sx={{ backgroundColor: "#1f618d", color: "white", ":hover": { opacity: 0.7 }, position: "fixed", right: 50, top: 80, borderRadius: "8px", padding: "10px 20px", display: "flex", alignItems: "center", gap: "8px", }}
+          onClick={handleOpenModalAdd}>
+          <AddchartIcon sx={{ fontSize: 24 }} />
+          Agregar Motos
+        </Button>
 
-      {/* <IconButton
+        {/* <IconButton
           sx={{ color: "black" }}
           onClick={() => handleOpenModalMarcas()}
         >
@@ -160,189 +161,126 @@ export const MotosTable = () => {
         /> */}
 
 
-      <Box width="90%" maxWidth={2000} margin="0 auto" mt={4}>
-        {/* Header alineado a la izquierda con fondo */}
-        <Box sx={{ backgroundColor: "#1f618d", padding: "10px 20px", borderRadius: "8px 8px 0 0" }}>
-          <Typography variant="h5" fontWeight="bold" color="white">
-            Lista de Motos
-          </Typography>
-        </Box>
-
-        <Box sx={{ display: "flex", justifyContent: "flex-end", marginBottom: 1, marginTop: 1 }}>
-          <IconButton
-            sx={{ color: "black" }}
-            onClick={() => handleOpenModalMarcas()}
-          >
-            <AddCircleOutlineIcon />
-            <Typography variant="body1" sx={{ ml: 1 }}>
-              Agregar Marca
+        <Box width="90%" maxWidth={2000} margin="0 auto" mt={9}>
+          {/* Header alineado a la izquierda con fondo */}
+          <Box sx={{ backgroundColor: "#1f618d", padding: "10px 20px", borderRadius: "8px 8px 0 0" }}>
+            <Typography variant="h5" fontWeight="bold" color="white">
+              Lista de Motos
             </Typography>
-          </IconButton>
-
-          <Box sx={{ display: "flex", justifyContent: "flex-end", marginBottom: 1, marginTop: 1 }}>
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={showInactive}
-                  onChange={(e) => setShowInactive(e.target.checked)}
-                  color="default"
-                />
-              }
-              label="Mostrar inactivas"
-            />
           </Box>
-        </Box>
 
-        {/* Contenedor de la tabla */}
-        <Paper sx={{ width: "100%" }}>
-          <TableContainer sx={{ maxHeight: 800, backgroundColor: "#f4f6f7" }}>
-            <Table stickyHeader aria-label="sticky table">
-              <TableHead>
-                <TableRow>
-                  <TableCell
+          <Box sx={{ display: "flex", justifyContent: "flex-end", backgroundColor: 'white' }}>
+            <IconButton
+              sx={{ color: "black" }}
+              onClick={() => handleOpenModalMarcas()}
+            >
+              <AddCircleOutlineIcon />
+              <Typography variant="body1" sx={{ ml: 1 }}>
+                Agregar Marca
+              </Typography>
+            </IconButton>
 
-                    sx={{
+            <Box sx={{ display: "flex", justifyContent: "flex-end", marginLeft: 2 }}>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={showInactive}
+                    onChange={(e) => setShowInactive(e.target.checked)}
+                    color="default"
+                  />
+                }
+                label="Mostrar inactivas"
+              />
+            </Box>
+          </Box>
 
-                      backgroundColor: "#d5dbdb",
-                      color: "black",
-                      textAlign: "right"
-                    }}
-                  >
-                    Inciso
-                  </TableCell>
-                  <TableCell
-
-                    sx={{
-
-                      backgroundColor: "#d5dbdb",
-                      color: "black",
-                      textAlign: "right"
-                    }}
-                  >
-                    Modelo
-                  </TableCell>
-                  <TableCell
-
-                    sx={{
-
-                      backgroundColor: "#d5dbdb",
-                      color: "black",
-                      textAlign: "right"
-                    }}
-                  >
-                    N.Serie
-                  </TableCell>
-                  <TableCell
-
-                    sx={{
-
-                      backgroundColor: "#d5dbdb",
-                      color: "black",
-                      textAlign: "right"
-                    }}
-                  >
-                    Placa
-                  </TableCell>
-                  <TableCell
-
-                    sx={{
-
-                      backgroundColor: "#d5dbdb",
-                      color: "black",
-                      textAlign: "right"
-                    }}
-                  >
-                    Propietario
-                  </TableCell>
-                  <TableCell
-
-                    sx={{
-
-                      backgroundColor: "#d5dbdb",
-                      color: "black",
-                      textAlign: "right"
-                    }}
-                  >
-                    Nota
-                  </TableCell>
-                  <TableCell
-
-                    sx={{
-
-                      backgroundColor: "#d5dbdb",
-                      color: "black",
-                      textAlign: "right"
-                    }}
-                  >
-                    Acciones
-                  </TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {filteredMotos.map((moto) => (
-                  <TableRow
-                    key={moto.id}
-                    sx={{ backgroundColor: getStatusColor(moto.status) }}
-                  >
-                    <TableCell sx={{ textAlign: "right" }}>
-                      {moto.inciso}
-                    </TableCell>
-                    <TableCell sx={{ textAlign: "right" }}>
-                      {moto.modelo}
-                    </TableCell>
-                    <TableCell sx={{ textAlign: "right" }}>
-                      {moto.no_serie}
-                    </TableCell>
-                    <TableCell sx={{ textAlign: "right" }}>
-                      {moto.placa}
-                    </TableCell>
-                    <TableCell sx={{ textAlign: "right" }}>
-                      {moto.propietario}
-                    </TableCell>
-                    <TableCell sx={{ textAlign: "right" }}>
-                      {moto.nota}
-                    </TableCell>
-                    <TableCell sx={{ textAlign: "right" }}>
-                      <IconButton
-                        variant="contained"
-                        sx={{ color: 'black' }}
-                        onClick={() => handleOpenModalEdit(moto)}
+          {/* Contenedor de la tabla */}
+          <Paper sx={{ width: "100%" }}>
+            <TableContainer sx={{ maxHeight: 800, backgroundColor: "#f4f6f7" }}>
+              <Table stickyHeader aria-label="sticky table">
+                <TableHead>
+                  <TableRow>
+                    {["Inciso", "Modelo", " N.Serie", "Placa", "Propietario", "Nota", "Acciones"].map((col) => (
+                      <TableCell
+                        key={col}
+                        sx={{
+                          backgroundColor: "#d5dbdb",
+                          color: "black",
+                          textAlign: "center",
+                          width: "16.66%",  // 🔥 Distribuir equitativamente
+                        }}
                       >
-                        <EditIcon sx={{ fontSize: 20 }} />
-                      </IconButton>
-                      <IconButton
-                        variant="contained"
-                        color="error"
-                        style={{ marginLeft: "10px" }}
-                        onClick={() => handleActualizarStatus(moto.id)}
-                      >
-                        <InventoryIcon sx={{ fontSize: 20 }} />
-                      </IconButton>
-                    </TableCell>
+                        {col}
+                      </TableCell>
+                    ))}
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
+                </TableHead>
+                <TableBody>
+                  {filteredMotos.map((moto) => (
+                    <TableRow
+                      key={moto.id}
+                      sx={{ backgroundColor: getStatusColor(moto.status) }}
+                    >
+                      <TableCell sx={{ textAlign: "right", width: "16.66%" }}>
+                        {moto.inciso}
+                      </TableCell>
+                      <TableCell sx={{ textAlign: "right", width: "16.66%" }}>
+                        {moto.modelo}
+                      </TableCell>
+                      <TableCell sx={{ textAlign: "right", width: "16.66%" }}>
+                        {moto.no_serie}
+                      </TableCell>
+                      <TableCell sx={{ textAlign: "right", width: "16.66%" }}>
+                        {moto.placa}
+                      </TableCell>
+                      <TableCell sx={{ textAlign: "right", width: "16.66%" }}>
+                        {moto.propietario}
+                      </TableCell>
+                      <TableCell sx={{ textAlign: "right", width: "16.66%" }}>
+                        {moto.nota}
+                      </TableCell>
+                      <TableCell sx={{ textAlign: "right", width: "16.66%" }}>
+                        <IconButton
+                          variant="contained"
+                          sx={{ color: 'black' }}
+                          onClick={() => handleOpenModalEdit(moto)}
+                        >
+                          <EditIcon sx={{ fontSize: 20 }} />
+                        </IconButton>
+                        <IconButton
+                          variant="contained"
+                          color="error"
+                          style={{ marginLeft: "10px" }}
+                          onClick={() => handleActualizarStatus(moto.id)}
+                        >
+                          <InventoryIcon sx={{ fontSize: 20 }} />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
 
-          <EditarModal
-            onClose={handleCloseModalEdit}
-            modalOpen={openModalEditar}
-            moto={motoSeleccionada}
-            actualizarLista={actualizarLista}
-            listaMarcas={marcas}
-          />
-          <AgregarModal
-            onClose={handleCloseModalAdd}
-            modalOpen={openModalAgregar}
-            agregarMotoLista={agregarMotoLista}
-            listaMarcas={marcas}
-          />
-          <MarcasModal
-            onClose={handleCloseModalMarcas}
-            modalOpen={openModalMarcas}
-          />
-        </Paper>
+            <EditarModal
+              onClose={handleCloseModalEdit}
+              modalOpen={openModalEditar}
+              moto={motoSeleccionada}
+              actualizarLista={actualizarLista}
+              listaMarcas={marcas}
+            />
+            <AgregarModal
+              onClose={handleCloseModalAdd}
+              modalOpen={openModalAgregar}
+              agregarMotoLista={agregarMotoLista}
+              listaMarcas={marcas}
+            />
+            <MarcasModal
+              onClose={handleCloseModalMarcas}
+              modalOpen={openModalMarcas}
+            />
+          </Paper>
+        </Box>
       </Box>
     </>
   );

@@ -13,6 +13,7 @@ export const EditarProveedoresModal = ({ onClose, modalOpen, proveedor, actualiz
     rfc: proveedor.rfc,
     telefono_contacto: proveedor.telefono_contacto,
     telefono_empresa: proveedor.telefono_empresa,
+    status: proveedor.status
   });
 
   const [errors, setErrors] = useState({});
@@ -25,6 +26,7 @@ export const EditarProveedoresModal = ({ onClose, modalOpen, proveedor, actualiz
         rfc: proveedor.rfc || "",
         telefono_contacto: proveedor.telefono_contacto || "",
         telefono_empresa: proveedor.telefono_empresa || "",
+        status: proveedor.status || ""
       });
     }
   }, [proveedor]);
@@ -166,6 +168,22 @@ export const EditarProveedoresModal = ({ onClose, modalOpen, proveedor, actualiz
                       </div>
                     )}
                   </div>
+                  <div className="col-md-6 mb-3">
+                    <label className="form-label">Status</label>
+                    <select
+                      name="status"
+                      className={`form-control ${errors.status ? "is-invalid" : ""}`}
+                      value={formData.status}  // Asegúrate de que `formData.status` proviene de la BD
+                      onChange={handleChange}
+                    >
+                      <option value="1">Activo</option>
+                      <option value="0">Inactivo</option>
+                    </select>
+                    {errors.status && (
+                      <div className="invalid-feedback">{errors.status}</div>
+                    )}
+                  </div>
+
                 </div>
               </div>
 

@@ -50,25 +50,25 @@ router.post('/agregar_producto', async (req, res) => {
 router.get('/obtener_productos', async (req, res) => {
     console.log(req.body)
     const query = `
-  SELECT 
-        p.*, 
-        g.nombre AS grupo,
-        u.nombre AS unidad_medida,
-        JSON_ARRAYAGG(
-            JSON_OBJECT('proveedor_id', pr.id, 'nombre_proveedor', pr.nombre_proveedor)
-        ) AS proveedores
-    FROM 
-        productos p
-    JOIN 
-        cat_grupos_prueba g ON p.idGrupo = g.id
-    JOIN 
-        cat_unidad_medida u ON p.idUnidadMedida = u.id
-    LEFT JOIN 
-        productos_proveedor pp ON p.id = pp.idProducto
-    LEFT JOIN 
-        proveedores pr ON pp.idProveedor = pr.id  
-    GROUP BY 
-        p.id;
+SELECT 
+    p.*, 
+    g.nombre AS grupo,
+    u.nombre AS unidad_medida,
+    JSON_ARRAYAGG(
+        JSON_OBJECT('id', pr.id, 'nombre', pr.nombre_proveedor)
+    ) AS proveedores
+FROM 
+    productos p
+JOIN 
+    cat_grupos_prueba g ON p.idGrupo = g.id
+JOIN 
+    cat_unidad_medida u ON p.idUnidadMedida = u.id
+LEFT JOIN 
+    productos_proveedor pp ON p.id = pp.idProducto
+LEFT JOIN 
+    proveedores pr ON pp.idProveedor = pr.id  
+GROUP BY 
+    p.id
 
     `;
 

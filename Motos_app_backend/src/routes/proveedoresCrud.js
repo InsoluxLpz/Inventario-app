@@ -6,7 +6,7 @@ const db = dbConexion();
 // * Agregar proveedor
 router.post('/agregar_proveedor', async (req, res) => {
     const { nombre_empresa, nombre_proveedor, rfc, telefono_contacto, telefono_empresa } = req.body;
-    console.log("llego la peticion");
+    console.log("llego la peticion", req.body);
 
     if (!nombre_empresa || !nombre_proveedor || !rfc) {
         return res.status(400).json({ message: 'El nombre del proveedor es obligatorio' });
@@ -45,16 +45,17 @@ router.get('/obtener_proveedores', async (req, res) => {
 
 // * Actualizar proveedor
 router.put('/actualizar_proveedor/:id', async (req, res) => {
+    console.log("llego la peticion", req.body);
     const { id } = req.params;
-    const { nombre_empresa, nombre_proveedor, rfc, telefono_contacto, telefono_empresa } = req.body;
+    const { nombre_empresa, nombre_proveedor, rfc, telefono_contacto, telefono_empresa, status } = req.body;
 
     if (!nombre_empresa || !nombre_proveedor || !rfc) {
         return res.status(400).json({ message: 'El nombre del proveedor es obligatorio' });
     }
 
     try {
-        const query = `UPDATE proveedores SET nombreProveedor = ?, telefonoContacto = ?, rfc = ?, telefonoEmpresa = ?, nombre_empresa = ? WHERE id = ?`;
-        const values = [nombreProveedor, telefonoContacto, rfc, telefonoEmpresa, nombre_empresa, id];
+        const query = `UPDATE proveedores SET nombre_empresa = ?, nombre_proveedor = ?, rfc = ?, telefono_contacto = ?, telefono_empresa = ?, status = ? WHERE id = ?`;
+        const values = [nombre_empresa, nombre_proveedor, rfc, telefono_contacto, telefono_empresa, status, id];
 
         await db.query(query, values);
 
