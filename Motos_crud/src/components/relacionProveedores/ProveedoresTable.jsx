@@ -94,150 +94,104 @@ export const ProveedoresTable = () => {
 
   return (
     <>
-      <NavBar onSearch={setSearchTerm} />
+      <Box sx={{ backgroundColor: "#d6dbdf", minHeight: "100vh" }}>
+        <NavBar onSearch={setSearchTerm} />
 
-      <Button
-        variant="contained"
-        sx={{ backgroundColor: "#1f618d", color: "white", ":hover": { opacity: 0.7 }, position: "fixed", right: 50, top: 80, borderRadius: "8px", padding: "10px 20px", display: "flex", alignItems: "center", gap: "8px", }}
-        onClick={handleOpenModalAgregar}>
-        <AddchartIcon sx={{ fontSize: 24 }} />
-        Agregar Proveedores
-      </Button>
+        <Button
+          variant="contained"
+          sx={{ backgroundColor: "#1f618d", color: "white", ":hover": { opacity: 0.7 }, position: "fixed", right: 50, top: 80, borderRadius: "8px", padding: "10px 20px", display: "flex", alignItems: "right", gap: "8px", }}
+          onClick={handleOpenModalAgregar}>
+          <AddchartIcon sx={{ fontSize: 24 }} />
+          Agregar Proveedores
+        </Button>
 
-      <Box width="90%" maxWidth={2000} margin="0 auto" mt={4}>
-        {/* Header alineado a la izquierda con fondo */}
-        <Box sx={{ backgroundColor: "#1f618d", padding: "10px 20px", borderRadius: "8px 8px 0 0" }}>
-          <Typography variant="h5" fontWeight="bold" color="white">
-            Proveedores
-          </Typography>
-        </Box>
+        <Box width="90%" maxWidth={2000} margin="0 auto" mt={9}>
+          {/* Header alineado a la izquierda con fondo */}
+          <Box sx={{ backgroundColor: "#1f618d", padding: "10px 20px", borderRadius: "8px 8px 0 0" }}>
+            <Typography variant="h5" fontWeight="bold" color="white">
+              Proveedores
+            </Typography>
+          </Box>
 
-        <Box sx={{ display: "flex", justifyContent: "flex-end", marginBottom: 1, marginTop: 1 }}>
-          <FormControlLabel
-            control={
-              <Switch
-                checked={showInactive}
-                onChange={(e) => setShowInactive(e.target.checked)}
-                color="default"
-              />
-            }
-            label="Mostrar inactivas"
-          />
-        </Box>
+          <Box sx={{ display: "flex", justifyContent: "flex-end", backgroundColor: 'white' }}>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={showInactive}
+                  onChange={(e) => setShowInactive(e.target.checked)}
+                  color="default"
+                />
+              }
+              label="Mostrar inactivas"
+            />
+          </Box>
 
-        {/* Contenedor de la tabla */}
-        <Paper sx={{ width: "100%" }}>
-          <TableContainer sx={{ maxHeight: 800, backgroundColor: "#f4f6f7" }}>
-            <Table stickyHeader aria-label="sticky table">
-              <TableHead>
-                <TableRow>
-                  <TableCell
-                    sx={{
-                      fontWeight: "bold",
-                      backgroundColor: "#d5dbdb",
-                      color: "black",
-                      textAlign: "right"
-                    }}
-                  >
-                    Empresa
-                  </TableCell>
-                  <TableCell
-                    sx={{
-                      fontWeight: "bold",
-                      backgroundColor: "#d5dbdb",
-                      color: "black",
-                      textAlign: "right"
-                    }}
-                  >
-                    Nombre
-                  </TableCell>
-                  <TableCell
-                    sx={{
-                      fontWeight: "bold",
-                      backgroundColor: "#d5dbdb",
-                      color: "black",
-                      textAlign: "right"
-                    }}
-                  >
-                    Teléfono Contacto
-                  </TableCell>
-                  <TableCell
-                    sx={{
-                      fontWeight: "bold",
-                      backgroundColor: "#d5dbdb",
-                      color: "black",
-                      textAlign: "right"
-                    }}
-                  >
-                    RFC
-                  </TableCell>
-                  <TableCell
-                    sx={{
-                      fontWeight: "bold",
-                      backgroundColor: "#d5dbdb",
-                      color: "black",
-                      textAlign: "right"
-                    }}
-                  >
-                    Teléfono Empresa
-                  </TableCell>
-                  <TableCell
-                    sx={{
-                      fontWeight: "bold",
-                      backgroundColor: "#d5dbdb",
-                      color: "black",
-                      textAlign: "right"
-                    }}
-                  >
-                    Acciones
-                  </TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {filteredProveedores.map((proveedor) => (
-                  <TableRow key={proveedor.id} sx={{ backgroundColor: getStatusColor(proveedor.status) }}>
-                    <TableCell sx={{ textAlign: "right" }}>{proveedor.nombre_empresa}</TableCell>
-                    <TableCell sx={{ textAlign: "right" }}>{proveedor.nombre_proveedor}</TableCell>
-                    <TableCell sx={{ textAlign: "right" }}>{proveedor.telefono_contacto}</TableCell>
-                    <TableCell sx={{ textAlign: "right" }}>{proveedor.rfc}</TableCell>
-                    <TableCell sx={{ textAlign: "right" }}>{proveedor.telefono_empresa}</TableCell>
-                    <TableCell sx={{ textAlign: "right" }}>
-                      <IconButton
-                        variant="contained"
-                        sx={{ color: 'black', }}
-                        onClick={() => handleOpenModalEditar(proveedor)}
+          {/* Contenedor de la tabla */}
+          <Paper sx={{ width: "100%" }}>
+            <TableContainer sx={{ maxHeight: 800, backgroundColor: "#f4f6f7" }}>
+              <Table stickyHeader aria-label="sticky table">
+                <TableHead>
+                  <TableRow>
+                    {["Empresa", "Nombre", "Teléfono Contacto", "RFC", "Teléfono Empresa", "Acciones"].map((col) => (
+                      <TableCell
+                        key={col}
+                        sx={{
+                          backgroundColor: "#d5dbdb",
+                          color: "black",
+                          textAlign: "center",
+                          width: "16.66%",
+                        }}
                       >
-                        <EditIcon sx={{ fontSize: 20 }} />
-                      </IconButton>
-                      <IconButton
-                        variant="contained"
-                        color="error"
-                        style={{ marginLeft: "10px" }}
-                        onClick={() => handleActualizarStatus(proveedor.id)}
-
-                      >
-                        <InventoryIcon sx={{ fontSize: 20 }} />
-                      </IconButton>
-                    </TableCell>
+                        {col}
+                      </TableCell>
+                    ))}
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </Paper>
+                </TableHead>
 
+                <TableBody>
+                  {filteredProveedores.map((proveedor, index) => (
+                    <TableRow
+                      key={proveedor.id}
+                      sx={{
+                        backgroundColor: getStatusColor(proveedor.status), // Combina ambos colores
+                        "&:hover": {
+                          backgroundColor: "#eaecee ", // Color al pasar el mouse
+                        }
+                      }}
+                    >
+                      <TableCell sx={{ textAlign: "right", width: "16.66%" }}>{proveedor.nombre_empresa}</TableCell>
+                      <TableCell sx={{ textAlign: "right", width: "16.66%" }}>{proveedor.nombre_proveedor}</TableCell>
+                      <TableCell sx={{ textAlign: "right", width: "16.66%" }}>{proveedor.telefono_contacto}</TableCell>
+                      <TableCell sx={{ textAlign: "right", width: "16.66%" }}>{proveedor.rfc}</TableCell>
+                      <TableCell sx={{ textAlign: "right", width: "16.66%" }}>{proveedor.telefono_empresa}</TableCell>
+                      <TableCell sx={{ textAlign: "right", width: "16.66%" }}>
+                        <IconButton sx={{ color: "black" }} onClick={() => handleOpenModalEditar(proveedor)}>
+                          <EditIcon sx={{ fontSize: 20 }} />
+                        </IconButton>
+                        <IconButton color="error" sx={{ marginLeft: "10px" }} onClick={() => handleActualizarStatus(proveedor.id)}>
+                          <InventoryIcon sx={{ fontSize: 20 }} />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Paper>
+
+        </Box>
+        <AgregarProveedoresModal
+          modalOpen={openModalAgregar}
+          onClose={handleCloseModalAgregar}
+          agregarProveedorHandler={agregarProveedorHandler}
+        />
+        <EditarProveedoresModal
+          modalOpen={openModalEditar}
+          onClose={handleCloseModalEditar}
+          proveedor={proveedorSeleccionado}
+          actualizarLista={actualizarLista}
+        />
       </Box>
-      <AgregarProveedoresModal
-        modalOpen={openModalAgregar}
-        onClose={handleCloseModalAgregar}
-        agregarProveedorHandler={agregarProveedorHandler}
-      />
-      <EditarProveedoresModal
-        modalOpen={openModalEditar}
-        onClose={handleCloseModalEditar}
-        proveedor={proveedorSeleccionado}
-        actualizarLista={actualizarLista}
-      />
     </>
   );
 };
