@@ -10,7 +10,7 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import { Box, Button, Typography, IconButton } from "@mui/material";
 import { NavBar } from "../NavBar";
-import { obtenerInventario } from "../../api/almacenProductosApi";
+import { cargarListasCampos } from "../../api/almacenProductosApi";
 import AddchartIcon from "@mui/icons-material/Addchart";
 import InventoryIcon from "@mui/icons-material/Inventory";
 import { EditarProductoAlmacenModal } from "./EditarProductoAlmacenModal";
@@ -21,7 +21,6 @@ import { useNavigate } from "react-router";
 export const ProductoAlmacenTable = () => {
   const navigate = useNavigate();
 
-
   const [openModalEditar, setOpenModalEditar] = useState(false);
   const [openModalAgregar, setOpenModalAgregar] = useState(false);
   const [inventario, setInventario] = useState([]);
@@ -29,9 +28,9 @@ export const ProductoAlmacenTable = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [showInactive, setShowInactive] = useState(false);
 
-  // * estados para el modal dinamico 
-  const [productos, setProductos] = useState([]);  
-  const [proveedores, setProveedores] = useState([]);  
+  // * estados para el modal dinamico
+  const [productos, setProductos] = useState([]);
+  const [proveedores, setProveedores] = useState([]);
 
   useEffect(() => {
     fetchInventario();
@@ -39,7 +38,7 @@ export const ProductoAlmacenTable = () => {
 
   const fetchInventario = async () => {
     try {
-      const data = await obtenerInventario(); // Modificar para que coincida con tu API de inventario
+      const data = await cargarListasCampos();
       console.log("datos de la peticion inventario", data);
       if (data) {
         setInventario(data);
@@ -48,27 +47,6 @@ export const ProductoAlmacenTable = () => {
       console.error("Error en la petición al obtener Inventario");
     }
   };
-
-  // * necesito traer productos, tupo, autorizo y proveedores para reflejarlos en los campos
-  const fetchProductos = async () => {
-    const data = await obtenerProductos();
-    if(data) {
-      setProductos(data);
-    }
-  };
-
-  const fetchAutorizo = async () => {
-    const data = await obten
-  };
-
-  const fetchProveedores = async () => {
-    const data = await obtenerProveedores();
-    if(data){
-      setProveedores(data)
-    }
-  };
-
-
 
   const actualizarLista = (productoActualizado) => {
     setInventario((prevInventario) =>
@@ -146,7 +124,7 @@ export const ProductoAlmacenTable = () => {
           }}
         >
           <Typography variant="h5" fontWeight="bold" color="white">
-          Almacén
+            Almacén
           </Typography>
         </Box>
 
@@ -156,12 +134,12 @@ export const ProductoAlmacenTable = () => {
               <TableHead>
                 <TableRow>
                   {[
-                    "ID",
+                    "Codigo",
                     "Proveedor",
                     "Fecha",
                     "Cantidad",
                     "Costo Unitario",
-                    "Tipo",
+                    // "Tipo",
                     "Producto",
                     "Autorizo",
                     "acciones",
@@ -184,24 +162,21 @@ export const ProductoAlmacenTable = () => {
               <TableBody>
                 {filteredInventario.map((producto) => (
                   <TableRow key={producto.id}>
-                    <TableCell align="center">{producto.id}</TableCell>
-                    <TableCell align="center">{producto.proveedor}</TableCell>
+                    <TableCell align="center">{producto.idProducto}</TableCell>
+                    <TableCell align="center">{producto.proveedor_nombre}</TableCell>
                     <TableCell align="center" sx={{ textAlign: "right" }}>
-                      {producto.fecha
-                        ? new Date(producto.fecha).toLocaleDateString(
-                            "es-MX"
-                          )
+                      {producto.fecha_movimiento
+                        ? new Date(producto.fecha_movimiento).toLocaleDateString("es-MX")
                         : "Fecha no disponible"}
                     </TableCell>
                     <TableCell align="center">{producto.cantidad}</TableCell>
                     <TableCell align="center">
                       {formatearDinero(Number(producto.costo_unitario) || 0)}
                     </TableCell>
-                    <TableCell align="center">{producto.tipo}</TableCell>
-                    <TableCell align="center">{producto.producto}</TableCell>
+                    <TableCell align="center">{producto.nombreProducto}</TableCell>
                     <TableCell align="center">{producto.autorizo}</TableCell>
                     <TableCell align="center">
-                      <IconButton
+                      {/* <IconButton
                         sx={{ color: "black" }}
                         onClick={() => {
                           setProductoSeleccionado(producto);
@@ -209,7 +184,7 @@ export const ProductoAlmacenTable = () => {
                         }}
                       >
                         <EditIcon sx={{ fontSize: 20 }} />
-                      </IconButton>
+                      </IconButton> */}
 
                       <IconButton
                         variant="contained"

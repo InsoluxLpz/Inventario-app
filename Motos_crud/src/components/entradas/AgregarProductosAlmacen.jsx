@@ -9,7 +9,7 @@ import {
 } from "../../api/almacenProductosApi";
 import { useNavigate } from "react-router";
 
-export const AgregarProductosAlmacen = ({ productos }) => {
+export const AgregarProductosAlmacen = () => {
   const navigate = useNavigate();
 
   const [listaProveedores, setListaProveedores] = useState([]);
@@ -18,11 +18,8 @@ export const AgregarProductosAlmacen = ({ productos }) => {
   const [listaTipoEntrada, setListaTipoEntrada] = useState([]);
   const [listaTipoMovimiento, setListaTipoMovimiento] = useState([]);
   const [errors, setErrors] = useState({});
-
-  // * guardar en un estado hasta que se manden todos a la db
   const [productosAgregados, setProductosAgregados] = useState([]);
 
-  // * estado del formulario por defecto
   const [formData, setFormData] = useState({
     proveedor: null,
     fecha: "",
@@ -34,7 +31,56 @@ export const AgregarProductosAlmacen = ({ productos }) => {
     tipoMovimiento: null,
   });
 
-  // * funciones
+  useEffect(() => {
+    const cargarListas = async () => {
+      try {
+        const data = await cargarListasEntradas();
+
+        if (data.proveedores) {
+          setListaProveedores(
+            data.proveedores.map((p) => ({
+              value: p.id,
+              label: p.nombre_proveedor,
+            }))
+          );
+        }
+        if (data.productos) {
+          setListaProductos(
+            data.productos.map((p) => ({ value: p.id, label: p.nombre }))
+          );
+        }
+        if (data.autorizaciones) {
+          setListaAutorizaciones(
+            data.autorizaciones.map((a) => ({
+              value: a.idAutorizo,
+              label: a.nombre,
+            }))
+          );
+        }
+        if (data.tiposEntrada) {
+          setListaTipoEntrada(
+            data.tiposEntrada.map((t) => ({
+              value: t.id,
+              label: t.tipo_entrada,
+            }))
+          );
+        }
+        if (data.tipoMovimiento) {
+          setListaTipoMovimiento(
+            data.tipoMovimiento.map((m) => ({
+              value: m.idMovimiento,
+              label: m.movimiento,
+            }))
+          );
+        }
+      } catch (error) {
+        console.error("Error al cargar los datos:", error);
+      }
+    };
+
+    cargarListas();
+  }, []);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -59,113 +105,37 @@ export const AgregarProductosAlmacen = ({ productos }) => {
     return Object.keys(newErrors).length === 0;
   };
 
-  // * cargar los datos para seleccionar los campos unificación de peticiones
-  useEffect(() => {
-    const cargarListas = async () => {
-      try {
-        const data = await cargarListasEntradas();
-
-        if (data.productos) setListaProductos(data.productos);
-        if (data.proveedores) setListaProveedores(data.proveedores);
-        if (data.autorizaciones) setListaAutorizaciones(data.autorizaciones);
-        if (data.tiposEntrada) setListaTipoEntrada(data.tiposEntrada);
-        if (data.tipoMovimiento) setListaTipoMovimiento(data.tipoMovimiento);
-      } catch (error) {
-        console.error("Error al cargar los datos:", error);
-      }
-    };
-
-    cargarListas();
-  }, []);
-
-  // * Función para obtener las opciones de proveedores
-  const opcionesProveedores = listaProveedores
-    ? listaProveedores.map((prov) => ({
-        value: prov.id,
-        label: prov.nombre_proveedor,
-      }))
-    : [];
-
-  // * Función para obtener las opciones de productos
-  const opcionesProductos = listaProductos
-    ? listaProductos.map((prod) => ({
-        value: prod.id,
-        label: prod.nombre,
-      }))
-    : [];
-
-  // * Función para obtener las opciones de autorizaciones
-  const opcionesAutorizaciones = listaAutorizaciones
-    ? listaAutorizaciones.map((auto) => ({
-        value: auto.idAutorizo,
-        label: auto.nombre,
-      }))
-    : [];
-
-  // * Función para obtener las opciones de tipos de entrada
-  const opcionesTiposEntrada = listaTipoEntrada
-    ? listaTipoEntrada.map((tipo) => ({
-        value: tipo.id,
-        label: tipo.tipo_entrada,
-      }))
-    : [];
-
-  // * Función para obtener las opciones de tipos de movimiento
-  const opcionesTiposMovimiento = listaTipoMovimiento
-    ? listaTipoMovimiento.map((mov) => ({
-        value: mov.idMovimiento,
-        label: mov.movimiento,
-      }))
-    : [];
-
-  // * funcion para guardar en un estado los productos antes de enviarlos
   const handleSubmit = (e) => {
     e.preventDefault();
 
     if (!validateForm()) return;
 
-    // Extraemos tanto los valores como los labels de los objetos select
     const nuevoProducto = {
-      proveedor: formData.proveedor
-        ? {
-            value: formData.proveedor.value,
-            label: formData.proveedor.label,
-          }
-        : null, // Guardamos tanto el ID como el nombre del proveedor
+      proveedor_id: formData.proveedor
+        ? { value: formData.proveedor.value, label: formData.proveedor.label }
+        : null,
       fecha: formData.fecha,
       cantidad: formData.cantidad,
-      producto: formData.producto
-        ? {
-            value: formData.producto.value,
-            label: formData.producto.label,
-          }
-        : null, // Guardamos tanto el ID como el nombre del producto
+      producto_id: formData.producto
+        ? { value: formData.producto.value, label: formData.producto.label }
+        : null,
       costo_unitario: formData.costo_unitario,
-      tipo: formData.tipo
-        ? {
-            value: formData.tipo.value,
-            label: formData.tipo.label,
-          }
-        : null, // Guardamos tanto el ID como el nombre del tipo de entrada
+      tipo_entrada_id: formData.tipo
+        ? { value: formData.tipo.value, label: formData.tipo.label }
+        : null,
       autorizo_id: formData.autorizo
-        ? {
-            value: formData.autorizo.value,
-            label: formData.autorizo.label,
-          }
-        : null, // Guardamos tanto el ID como el nombre de la persona que autorizó
-      tipoMovimiento: formData.tipoMovimiento
+        ? { value: formData.autorizo.value, label: formData.autorizo.label }
+        : null,
+      tipo_movimiento_id: formData.tipoMovimiento
         ? {
             value: formData.tipoMovimiento.value,
             label: formData.tipoMovimiento.label,
           }
-        : null, // Guardamos tanto el ID como el nombre del tipo de movimiento
+        : null,
     };
-
-    console.log("nuevoProducto", nuevoProducto);
 
     setProductosAgregados((prevProductos) => [...prevProductos, nuevoProducto]);
 
-    // Limpiar el formulario después de agregar un producto
     setFormData({
       proveedor: null,
       fecha: "",
@@ -180,7 +150,6 @@ export const AgregarProductosAlmacen = ({ productos }) => {
     setErrors({});
   };
 
-  // * funcion para enviar los datos a la tabla
   const handleGuardarTodo = async () => {
     if (productosAgregados.length === 0) {
       alert("No hay productos para guardar");
@@ -197,8 +166,6 @@ export const AgregarProductosAlmacen = ({ productos }) => {
     }
 
     alert("Productos guardados correctamente");
-
-    // Limpiar la tabla
     setProductosAgregados([]);
   };
 
@@ -220,7 +187,6 @@ export const AgregarProductosAlmacen = ({ productos }) => {
           alignItems: "center",
           gap: "8px",
         }}
-        // onClick={handleModalAgregar}
         onClick={() => navigate("/almacen/ProductoAlmacenTable")}
       >
         <WarehouseIcon sx={{ fontSize: 24 }} />
@@ -234,10 +200,13 @@ export const AgregarProductosAlmacen = ({ productos }) => {
             <div className="col-md-4">
               <label>Proveedor</label>
               <Select
-                options={opcionesProveedores}
+                options={listaProveedores}
                 value={formData.proveedor}
                 onChange={(opcion) => handleSelectChange("proveedor", opcion)}
               />
+              {errors.proveedor && (
+                <div className="text-danger">{errors.proveedor}</div>
+              )}
             </div>
 
             <div className="col-md-4">
@@ -249,7 +218,11 @@ export const AgregarProductosAlmacen = ({ productos }) => {
                 value={formData.fecha}
                 onChange={handleChange}
               />
+              {errors.fecha && (
+                <div className="text-danger">{errors.fecha}</div>
+              )}
             </div>
+
             <div className="col-md-4">
               <label>Cantidad</label>
               <input
@@ -259,15 +232,21 @@ export const AgregarProductosAlmacen = ({ productos }) => {
                 value={formData.cantidad}
                 onChange={handleChange}
               />
+              {errors.cantidad && (
+                <div className="text-danger">{errors.cantidad}</div>
+              )}
             </div>
 
             <div className="col-md-4">
               <label>Producto</label>
               <Select
-                options={opcionesProductos}
+                options={listaProductos}
                 value={formData.producto}
                 onChange={(opcion) => handleSelectChange("producto", opcion)}
               />
+              {errors.producto && (
+                <div className="text-danger">{errors.producto}</div>
+              )}
             </div>
 
             <div className="col-md-4">
@@ -279,38 +258,51 @@ export const AgregarProductosAlmacen = ({ productos }) => {
                 value={formData.costo_unitario}
                 onChange={handleChange}
               />
+              {errors.costo_unitario && (
+                <div className="text-danger">{errors.costo_unitario}</div>
+              )}
             </div>
 
             <div className="col-md-4">
               <label>Tipo de entrada</label>
               <Select
-                options={opcionesTiposEntrada}
+                options={listaTipoEntrada}
                 value={formData.tipo}
                 onChange={(opcion) => handleSelectChange("tipo", opcion)}
               />
+              {errors.tipo && <div className="text-danger">{errors.tipo}</div>}
             </div>
 
             <div className="col-md-4">
               <label>Autorizó</label>
               <Select
-                options={opcionesAutorizaciones}
+                options={listaAutorizaciones}
                 value={formData.autorizo}
                 onChange={(opcion) => handleSelectChange("autorizo", opcion)}
               />
+              {errors.autorizo && (
+                <div className="text-danger">{errors.autorizo}</div>
+              )}
             </div>
 
             <div className="col-md-4">
               <label>Tipo Movimiento</label>
               <Select
-                options={opcionesTiposMovimiento}
+                options={listaTipoMovimiento}
                 value={formData.tipoMovimiento}
                 onChange={(opcion) =>
                   handleSelectChange("tipoMovimiento", opcion)
                 }
               />
+              {errors.tipoMovimiento && (
+                <div className="text-danger">{errors.tipoMovimiento}</div>
+              )}
             </div>
           </div>
-          <div className="mt-3">
+          <div
+          className="mt-5"
+          style={{ display: "flex", justifyContent: "flex-end" }}
+        >
             <Button type="submit" variant="contained" color="primary">
               Agregar
             </Button>
@@ -318,41 +310,68 @@ export const AgregarProductosAlmacen = ({ productos }) => {
         </form>
       </div>
 
-      <table className="table mt-3">
-        <thead>
-          <tr>
-            <th>Proveedor</th>
-            <th>Fecha</th>
-            <th>Cantidad</th>
-            <th>Producto</th>
-            <th>Costo Unitario</th>
-            <th>Tipo de Entrada</th>
-            <th>Autorizó</th>
-            <th>Movimiento</th>
-          </tr>
-        </thead>
-        <tbody>
-          {productosAgregados.map((producto, index) => (
-            <tr key={`${producto}-${index}`}>
-              <td>{producto.proveedor ? producto.proveedor.label : ""}</td>
-              <td>{producto.fecha}</td>
-              <td>{producto.cantidad}</td>
-              <td>{producto.producto ? producto.producto.label : ""}</td>
-              <td>{producto.costo_unitario}</td>
-              <td>{producto.tipo ? producto.tipo.label : ""}</td>
-              <td>{producto.autorizo ? producto.autorizo.label : ""}</td>
-              <td>
-                {producto.tipoMovimiento ? producto.tipoMovimiento.label : ""}
-              </td>
+<hr />
+      <div className="container mt-4">
+      <h3 className="text-center">PRODUCTOS AGREGADOS </h3>
+        <table className="table mt-3">
+          <thead> 
+            <tr>
+              <th>Proveedor</th>
+              <th>Fecha</th>
+              <th>Cantidad</th>
+              <th>Producto</th>
+              <th>C/U</th>
+              <th>Tipo Entrada</th>
+              <th>Autorizó</th>
+              <th>Movimiento</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
-
-      <div className="mt-5 d-flex justify-content-end ">
-        <Button variant="contained" color="success" onClick={handleGuardarTodo}>
-          Guardar
-        </Button>
+          </thead>
+          <tbody>
+            {productosAgregados.map((producto, index) => (
+              <tr key={`${producto}-${index}`}>
+                <td>
+                  {producto.proveedor_id ? producto.proveedor_id.label : ""}
+                </td>
+                <td align="center" sx={{ textAlign: "right" }}>
+                  {producto.fecha
+                    ? new Date(producto.fecha).toLocaleDateString("es-MX")
+                    : "Fecha no disponible"}
+                </td>
+                <td>{producto.cantidad}</td>
+                <td>
+                  {producto.producto_id ? producto.producto_id.label : ""}
+                </td>
+                <td>{producto.costo_unitario}</td>
+                <td>
+                  {producto.tipo_entrada_id
+                    ? producto.tipo_entrada_id.label
+                    : ""}
+                </td>
+                <td>
+                  {producto.autorizo_id ? producto.autorizo_id.label : ""}
+                </td>
+                <td>
+                  {producto.tipo_movimiento_id
+                    ? producto.tipo_movimiento_id.label
+                    : ""}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <div
+          className="mt-5"
+          style={{ display: "flex", justifyContent: "flex-end" }}
+        >
+          <Button
+            onClick={handleGuardarTodo}
+            variant="contained"
+            color="primary"
+            disabled={productosAgregados.length === 0}
+          >
+            Guardar Todos
+          </Button>
+        </div>
       </div>
     </>
   );

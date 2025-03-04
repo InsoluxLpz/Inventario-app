@@ -6,38 +6,38 @@ const db = dbConexion();
 
 
 router.post('/agregar_inventario', async (req, res) => {
+    const { 
+        fecha, 
+        cantidad, 
+        costo_unitario, 
+        producto_id, 
+        tipo_movimiento_id, 
+        tipo_entrada_id, 
+        autorizo_id, 
+        proveedor_id, 
+        usuario_id 
+    } = req.body;
     
-        const { fecha, cantidad, costo_unitario, producto, tipoMovimiento, autorizo_id, usuario_id, proveedor } = req.body;
-        
-        
-        console.log('Fecha:', fecha);
-        console.log('Cantidad:', cantidad);
-        console.log('Costo Unitario:', costo_unitario);
-        console.log('Producto:', producto);
-        console.log('Tipo de Movimiento:', tipoMovimiento);
-        console.log('Autorizo ID:', autorizo_id);
-        console.log('Usuario ID:', usuario_id);
-        console.log('Proveedor:', proveedor);
-        
-        // Validación básica
-        if (!fecha || !cantidad || !costo_unitario || !producto || !tipoMovimiento || !autorizo_id || !usuario_id || !proveedor) {
-            return res.status(400).json({ message: 'Todos los campos son obligatorios' });
+    console.log({ fecha, cantidad, costo_unitario, producto_id, tipo_movimiento_id, tipo_entrada_id, autorizo_id, proveedor_id, usuario_id });
+
+    // Validación de datos
+    if (!fecha || !cantidad || !costo_unitario || !producto_id || !tipo_movimiento_id || !tipo_entrada_id || !autorizo_id || !proveedor_id || !usuario_id) {
+        return res.status(400).json({ message: 'Todos los campos son obligatorios' });
     }
-    
 
-    const connection = await db.getConnection();
-
+    let connection;
     try {
-        await connection.beginTransaction();
+        connection = await db.getConnection();
+        await connection.beginTransaction(); // Iniciar transacción
 
         // Insertar en movimientos_almacen
         const queryMaestro = `
             INSERT INTO movimientos_almacen 
-            (fecha, cantidad, costo_unitario, producto_id, tipo_movimiento_id, autorizo_id, proveedor_id, usuario_id) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
+            (fecha, cantidad, costo_unitario, producto_id, tipo_movimiento_id, tipo_entrada_id, autorizo_id, proveedor_id, usuario_id) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
         const [result] = await connection.query(queryMaestro, 
-            [fecha, cantidad, costo_unitario, producto.value, tipoMovimiento.value, autorizo_id.value, proveedor.value, usuario_id]);
+            [fecha, cantidad, costo_unitario, producto_id.value, tipo_movimiento_id.value, tipo_entrada_id.value, autorizo_id.value, proveedor_id.value, usuario_id]);
 
         const id_movimiento = result.insertId;
 
@@ -47,60 +47,20 @@ router.post('/agregar_inventario', async (req, res) => {
             (id_movimiento, producto_id, cantidad, costo_unitario) 
             VALUES (?, ?, ?, ?)`;
 
-        await connection.query(queryDetalle, [id_movimiento, producto.value, cantidad, costo_unitario]);
+        await connection.query(queryDetalle, [id_movimiento, producto_id.value, cantidad, costo_unitario]);
 
-        await connection.commit();
+        await connection.commit(); // Confirmar transacción
         res.status(201).json({ message: "Producto agregado correctamente", id: id_movimiento });
 
     } catch (error) {
-        await connection.rollback();
+        if (connection) await connection.rollback(); // Revertir cambios en caso de error
         console.error("Error al insertar el producto:", error);
-        res.status(500).json({ message: "Error al agregar el producto" });
+        res.status(500).json({ message: "Error al agregar el producto", error });
+
     } finally {
-        connection.release();
-    }
-})
-
-
-
-
-
-// * Obtener todos los registros del inventario
-router.get('/obtener_inventario', async (req, res) => {
-    try {
-        const query = `
-            SELECT 
-                a.id,
-                a.fecha,
-                p.nombre AS producto,  
-                te.tipo_entrada AS tipo, 
-                a.cantidad,
-                a.costo_unitario,
-                aut.nombre AS autorizo,  
-                prov.nombre_proveedor AS proveedores
-            FROM movimientos_almacen a
-            JOIN productos p ON a.producto_id = p.id
-            JOIN cat_tipo_entrada te ON a.tipo_id = te.id  
-            JOIN autorizaciones aut ON a.autorizo_id = aut.idAutorizo 
-            JOIN proveedores prov ON a.proveedor_id = prov.id
-        `;
-        const [results] = await db.query(query);
-
-        console.log('Resultados de la consulta:', results);
-
-        if (results.length === 0) {
-            return res.status(404).json('No hay valores que mostrar en la tabla');
-        }
-
-        return res.status(200).json(results);
-    } catch (error) {
-        console.error('Error al obtener los registros:', error);
-        return res.status(500).json({ message: 'Error al obtener los registros' });
+        if (connection) connection.release(); // Liberar la conexión
     }
 });
-
-
-
 
 // Actualizar un registro del inventario por ID
 router.put('/actualizar_inventario/:id', async (req, res) => {
@@ -143,59 +103,65 @@ router.delete('/eliminar_inventario/:id', async (req, res) => {
     }
 });
 
-// * endpoint para mandar autorizaciones
-// router.get('/obtener_autorizaciones', async (req, res) => {
-//     const query = `SELECT idAutorizo, nombre FROM autorizaciones`; 
-
-//     try {
-//         const [results] = await db.query(query);
-//         if (results.length === 0) {
-//             return res.status(404).json({ error: 'No hay datos en la tabla' });
-//         }
-//         return res.status(200).json(results);
-//     } catch (error) {
-//         console.error('Error al obtener los autorizadores', error);
-//         return res.status(500).json({ error: 'Error en el servidor' });
-//     }
-// });
-
-// // * endpoint para mandar autorizaciones
-// router.get('/obtener_tipo_entradas', async (req, res) => {
-//     const query = `SELECT id, tipo_entrada FROM cat_tipo_entrada`; 
-
-//     try {
-//         const [results] = await db.query(query);
-//         if (results.length === 0) {
-//             return res.status(404).json({ error: 'No hay datos en la tabla' });
-//         }
-//         return res.status(200).json(results);
-//     } catch (error) {
-//         console.error('Error al obtener los autorizadores', error);
-//         return res.status(500).json({ error: 'Error en el servidor' });
-//     }
-// });
-
 // * peticion unificada para cargar listas
 router.get('/obtener_listas', async (req, res) => {
     try {
-        const [proveedores] = await db.query("SELECT id, nombre_proveedor FROM proveedores");
-        const [productos] = await db.query("SELECT * FROM productos");
-        const [autorizaciones] = await db.query("SELECT idAutorizo, nombre FROM autorizaciones");
-        const [tiposEntrada] = await db.query("SELECT id, tipo_entrada FROM cat_tipo_entrada");
-        const [tipoMovimiento] = await db.query("SELECT idMovimiento, movimiento FROM tipo_movimiento");
+            const [proveedores] = await db.query("SELECT id, nombre_proveedor FROM proveedores");
+            const [productos] = await db.query("SELECT * FROM productos");
+            const [autorizaciones] = await db.query("SELECT idAutorizo, nombre FROM autorizaciones");
+            const [tiposEntrada] = await db.query("SELECT id, tipo_entrada FROM cat_tipo_entrada");
+            const [tipoMovimiento] = await db.query("SELECT idMovimiento, movimiento FROM tipo_movimiento");
+        
+            res.status(200).json({
+                proveedores,
+                productos,
+                autorizaciones,
+                tiposEntrada,
+                tipoMovimiento
+            });
+        } catch (error) {
+            console.error("Error al obtener listas:", error);
+            res.status(500).json({ message: "Error en el servidor" });
+        }
 
-        res.status(200).json({
-            proveedores,
-            productos,
-            autorizaciones,
-            tiposEntrada,
-            tipoMovimiento
-        });
+});
+
+
+// * consulta buena falta la autorizacion
+router.get('/obtener_inventario', async (req, res) => {
+    try {
+        const [result] = await db.query(`                
+                    SELECT 
+                    ma.fecha fecha_movimiento, cantidad , costo_unitario, proveedor_id,
+                    p.id AS idProducto,
+                    p.nombre AS nombreProducto,
+                    pr.id AS proveedor_id,
+                    pr.nombre_proveedor AS proveedor_nombre,
+                    a.idAutorizo AS autorizacion_id,
+                    a.nombre AS autorizo,
+                    t.id AS tipo_entrada_id,
+                    t.tipo_entrada AS tipo_entrada,
+                    tm.idMovimiento AS tipo_movimiento_id,
+                    tm.movimiento AS tipo_movimiento
+                FROM 
+                    movimientos_almacen ma
+                LEFT JOIN productos p ON ma.producto_id = p.id
+                LEFT JOIN productos_proveedor pp ON pp.idProducto = p.id
+                LEFT JOIN proveedores pr ON pr.id = pp.idProveedor
+                LEFT JOIN autorizaciones a ON a.idAutorizo = ma.autorizo_id
+                LEFT JOIN cat_tipo_entrada t ON t.id = ma.tipo_movimiento_id
+                LEFT JOIN tipo_movimiento tm ON tm.idMovimiento = ma.tipo_movimiento_id;
+        `);
+        
+        res.status(200).json(result);
     } catch (error) {
-        console.error("Error al obtener listas:", error);
+        console.error("Error al obtener datos:", error);
         res.status(500).json({ message: "Error en el servidor" });
     }
+    
 });
+
+
 
 
 module.exports = router;

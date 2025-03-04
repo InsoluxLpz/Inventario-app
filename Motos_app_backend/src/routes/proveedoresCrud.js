@@ -13,7 +13,7 @@ router.post('/agregar_proveedor', async (req, res) => {
     }
 
     try {
-        const query = `INSERT INTO proveedores (nombreProveedor, telefonoContacto, rfc, telefonoEmpresa, nombre_empresa) VALUES (?, ?, ?, ?, ?)`;
+        const query = `INSERT INTO proveedores (nombre_proveedor, telefono_contacto, rfc, telefono_empresa, nombre_empresa) VALUES (?, ?, ?, ?, ?)`;
 
         const values = [nombre_empresa, nombre_proveedor, rfc, telefono_contacto, telefono_empresa];
 

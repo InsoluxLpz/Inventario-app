@@ -172,11 +172,28 @@ export const eliminarInventario = async (id, actualizarLista) => {
 //     }
 // };
 
-
-// * funcion para obtener los nombres de los que autorizan (autorizaciones)
 export const cargarListasEntradas = async () => {
     try {
         const response = await fetch(`${API_URL}/entrada/obtener_listas`, {
+            method: "GET",
+            headers: {
+                'Content-Type': 'application/json'
+            },
+        });
+        if (response.ok) {
+            const data = await response.json();
+            return data;
+        }
+    } catch (error) {
+        console.error('Error al realizar la solicitud', error);
+        Swal.fire('Error', 'Hubo un problema al conectar con el servidor.', 'error');
+        return null;
+    }
+};
+
+export const cargarListasCampos = async () => {
+    try {
+        const response = await fetch(`${API_URL}/entrada/obtener_inventario`, {
             method: "GET",
             headers: {
                 'Content-Type': 'application/json'
