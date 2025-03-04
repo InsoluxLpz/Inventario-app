@@ -113,8 +113,10 @@ export const EditarProductoModal = ({ onClose, modalOpen, producto, actualizarLi
     .sort((a, b) => a.nombre.localeCompare(b.nombre))
     .map((uni) => ({ value: uni.id, label: uni.nombre }));
 
-  const opcioneProveedor = [...Proveedor]
-    .map((prov) => ({ value: prov.id, label: prov.nombre_proveedor }));
+  const opcioneProveedor = Proveedor
+    .filter(prov => prov.status !== 0)
+    .map(prov => ({ value: prov.id, label: prov.nombre_proveedor }));
+
 
   return (
     <>

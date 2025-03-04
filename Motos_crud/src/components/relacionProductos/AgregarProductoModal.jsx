@@ -27,6 +27,7 @@ export const AgregarProductoModal = ({ modalOpen, onClose, grupos, unidadMedida 
             const data = await obtenerProveedores();
             if (data) {
                 const proveedoresFiltrados = data.filter(prov => prov.status !== 0);
+                console.log("Proveedores filtrados:", proveedoresFiltrados);
                 setProveedores(proveedoresFiltrados.map(prov => ({
                     value: prov.id,
                     label: prov.nombre_proveedor,
@@ -35,6 +36,7 @@ export const AgregarProductoModal = ({ modalOpen, onClose, grupos, unidadMedida 
         };
         cargarProveedores();
     }, []);
+
 
     const opcionesGrupos = grupos.map(grupo => ({ value: grupo.id, label: grupo.nombre }));
     const opcionesUnidad = unidadMedida.map(uni => ({ value: uni.id, label: uni.nombre }));

@@ -64,8 +64,8 @@ export const MarcasModal = ({ onClose, modalOpen }) => {
                                 </div>
                             </div>
                             <div className="modal-footer">
-                                < Button type="button" style={{ backgroundColor: '#f1c40f', color: 'white' }} onClick={onClose}>Cancelar</Button>
-                                <Button type="submit" style={{ backgroundColor: '#7f8c8d  ', marginLeft: 5, color: 'white' }} >Guardar</Button>
+                                <Button type="submit" style={{ backgroundColor: '#f1c40f  ', color: 'white' }} >Guardar</Button>
+                                < Button type="button" style={{ backgroundColor: '#7f8c8d', color: 'white', marginLeft: 5 }} onClick={onClose}>Cancelar</Button>
                             </div>
                         </form>
                     </div>

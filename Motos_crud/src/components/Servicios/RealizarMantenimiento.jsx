@@ -120,7 +120,7 @@ export const RealizarMantenimiento = ({ modalOpen, onClose }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // if (!validateForm()) return;
+        if (!validateForm()) return;
 
         const nuevoMantenimiento = {
             fecha_inicio: formData.fecha_inicio,

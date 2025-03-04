@@ -8,18 +8,22 @@ import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
-import { Box, Button, IconButton, TextField, Typography } from "@mui/material";
+import { Box, Button, IconButton, Typography } from "@mui/material";
 import { NavBar } from "../NavBar";
-import {
-  EliminarMantenimiento,
-  ObtenerMantenimientos,
-} from "../../api/ServiciosApi";
+import { EliminarMantenimiento, ObtenerMantenimientos, ObtenerServicios, } from "../../api/ServiciosApi";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { RealizarMantenimiento } from "./RealizarMantenimiento";
+import { EditarMantenimiento } from "./EditarMantenimiento";
+import { obtenerProveedores } from "../../api/proveedoresApi";
+import { obtenerProductos } from "../../api/productosApi";
 
 export const ListaMantenimientos = () => {
   const [mantenimientos, setMantenimientos] = useState([]);
   const [openModalAgregar, setOpenModalAgregar] = useState(false);
+  const [openModalEditar, setOpenModalEditar] = useState(false);
+  const [proveedores, setProveedores] = useState([]);
+  const [servicios, setServicios] = useState([]);
+  const [productos, setProductos] = useState([]);
   const [filtro, setFiltro] = useState({
     vehiculo: "",
     fecha: "",
@@ -31,6 +35,34 @@ export const ListaMantenimientos = () => {
   };
   const handleCloseModalAgregar = () => {
     setOpenModalAgregar(false);
+  };
+
+  const handleOpenModalEditar = () => {
+    setOpenModalEditar(true);
+  };
+  const handleCloseModalEditar = () => {
+    setOpenModalEditar(false);
+  };
+
+  const fetchProveedor = async () => {
+    const data = await obtenerProveedores();
+    if (data) {
+      setProveedores(data);
+    }
+  };
+
+  const fetchServicios = async () => {
+    const data = await ObtenerServicios();
+    if (data) {
+      setServicios(data);
+    }
+  };
+
+  const fetchProducto = async () => {
+    const data = await obtenerProductos();
+    if (data) {
+      setProductos(data);
+    }
   };
 
   const handleEliminarMantenimiento = (id) => {
@@ -71,6 +103,9 @@ export const ListaMantenimientos = () => {
 
   useEffect(() => {
     cargarMantenimientos();
+    fetchProducto();
+    fetchProveedor();
+    fetchServicios();
   }, []);
 
   // * filtro para buscar por vehiculo fecha o servicio
@@ -94,33 +129,24 @@ export const ListaMantenimientos = () => {
     }).format(valor);
   };
 
+  const miniDrawerWidth = 50;
+
   return (
     <>
-      <Box sx={{ backgroundColor: "#d6dbdf", minHeight: "100vh" }}>
+      <Box
+        sx={{ backgroundColor: "#f2f3f4", minHeight: "100vh", paddingBottom: 4, transition: "margin 0.3s ease-in-out", marginLeft: `${miniDrawerWidth}px`, }}
+      >
         <NavBar />
 
         <Button
           variant="contained"
-          sx={{
-            backgroundColor: "#1f618d",
-            color: "white",
-            ":hover": { opacity: 0.7 },
-            position: "fixed",
-            right: 50,
-            top: 80,
-            borderRadius: "8px",
-            padding: "10px 20px",
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
-          }}
-          onClick={handleOpenModalAgregar}
+          sx={{ backgroundColor: "#1f618d", color: "white", ":hover": { opacity: 0.7 }, position: "fixed", right: 50, top: 80, borderRadius: "8px", padding: "10px 20px", display: "flex", alignItems: "center", gap: "8px", }} onClick={handleOpenModalAgregar}
         >
           <AddchartIcon sx={{ fontSize: 24 }} />
           Agregar Mantenimiento
         </Button>
 
-        <Box display="flex" justifyContent="center" gap={2} my={2}>
+        {/* <Box display="flex" justifyContent="center" gap={2} my={2}>
           <TextField
             label="Vehículo"
             name="vehiculo"
@@ -148,10 +174,10 @@ export const ListaMantenimientos = () => {
           justifyContent="space-between"
           alignItems="center"
           sx={{ marginTop: 4 }}
-        ></Box>
+        >
+        </Box> */}
 
-        <Box width="90%" maxWidth={2000} margin="0 auto" mt={4}>
-          {/* Header alineado a la izquierda con fondo */}
+        <Box width="90%" maxWidth={2000} margin="0 auto" mt={10}>
           <Box
             sx={{
               backgroundColor: "#1f618d",
@@ -159,14 +185,13 @@ export const ListaMantenimientos = () => {
               borderRadius: "8px 8px 0 0",
             }}
           >
-            <Typography variant="h5" fontWeight="bold" color="white">
+            <Typography variant="h5" color="white">
               Lista de Mantenimientos
             </Typography>
           </Box>
 
-          {/* Contenedor de la tabla */}
-          <Paper sx={{ width: "100%" }}>
-            <TableContainer sx={{ maxHeight: 800, backgroundColor: "#f4f6f7 " }}>
+          <Paper sx={{ width: "100%", maxWidth: "2000px", margin: "0 auto", backgroundColor: "white", padding: 2 }}>
+            <TableContainer sx={{ maxHeight: 800, backgroundColor: "#ffff ", border: "1px solid #d7dbdd", borderRadius: "2px" }}>
               <Table stickyHeader aria-label="sticky table">
                 <TableHead>
                   <TableRow>
@@ -180,7 +205,12 @@ export const ListaMantenimientos = () => {
                 <TableBody>
                   {mantenimientos.length > 0 ? (
                     mantenimientos.map((mantenimiento) => (
-                      <TableRow key={mantenimiento.id}>
+                      <TableRow key={mantenimiento.id} sx={{
+                        backgroundColor: '#ffff', "&:hover": {
+                          backgroundColor: "#eaecee ",
+                        }
+                      }}
+                      >
                         <TableCell align="center" sx={{ textAlign: "right", width: "16.66%" }}>
                           {mantenimiento.moto_inciso}
                         </TableCell>
@@ -204,7 +234,7 @@ export const ListaMantenimientos = () => {
                           {formatearDinero(mantenimiento.costo)}
                         </TableCell>
                         <TableCell align="center" sx={{ textAlign: "right", width: "16.66%" }}>
-                          <IconButton variant="contained" sx={{ color: "black" }}>
+                          <IconButton variant="contained" sx={{ color: "black" }} onClick={handleOpenModalEditar}>
                             <EditIcon sx={{ fontSize: 20 }} />
                           </IconButton>
                           <IconButton
@@ -232,6 +262,12 @@ export const ListaMantenimientos = () => {
             <RealizarMantenimiento
               modalOpen={openModalAgregar}
               onClose={handleCloseModalAgregar}
+            />
+
+            <EditarMantenimiento
+              modalOpen={openModalEditar}
+              onClose={handleCloseModalEditar}
+              mantenimiento={mantenimientos}
             />
           </Paper>
         </Box>

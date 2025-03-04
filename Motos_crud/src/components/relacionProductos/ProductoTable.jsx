@@ -7,14 +7,14 @@ import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
-import { Box, Button, FormControl, IconButton, InputLabel, MenuItem, TextField, Typography } from "@mui/material";
+import { Box, Button, IconButton, TextField, Typography } from "@mui/material";
 import { NavBar } from "../NavBar";
 import { obtenerProductos, ActualizarStatus, obtenerUnidadMedidas, obtenerGrupos } from "../../api/productosApi";
 import { EditarProductoModal } from "../relacionProductos/EditarProductoModal";
 import { AgregarProductoModal } from "./AgregarProductoModal";
 import AddchartIcon from '@mui/icons-material/Addchart';
-import Select from "react-select";
 import { obtenerProveedores } from "../../api/proveedoresApi";
+import { Grid } from "@material-ui/core";
 
 export const ProductoTable = () => {
   const [openModalEditar, setOpenModalEditar] = useState(false);
@@ -22,21 +22,16 @@ export const ProductoTable = () => {
   const [productos, setProductos] = useState([]);
   const [productoSeleccionado, setProductoSeleccionado] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedProveedor, setSelectedProveedor] = useState(""); // Nuevo estado para el proveedor seleccionado
   const [proveedores, setProveedores] = useState([]);
   const [grupos, setGrupos] = useState([]);
   const [unidadMedida, setUnidadMedida] = useState([]);
 
   const fetchProductos = async () => {
-    try {
-      const data = await obtenerProductos();
-      console.log("Productos recibidos en el frontend:", data);
-      if (data) {
-        setProductos(data);
-      }
-    } catch (error) {
-      console.error("Error en la petición al obtener Productos");
+    const data = await obtenerProductos();
+    if (data) {
+      setProductos(data);
     }
+
   };
 
   const fetchGrupos = async () => {
@@ -113,65 +108,66 @@ export const ProductoTable = () => {
     fetchProveedor();
   }, []);
 
+  const miniDrawerWidth = 50;
+
   return (
     <>
-      <Box sx={{ backgroundColor: "#d6dbdf", minHeight: "100vh" }}>
+      <Box
+        sx={{ backgroundColor: "#f2f3f4", minHeight: "100vh", paddingBottom: 4, transition: "margin 0.3s ease-in-out", marginLeft: `${miniDrawerWidth}px` }}
+      >
         <NavBar onSearch={setSearchTerm} />
+        <Box sx={{ width: "100%", display: "flex", justifyContent: "center", marginTop: 3 }}>
+          <Grid container spacing={2} alignItems="center" sx={{ maxWidth: 1200 }}>
+            <Grid item xs={12} sm={8} display="flex" justifyContent="flex-start">
+              <TextField
+                label="Buscar por nombre"
+                variant="outlined"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                sx={{ width: 500, backgroundColor: "white", marginLeft: 12 }}
+                InputProps={{
+                  sx: { height: "40px" }
+                }}
+              />
+            </Grid>
 
-        {/* Contenedor de la fila con los filtros a la izquierda y el botón a la derecha */}
-        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 3 }}>
-          {/* Filtros a la izquierda */}
-          <Box sx={{ display: "flex", gap: 2 }}>
-            <TextField
-              label="Buscar por nombre"
-              variant="outlined"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              sx={{ width: 500, marginLeft: 12, backgroundColor: 'white' }}
-              InputProps={{
-                sx: {
-                  height: '40px', // Ajusta la altura del campo de texto
-                }
-              }}
-            />
-
-          </Box>
-
-          <Button
-            variant="contained"
-            sx={{
-              backgroundColor: "#1f618d",
-              color: "white",
-              ":hover": { opacity: 0.7 },
-              borderRadius: "8px",
-              padding: "10px 20px",
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              marginRight: 4
-            }}
-            onClick={handleModalAgregar}
-          >
-            <AddchartIcon sx={{ fontSize: 24 }} />
-            Agregar Productos
-          </Button>
+            <Grid item xs={12} sm={4} display="flex" justifyContent="flex-end">
+              <Button
+                variant="contained"
+                sx={{
+                  backgroundColor: "#1f618d",
+                  color: "white",
+                  ":hover": { opacity: 0.7 },
+                  borderRadius: "8px",
+                  padding: "10px 20px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  marginLeft: 39
+                }}
+                onClick={handleModalAgregar}
+              >
+                <AddchartIcon sx={{ fontSize: 24 }} />
+                Agregar Productos
+              </Button>
+            </Grid>
+          </Grid>
         </Box>
 
-        {/* Tabla de productos */}
         <Box width="90%" maxWidth={2000} margin="0 auto" mt={2}>
           <Box sx={{ backgroundColor: "#1f618d", padding: "10px 20px", borderRadius: "8px 8px 0 0" }}>
-            <Typography variant="h5" fontWeight="bold" color="white">
+            <Typography variant="h5" color="white">
               Lista de Productos
             </Typography>
           </Box>
 
-          <Paper sx={{ width: "100%" }}>
-            <TableContainer sx={{ maxHeight: 700, backgroundColor: "#eaeded" }}>
+          <Paper sx={{ width: "100%", maxWidth: "2000px", margin: "0 auto", backgroundColor: "white", padding: 2 }}>
+            <TableContainer sx={{ maxHeight: 700, backgroundColor: "#ffff", border: "1px solid #d7dbdd", borderRadius: "2px" }}>
               <Table stickyHeader>
                 <TableHead>
                   <TableRow>
                     {["Código", "Nombre", "Grupo", "Unidad de medida", "Proveedor", "Precio", "Descripción", "Acciones"].map((header) => (
-                      <TableCell key={header} align="center" sx={{ backgroundColor: "#f4f6f7", color: "black", textAlign: "center", width: "16.66%", }}>
+                      <TableCell key={header} align="center" sx={{ backgroundColor: "#f4f6f7", color: "black", textAlign: "center", width: "16.66%", fontWeight: "bold" }}>
                         {header}
                       </TableCell>
                     ))}
@@ -179,7 +175,12 @@ export const ProductoTable = () => {
                 </TableHead>
                 <TableBody>
                   {filteredProductos.map((producto) => (
-                    <TableRow key={producto.id}>
+                    <TableRow key={producto.id} sx={{
+                      backgroundColor: '#ffff', "&:hover": {
+                        backgroundColor: "#eaecee ",
+                      }
+                    }}
+                    >
                       <TableCell align="center" sx={{ textAlign: "right", width: "16.66%", }}>
                         {producto.codigo}
                       </TableCell>

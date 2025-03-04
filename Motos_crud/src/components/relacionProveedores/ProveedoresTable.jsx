@@ -86,15 +86,19 @@ export const ProveedoresTable = () => {
   const getStatusColor = (status) => {
     switch (status) {
       case 0:
-        return "#5d6d7e"; // Amarillo claro para "inactiva"
+        return "#f5b7b1"; // Amarillo claro para "inactiva"
       default:
         return "transparent"; // Fondo transparente si no coincide
     }
   };
 
+  const miniDrawerWidth = 50;
+
   return (
     <>
-      <Box sx={{ backgroundColor: "#d6dbdf", minHeight: "100vh" }}>
+      <Box
+        sx={{ backgroundColor: "#f2f3f4", minHeight: "100vh", paddingBottom: 4, transition: "margin 0.3s ease-in-out", marginLeft: `${miniDrawerWidth}px`, }}
+      >
         <NavBar onSearch={setSearchTerm} />
 
         <Button
@@ -102,14 +106,14 @@ export const ProveedoresTable = () => {
           sx={{ backgroundColor: "#1f618d", color: "white", ":hover": { opacity: 0.7 }, position: "fixed", right: 50, top: 80, borderRadius: "8px", padding: "10px 20px", display: "flex", alignItems: "right", gap: "8px", }}
           onClick={handleOpenModalAgregar}>
           <AddchartIcon sx={{ fontSize: 24 }} />
-          Agregar Proveedores
+          Agregar Proveedor
         </Button>
 
-        <Box width="90%" maxWidth={2000} margin="0 auto" mt={9}>
+        <Box width="90%" maxWidth={2000} margin="0 auto" mt={12}>
           {/* Header alineado a la izquierda con fondo */}
           <Box sx={{ backgroundColor: "#1f618d", padding: "10px 20px", borderRadius: "8px 8px 0 0" }}>
-            <Typography variant="h5" fontWeight="bold" color="white">
-              Proveedores
+            <Typography variant="h5" color="white">
+              Lista Proveedores
             </Typography>
           </Box>
 
@@ -126,9 +130,8 @@ export const ProveedoresTable = () => {
             />
           </Box>
 
-          {/* Contenedor de la tabla */}
-          <Paper sx={{ width: "100%" }}>
-            <TableContainer sx={{ maxHeight: 800, backgroundColor: "#f4f6f7" }}>
+          <Paper sx={{ width: "100%", maxWidth: "2000px", margin: "0 auto", backgroundColor: "white", padding: 2 }}>
+            <TableContainer sx={{ maxHeight: 800, backgroundColor: "#ffff", border: "1px solid #d7dbdd", borderRadius: "2px" }}>
               <Table stickyHeader aria-label="sticky table">
                 <TableHead>
                   <TableRow>
@@ -136,10 +139,11 @@ export const ProveedoresTable = () => {
                       <TableCell
                         key={col}
                         sx={{
-                          backgroundColor: "#d5dbdb",
+                          backgroundColor: "#f4f6f7",
                           color: "black",
                           textAlign: "center",
                           width: "16.66%",
+                          fontWeight: 'bold'
                         }}
                       >
                         {col}
@@ -153,7 +157,7 @@ export const ProveedoresTable = () => {
                     <TableRow
                       key={proveedor.id}
                       sx={{
-                        backgroundColor: getStatusColor(proveedor.status), // Combina ambos colores
+                        backgroundColor: getStatusColor(proveedor.status),// Combina ambos colores
                         "&:hover": {
                           backgroundColor: "#eaecee ", // Color al pasar el mouse
                         }

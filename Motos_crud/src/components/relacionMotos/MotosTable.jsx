@@ -10,7 +10,7 @@ import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
-import { Box, Button, FormControlLabel, IconButton, Switch, Typography, } from "@mui/material";
+import { Box, Button, FormControlLabel, IconButton, Switch, TextField, Typography, } from "@mui/material";
 import { ActualizarStatus, obtenerMotos } from "../../api/motosApi";
 import { useEffect } from "react";
 import { NavBar } from "../NavBar";
@@ -18,6 +18,7 @@ import { obtenerMarcas } from "../../api/marcasApi";
 import { MarcasModal } from "./MarcasModal";
 import { EditarModal } from "./EditarModal";
 import { AgregarModal } from "./AgregarModal";
+import { Grid } from "@material-ui/core";
 
 export const MotosTable = () => {
   const [openModalEditar, setOpenModalEditar] = useState(false);
@@ -28,6 +29,9 @@ export const MotosTable = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [showInactive, setShowInactive] = useState(false);
   const [marcas, setMarcas] = useState([]);
+  const [searchInciso, setSearchInciso] = useState("");
+  const [searchNoSerie, setSearchNoSerie] = useState("");
+  const [searchPlaca, setSearchPlaca] = useState("");
 
   const handleOpenModalEdit = (moto) => {
     setMotoSeleccionada(moto); // Al abrir el modal, guardas la moto seleccionada
@@ -95,7 +99,7 @@ export const MotosTable = () => {
   const getStatusColor = (status) => {
     switch (status) {
       case 0:
-        return "#5d6d7e"; // Amarillo claro para "inactiva"
+        return "#f5b7b1"; // Amarillo claro para "inactiva"
       case 2:
         return "#f5b041"; // Amarillo claro para "Taller"
       case 3:
@@ -107,16 +111,16 @@ export const MotosTable = () => {
 
   const filteredMotos = motos.filter((moto) => {
     const matchesSearch =
-      moto.placa.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      moto.no_serie.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      moto.inciso.toLowerCase().includes(searchTerm.toLowerCase());
+      moto.placa.toLowerCase().includes(searchPlaca.toLowerCase()) ||
+      moto.no_serie.toLowerCase().includes(searchNoSerie.toLowerCase()) ||
+      moto.inciso.toLowerCase().includes(searchInciso.toLowerCase());
 
     // Mostrar todas las coincidencias si el filtro de inactivos está activo
     if (showInactive) {
       return matchesSearch;
     }
 
-    // Si el filtro está desactivado, ocultar status 0 excepto si se busca algo
+
     return matchesSearch && moto.status !== 0;
   });
 
@@ -125,50 +129,53 @@ export const MotosTable = () => {
     fetchMarcas();
   }, []);
 
+  const miniDrawerWidth = 50;
+
   return (
     <>
-      <Box sx={{ backgroundColor: "#d6dbdf", minHeight: "100vh" }}>
+      <Box
+        sx={{ backgroundColor: "#f2f3f4", minHeight: "100vh", paddingBottom: 4, transition: "margin 0.3s ease-in-out", marginLeft: `${miniDrawerWidth}px`, }}
+      >
         <NavBar onSearch={setSearchTerm} />
 
-        <Button
-          variant="contained"
-          sx={{ backgroundColor: "#1f618d", color: "white", ":hover": { opacity: 0.7 }, position: "fixed", right: 50, top: 80, borderRadius: "8px", padding: "10px 20px", display: "flex", alignItems: "center", gap: "8px", }}
-          onClick={handleOpenModalAdd}>
-          <AddchartIcon sx={{ fontSize: 24 }} />
-          Agregar Motos
-        </Button>
+        <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", marginTop: 3, marginLeft: 12 }}>
+          <Box sx={{ flexGrow: 1 }}>
+            <Grid container spacing={2} justifyContent="center" alignItems="center">
 
-        {/* <IconButton
-          sx={{ color: "black" }}
-          onClick={() => handleOpenModalMarcas()}
-        >
-          <AddCircleOutlineIcon />
-          <Typography variant="body1" sx={{ ml: 1 }}>
-            Agregar Marca
-          </Typography>
-        </IconButton>
+              <Grid item xs={12} sm={6} md={3}>
+                <TextField fullWidth label="Buscar por Inciso" variant="outlined" sx={{ backgroundColor: "white" }} value={searchInciso} onChange={(e) => setSearchInciso(e.target.value)} />
+              </Grid>
+
+              <Grid item xs={12} sm={6} md={3}>
+                <TextField fullWidth label="Buscar por N.Serie" variant="outlined" sx={{ backgroundColor: "white" }} value={searchNoSerie} onChange={(e) => setSearchNoSerie(e.target.value)} />
+              </Grid>
+
+              <Grid item xs={12} sm={6} md={3}>
+                <TextField fullWidth label="Buscar por Placa" variant="outlined" sx={{ backgroundColor: "white" }} value={searchPlaca} onChange={(e) => setSearchPlaca(e.target.value)} />
+              </Grid>
+
+              <Grid item xs={12} sm={6} md={3} display="flex" justifyContent="center">
+                <Button
+                  variant="contained"
+                  sx={{ backgroundColor: "#1f618d", color: "white", ":hover": { opacity: 0.7 }, borderRadius: "8px", padding: "10px 20px", display: "flex", alignItems: "center", gap: "8px", marginLeft: 18 }}
+                  onClick={handleOpenModalAdd}
+                >
+                  <AddchartIcon sx={{ fontSize: 24 }} />
+                  Agregar Motos
+                </Button>
+              </Grid>
+            </Grid>
+          </Box>
+        </Box>
 
 
-        <FormControlLabel
-          control={
-            <Switch
-              checked={showInactive}
-              onChange={(e) => setShowInactive(e.target.checked)}
-              color="default"
-            />
-          }
-          label="Mostrar inactivas"
-        /> */}
+        <Box width="90%" maxWidth={2000} margin="0 auto" mt={4}>
 
-
-        <Box width="90%" maxWidth={2000} margin="0 auto" mt={9}>
-          {/* Header alineado a la izquierda con fondo */}
           <Box sx={{ backgroundColor: "#1f618d", padding: "10px 20px", borderRadius: "8px 8px 0 0" }}>
-            <Typography variant="h5" fontWeight="bold" color="white">
+            <Typography variant="h5" color="white">
               Lista de Motos
             </Typography>
           </Box>
-
           <Box sx={{ display: "flex", justifyContent: "flex-end", backgroundColor: 'white' }}>
             <IconButton
               sx={{ color: "black" }}
@@ -194,22 +201,13 @@ export const MotosTable = () => {
             </Box>
           </Box>
 
-          {/* Contenedor de la tabla */}
-          <Paper sx={{ width: "100%" }}>
-            <TableContainer sx={{ maxHeight: 800, backgroundColor: "#f4f6f7" }}>
-              <Table stickyHeader aria-label="sticky table">
+          <Paper sx={{ width: "100%", maxWidth: "2000px", margin: "0 auto", backgroundColor: "white", padding: 2 }}>
+            <TableContainer sx={{ maxHeight: 600, backgroundColor: "#ffff", border: "1px solid #d7dbdd", borderRadius: "2px" }}>
+              <Table stickyHeader>
                 <TableHead>
                   <TableRow>
-                    {["Inciso", "Modelo", " N.Serie", "Placa", "Propietario", "Nota", "Acciones"].map((col) => (
-                      <TableCell
-                        key={col}
-                        sx={{
-                          backgroundColor: "#d5dbdb",
-                          color: "black",
-                          textAlign: "center",
-                          width: "16.66%",  // 🔥 Distribuir equitativamente
-                        }}
-                      >
+                    {["Inciso", "Modelo", "N.Serie", "Placa", "Propietario", "Nota", "Acciones"].map((col) => (
+                      <TableCell key={col} sx={{ backgroundColor: "#f4f6f7", color: "black", textAlign: "center", fontWeight: "bold" }}>
                         {col}
                       </TableCell>
                     ))}
@@ -217,42 +215,22 @@ export const MotosTable = () => {
                 </TableHead>
                 <TableBody>
                   {filteredMotos.map((moto) => (
-                    <TableRow
-                      key={moto.id}
-                      sx={{ backgroundColor: getStatusColor(moto.status) }}
-                    >
-                      <TableCell sx={{ textAlign: "right", width: "16.66%" }}>
-                        {moto.inciso}
-                      </TableCell>
-                      <TableCell sx={{ textAlign: "right", width: "16.66%" }}>
-                        {moto.modelo}
-                      </TableCell>
-                      <TableCell sx={{ textAlign: "right", width: "16.66%" }}>
-                        {moto.no_serie}
-                      </TableCell>
-                      <TableCell sx={{ textAlign: "right", width: "16.66%" }}>
-                        {moto.placa}
-                      </TableCell>
-                      <TableCell sx={{ textAlign: "right", width: "16.66%" }}>
-                        {moto.propietario}
-                      </TableCell>
-                      <TableCell sx={{ textAlign: "right", width: "16.66%" }}>
-                        {moto.nota}
-                      </TableCell>
-                      <TableCell sx={{ textAlign: "right", width: "16.66%" }}>
-                        <IconButton
-                          variant="contained"
-                          sx={{ color: 'black' }}
-                          onClick={() => handleOpenModalEdit(moto)}
-                        >
+                    <TableRow key={moto.id} sx={{
+                      backgroundColor: getStatusColor(moto.status), "&:hover": {
+                        backgroundColor: "#eaecee ",
+                      }
+                    }}>
+                      <TableCell sx={{ textAlign: "center" }}>{moto.inciso}</TableCell>
+                      <TableCell sx={{ textAlign: "center" }}>{moto.modelo}</TableCell>
+                      <TableCell sx={{ textAlign: "center" }}>{moto.no_serie}</TableCell>
+                      <TableCell sx={{ textAlign: "center" }}>{moto.placa}</TableCell>
+                      <TableCell sx={{ textAlign: "center" }}>{moto.propietario}</TableCell>
+                      <TableCell sx={{ textAlign: "center" }}>{moto.nota}</TableCell>
+                      <TableCell sx={{ textAlign: "center" }}>
+                        <IconButton onClick={() => handleOpenModalEdit(moto)}>
                           <EditIcon sx={{ fontSize: 20 }} />
                         </IconButton>
-                        <IconButton
-                          variant="contained"
-                          color="error"
-                          style={{ marginLeft: "10px" }}
-                          onClick={() => handleActualizarStatus(moto.id)}
-                        >
+                        <IconButton color="error" sx={{ marginLeft: 1 }} onClick={() => handleActualizarStatus(moto.id)}>
                           <InventoryIcon sx={{ fontSize: 20 }} />
                         </IconButton>
                       </TableCell>
@@ -261,7 +239,6 @@ export const MotosTable = () => {
                 </TableBody>
               </Table>
             </TableContainer>
-
             <EditarModal
               onClose={handleCloseModalEdit}
               modalOpen={openModalEditar}

@@ -82,7 +82,7 @@ router.delete('/eliminar_servicio/:id', async (req, res) => {
 
 //* <============================== mantenimientos-motos======================================>
 
-router.post('/agregar_servicio', async (req, res) => {
+router.post('/agregar_mantenimiento', async (req, res) => {
     console.log("Datos recibidos en el backend:", req.body);
 
     const { fecha_inicio, moto, odometro, costo, comentario, idUsuario, idCancelo, fecha_cancelacion, servicios, productos } = req.body;
@@ -150,7 +150,7 @@ router.post('/agregar_servicio', async (req, res) => {
 });
 
 
-router.get('/obtener_servicios', async (req, res) => {
+router.get('/obtener_mantenimientos', async (req, res) => {
     const connection = await db.getConnection();
     try {
         const [rows] = await connection.query(`
@@ -232,6 +232,11 @@ router.get('/obtener_servicios', async (req, res) => {
         connection.release();
     }
 });
+
+router.delete('/actualizar_mantenimiento/:id', async (req, res) => {
+
+});
+
 
 router.delete('/eliminar_mantenimiento/:id', async (req, res) => {
     const { id } = req.params

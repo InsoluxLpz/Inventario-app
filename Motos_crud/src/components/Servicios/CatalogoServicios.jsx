@@ -66,48 +66,57 @@ export const CatalogoServicios = () => {
         cargarServicios();
     }, []);
 
+    const miniDrawerWidth = 50;
+
     return (
         <>
-            <NavBar />
+            <Box
+                sx={{ backgroundColor: "#d6dbdf", minHeight: "100vh", paddingBottom: 4, transition: "margin 0.3s ease-in-out", marginLeft: `${miniDrawerWidth}px`, }}
+            >
+                <NavBar />
 
-            <Button
-                variant="contained"
-                sx={{ backgroundColor: "#1f618d", color: "white", ":hover": { opacity: 0.7 }, position: "fixed", right: 50, top: 80, borderRadius: "8px", padding: "10px 20px", display: "flex", alignItems: "center", gap: "8px", }}
-                onClick={handleOpenModalAgregar}>
-                <AddchartIcon sx={{ fontSize: 24 }} />
-                Agregar Servicio
-            </Button>
+                <Button
+                    variant="contained"
+                    sx={{ backgroundColor: "#1f618d", color: "white", ":hover": { opacity: 0.7 }, position: "fixed", right: 50, top: 80, borderRadius: "8px", padding: "10px 20px", display: "flex", alignItems: "center", gap: "8px", }} onClick={handleOpenModalAgregar}
+                >
+                    <AddchartIcon sx={{ fontSize: 24 }} />
+                    Agregar Servicio
+                </Button>
 
-            <Box display="flex" justifyContent="space-between" alignItems="center" sx={{ marginTop: 4 }}>
-            </Box>
 
-            <Box width="90%" maxWidth={2000} margin="0 auto" mt={4}>
-                {/* Header alineado a la izquierda con fondo */}
-                <Box sx={{ backgroundColor: "#1f618d", padding: "10px 20px", borderRadius: "8px 8px 0 0" }}>
-                    <Typography variant="h5" fontWeight="bold" color="white">
-                        Catalogo de Servicios
-                    </Typography>
+                <Box width="100%" maxWidth={1800} margin="0 auto" mt={9}>
+                    {/* Header alineado a la izquierda con fondo */}
+                    <Box
+                        sx={{
+                            backgroundColor: "#1f618d",
+                            padding: "10px 20px",
+                            borderRadius: "8px 8px 0 0",
+                        }}
+                    >
+                        <Typography variant="h5" fontWeight="bold" color="white">
+                            Lista de Servicios
+                        </Typography>
+                    </Box>
                 </Box>
 
-                {/* Contenedor de la tabla */}
-                <Paper sx={{ width: "100%" }}>
+                <Paper sx={{ width: "100%", maxWidth: "1800px", margin: "0 auto", backgroundColor: "white", padding: 2 }}>
                     <TableContainer sx={{ maxHeight: 800, backgroundColor: "#f4f6f7 " }}>
                         <Table stickyHeader>
                             <TableHead>
                                 <TableRow>
-                                    <TableCell align="center" sx={{ fontWeight: "bold", color: "black", textAlign: "right" }}>Id</TableCell>
-                                    <TableCell align="center" sx={{ fontWeight: "bold", color: "black", textAlign: "right" }}>Nombre</TableCell>
-                                    <TableCell align="center" sx={{ fontWeight: "bold", color: "black", textAlign: "right" }}>Descripción</TableCell>
-                                    <TableCell align="center" sx={{ fontWeight: "bold", color: "black", textAlign: "right" }}>Opciones</TableCell>
+                                    <TableCell align="center" sx={{ fontWeight: "bold", color: "black", textAlign: "center", width: "16.66%" }}>Id</TableCell>
+                                    <TableCell align="center" sx={{ fontWeight: "bold", color: "black", textAlign: "center", width: "16.66%" }}>Nombre</TableCell>
+                                    <TableCell align="center" sx={{ fontWeight: "bold", color: "black", textAlign: "center", width: "16.66%" }}>Descripción</TableCell>
+                                    <TableCell align="center" sx={{ fontWeight: "bold", color: "black", textAlign: "center", width: "16.66%" }}>Opciones</TableCell>
                                 </TableRow>
                             </TableHead>
                             <TableBody>
                                 {servicios.map((servicio) => (
                                     <TableRow key={servicio.id}>
-                                        <TableCell align="center" sx={{ textAlign: "right" }}>{servicio.id}</TableCell>
-                                        <TableCell align="center" sx={{ textAlign: "right" }}>{servicio.nombre}</TableCell>
-                                        <TableCell align="center" sx={{ textAlign: "right" }}>{servicio.descripcion}</TableCell>
-                                        <TableCell align="center" sx={{ textAlign: "right" }}>
+                                        <TableCell align="right" sx={{ textAlign: "right", width: "16.66%" }}>{servicio.id}</TableCell>
+                                        <TableCell align="right" sx={{ textAlign: "right", width: "16.66%" }}>{servicio.nombre}</TableCell>
+                                        <TableCell align="right" sx={{ textAlign: "right", width: "16.66%" }}>{servicio.descripcion}</TableCell>
+                                        <TableCell align="right" sx={{ textAlign: "right", width: "16.66%" }}>
                                             <IconButton sx={{ color: 'black' }} onClick={() => handleOpenModalEdit(servicio)}>
                                                 <EditIcon sx={{ fontSize: 20 }} />
                                             </IconButton>
