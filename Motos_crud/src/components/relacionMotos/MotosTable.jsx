@@ -18,7 +18,8 @@ import { obtenerMarcas } from "../../api/marcasApi";
 import { MarcasModal } from "./MarcasModal";
 import { EditarModal } from "./EditarModal";
 import { AgregarModal } from "./AgregarModal";
-import { Grid } from "@material-ui/core";
+import { Grid } from "@mui/material";
+
 
 export const MotosTable = () => {
   const [openModalEditar, setOpenModalEditar] = useState(false);

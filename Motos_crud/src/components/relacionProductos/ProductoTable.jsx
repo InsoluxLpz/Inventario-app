@@ -14,7 +14,7 @@ import { EditarProductoModal } from "../relacionProductos/EditarProductoModal";
 import { AgregarProductoModal } from "./AgregarProductoModal";
 import AddchartIcon from '@mui/icons-material/Addchart';
 import { obtenerProveedores } from "../../api/proveedoresApi";
-import { Grid } from "@material-ui/core";
+import { Grid } from "@mui/material";
 
 export const ProductoTable = () => {
   const [openModalEditar, setOpenModalEditar] = useState(false);

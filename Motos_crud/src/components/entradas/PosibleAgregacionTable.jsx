@@ -1,3 +1,5 @@
+// Este componente se hizo por error pero puede ser que se pida mas adelante
+
 import React, { useState, useEffect } from "react";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
@@ -134,11 +136,15 @@ export const ProductoAlmacenTable = () => {
               <TableHead>
                 <TableRow>
                   {[
-                    "id",
                     "Codigo",
-                    "Producto",
+                    "Proveedor",
+                    "Fecha",
                     "Cantidad",
-                    "Acciones",
+                    "Costo Unitario",
+                    // "Tipo",
+                    "Producto",
+                    "Autorizo",
+                    "acciones",
                   ].map((header) => (
                     <TableCell
                       key={header}
@@ -159,9 +165,18 @@ export const ProductoAlmacenTable = () => {
                 {filteredInventario.map((producto) => (
                   <TableRow key={producto.id}>
                     <TableCell align="center">{producto.idProducto}</TableCell>
-                    <TableCell align="center">{producto.codigo}</TableCell>
+                    <TableCell align="center">{producto.proveedor_nombre}</TableCell>
+                    <TableCell align="center" sx={{ textAlign: "right" }}>
+                      {producto.fecha_movimiento
+                        ? new Date(producto.fecha_movimiento).toLocaleDateString("es-MX")
+                        : "Fecha no disponible"}
+                    </TableCell>
+                    <TableCell align="center">{producto.cantidad}</TableCell>
+                    <TableCell align="center">
+                      {formatearDinero(Number(producto.costo_unitario) || 0)}
+                    </TableCell>
                     <TableCell align="center">{producto.nombreProducto}</TableCell>
-                    <TableCell align="center">{Math.round(producto.cantidad)}</TableCell>
+                    <TableCell align="center">{producto.autorizo}</TableCell>
                     <TableCell align="center">
                       {/* <IconButton
                         sx={{ color: "black" }}
