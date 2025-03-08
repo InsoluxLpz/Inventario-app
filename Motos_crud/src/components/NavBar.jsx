@@ -10,6 +10,7 @@ import IconButton from "@mui/material/IconButton";
 import MenuIcon from "@mui/icons-material/Menu";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import MoveToInboxIcon from '@mui/icons-material/MoveToInbox';
 import ListItem from "@mui/material/ListItem";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
@@ -143,6 +144,7 @@ export const NavBar = ({ onSearch }) => {
     "/servicios/RealizarServicio": "Servicios",
     "/servicios/ListaServicios": "Servicios",
     "/almacen/ProductoAlmacenTable": "Almacén de productos",
+    "/almacen/MovimientosAlmacenTable": "Movimientos de productos",
   };
 
   const currentTitle = routeTitles[location.pathname] || "Inicio";
@@ -249,11 +251,17 @@ export const NavBar = ({ onSearch }) => {
                 </ListItemIcon>
                 <ListItemText primary="Entradas" />
               </ListItem>
+              <ListItem button sx={{ pl: 4 }} onClick={() => handleNavigate("/almacen/MovimientosAlmacenTable")}>
+                <ListItemIcon>
+                  <MoveToInboxIcon sx={{ fontSize: 18 }} />
+                </ListItemIcon>
+                <ListItemText primary="Movimientos" />
+              </ListItem>
               <ListItem button sx={{ pl: 4 }} onClick={() => handleNavigate("/almacen/ProductoAlmacenTable")}>
                 <ListItemIcon>
                   <CategoryIcon sx={{ fontSize: 18 }} />
                 </ListItemIcon>
-                <ListItemText primary="Productos en Almacén" />
+                <ListItemText primary="Almacén" />
               </ListItem>
             </List>
           </Collapse>

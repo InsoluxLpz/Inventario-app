@@ -16,6 +16,7 @@ import { RealizarMantenimiento } from '../components/Servicios/RealizarMantenimi
 import { ProveedoresTable } from '../components/relacionProveedores/ProveedoresTable';
 import { ProductoAlmacenTable } from '../components/entradas/ProductoAlmacenTable';
 import { AgregarProductosAlmacen } from '../components/entradas/AgregarProductosAlmacen';
+import { MovimientosAlmacenTable } from '../components/entradas/MovimientosAlmacenTable.jsx';
 
 
 
@@ -42,6 +43,7 @@ export const AppRoutes = () => {
                 <Route path="/Proveedores" element={<ProveedoresTable />} />
                 <Route path="/almacen/Entradas" element={<AgregarProductosAlmacen />} />
                 <Route path="/almacen/ProductoAlmacenTable" element={<ProductoAlmacenTable />} />
+                <Route path="/almacen/MovimientosAlmacenTable" element={<MovimientosAlmacenTable />} />
             </Route>
         </Routes>
 

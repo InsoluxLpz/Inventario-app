@@ -45,11 +45,11 @@ router.post('/agregar_inventario', async (req, res) => {
         // Insertar en movimientos_almacen
         const queryMaestro = `
             INSERT INTO movimientos_almacen 
-            (fecha, tipo_movimiento_id, tipo_entrada_id, autorizo_id, proveedor_id, usuario_id) 
-            VALUES (?, ?, ?, ?, ?, ?)`;
+            (fecha, tipo_movimiento_id, tipo_entrada_id, autorizo_id, usuario_id) 
+            VALUES (?, ?, ?, ?, ?)`;
 
         const [result] = await connection.query(queryMaestro, 
-            [fecha, tipo_movimiento_id.value, tipo_entrada_id.value, autorizo_id.value, proveedor_id.value, usuario_id]);
+            [fecha, tipo_movimiento_id.value, tipo_entrada_id.value, autorizo_id.value, usuario_id]);
 
         const id_movimiento = result.insertId;
 
@@ -58,10 +58,10 @@ router.post('/agregar_inventario', async (req, res) => {
         // Insertar cada producto en movimientos_almacen_detalle
         const queryDetalle = `
             INSERT INTO movimientos_almacen_detalle 
-            (id_movimiento, producto_id, cantidad, costo_unitario, subtotal) 
-            VALUES (?,?,?,?,?)`;
+            (id_movimiento, producto_id, proveedor_id, cantidad, costo_unitario, subtotal) 
+            VALUES (?,?,?,?,?,?)`;
 
-        connection.query(queryDetalle, [id_movimiento, producto_id.value, cantidad, costo_unitario, subtotal])
+        connection.query(queryDetalle, [id_movimiento, producto_id.value, proveedor_id.value, cantidad, costo_unitario, subtotal])
 
         await connection.commit(); // Confirmar transacción
         res.status(201).json({ message: "Producto agregado correctamente", id_movimiento });
@@ -122,7 +122,13 @@ router.delete('/eliminar_inventario/:id', async (req, res) => {
 router.get('/obtener_listas', async (req, res) => {
     try {
             const [proveedores] = await db.query("SELECT id, nombre_proveedor FROM proveedores");
-            const [productos] = await db.query("SELECT * FROM productos");
+            const [productos] = await db.query(`
+                SELECT 
+                p.id,
+                p.nombre as nombre,
+                pp.idProveedor as id_proveedor
+            FROM productos p
+            left join productos_proveedor pp on p.id = pp.idProducto`);
             const [autorizaciones] = await db.query("SELECT idAutorizo, nombre FROM autorizaciones");
             const [tiposEntrada] = await db.query("SELECT id, tipo_entrada FROM tipo_entrada");
             const [tipoMovimiento] = await db.query("SELECT idMovimiento, movimiento FROM tipo_movimiento");
@@ -143,38 +149,38 @@ router.get('/obtener_listas', async (req, res) => {
 
 
 // * consulta que se puede pedir mas adelante para la tabla movimientos almacen
-// router.get('/obtener_inventario', async (req, res) => {
-//     try {
-//         const [result] = await db.query(`                
-//                     SELECT 
-//                     ma.fecha fecha_movimiento, cantidad , costo_unitario, proveedor_id,
-//                     p.id AS idProducto,
-//                     p.nombre AS nombreProducto,
-//                     pr.id AS proveedor_id,
-//                     pr.nombre_proveedor AS proveedor_nombre,
-//                     a.idAutorizo AS autorizacion_id,
-//                     a.nombre AS autorizo,
-//                     t.id AS tipo_entrada_id,
-//                     t.tipo_entrada AS tipo_entrada,
-//                     tm.idMovimiento AS tipo_movimiento_id,
-//                     tm.movimiento AS tipo_movimiento
-//                 FROM 
-//                     movimientos_almacen ma
-//                 LEFT JOIN productos p ON ma.producto_id = p.id
-//                 LEFT JOIN productos_proveedor pp ON pp.idProducto = p.id
-//                 LEFT JOIN proveedores pr ON pr.id = pp.idProveedor
-//                 LEFT JOIN autorizaciones a ON a.idAutorizo = ma.autorizo_id
-//                 LEFT JOIN tipo_entrada t ON t.id = ma.tipo_movimiento_id
-//                 LEFT JOIN tipo_movimiento tm ON tm.idMovimiento = ma.tipo_movimiento_id;
-//         `);
+router.get('/obtener_movimientos', async (req, res) => {
+    try {
+        const [result] = await db.query(`                
+                    SELECT 
+                    ma.fecha fecha_movimiento, cantidad , costo_unitario, proveedor_id,
+                    p.id AS idProducto,
+                    p.nombre AS nombreProducto,
+                    pr.id AS proveedor_id,
+                    pr.nombre_proveedor AS proveedor_nombre,
+                    a.idAutorizo AS autorizacion_id,
+                    a.nombre AS autorizo,
+                    t.id AS tipo_entrada_id,
+                    t.tipo_entrada AS tipo_entrada,
+                    tm.idMovimiento AS tipo_movimiento_id,
+                    tm.movimiento AS tipo_movimiento
+                FROM 
+                    movimientos_almacen ma
+                LEFT JOIN productos p ON ma.producto_id = p.id
+                LEFT JOIN productos_proveedor pp ON pp.idProducto = p.id
+                LEFT JOIN proveedores pr ON pr.id = pp.idProveedor
+                LEFT JOIN autorizaciones a ON a.idAutorizo = ma.autorizo_id
+                LEFT JOIN tipo_entrada t ON t.id = ma.tipo_movimiento_id
+                LEFT JOIN tipo_movimiento tm ON tm.idMovimiento = ma.tipo_movimiento_id;
+        `);
         
-//         res.status(200).json(result);
-//     } catch (error) {
-//         console.error("Error al obtener datos:", error);
-//         res.status(500).json({ message: "Error en el servidor" });
-//     }
+        res.status(200).json(result);
+    } catch (error) {
+        console.error("Error al obtener datos:", error);
+        res.status(500).json({ message: "Error en el servidor" });
+    }
     
-// });
+});
 
 // * consulta buena falta la autorizacion
 router.get('/obtener_inventario', async (req, res) => {

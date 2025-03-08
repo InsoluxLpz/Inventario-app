@@ -3,6 +3,8 @@ import React, { useEffect, useState } from "react";
 import { NavBar } from "../NavBar";
 import Select from "react-select";
 import WarehouseIcon from "@mui/icons-material/Warehouse";
+import MoveToInboxIcon from "@mui/icons-material/MoveToInbox";
+
 import {
   cargarListasEntradas,
   agregarInventario,
@@ -19,6 +21,16 @@ export const AgregarProductosAlmacen = () => {
   const [listaTipoMovimiento, setListaTipoMovimiento] = useState([]);
   const [errors, setErrors] = useState({});
   const [productosAgregados, setProductosAgregados] = useState([]);
+  // * filtro producto por proveedores
+  const [proveedorSeleccionado, setProveedorSeleccionado] = useState("");
+  const [productosFiltrados, setProductosFiltrados] = useState([]);
+
+  // * desactivar el select de movimiento despues de agregar un tiopo de entrada hasta que se guarde
+  const [tipoMovimientoBloqueado, setTipoMovimientoBloqueado] = useState(false);
+  const [tipoMovimientoFijo, setTipoMovimientoFijo] = useState(null);
+
+  // * filtro para el tipo de entrada con el tipo de movimiento
+  const [listaTipoEntradaFiltrada, setListaTipoEntradaFiltrada] = useState([]);
 
   const [formData, setFormData] = useState({
     proveedor: null,
@@ -31,6 +43,7 @@ export const AgregarProductosAlmacen = () => {
     tipoMovimiento: null,
   });
 
+  // * peticion a la db
   useEffect(() => {
     const cargarListas = async () => {
       try {
@@ -46,7 +59,11 @@ export const AgregarProductosAlmacen = () => {
         }
         if (data.productos) {
           setListaProductos(
-            data.productos.map((p) => ({ value: p.id, label: p.nombre }))
+            data.productos.map((p) => ({
+              value: p.id,
+              label: p.nombre,
+              proveedorId: p.id_proveedor,
+            }))
           );
         }
         if (data.autorizaciones) {
@@ -77,21 +94,33 @@ export const AgregarProductosAlmacen = () => {
         console.error("Error al cargar los datos:", error);
       }
     };
-
     cargarListas();
   }, []);
 
+  // * funciones para los campos sobre los que se escriben
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
     setErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
+  // * funcion para los campos de seleccion
   const handleSelectChange = (name, option) => {
     setFormData((prev) => ({
       ...prev,
       [name]: option ? { value: option.value, label: option.label } : null,
     }));
+
+    // * funcion para guardar el tipo de movimiento
+    if (name === "tipoMovimiento" && !tipoMovimientoFijo) {
+      setTipoMovimientoFijo(option); // Guardar el primer tipo de movimiento seleccionado
+    }
+
+    // * funcion para guardar el proveedor seleccionado y mostrar producto en su funcion
+    if (name === "proveedor") {
+      setProveedorSeleccionado(option); // Guardar proveedor seleccionado
+      setFormData((prev) => ({ ...prev, producto: null })); // Limpiar selección de producto
+    }
   };
 
   const validateForm = () => {
@@ -105,6 +134,7 @@ export const AgregarProductosAlmacen = () => {
     return Object.keys(newErrors).length === 0;
   };
 
+  // * guardar los datos en el estado
   const handleSubmit = (e) => {
     e.preventDefault();
 
@@ -127,14 +157,20 @@ export const AgregarProductosAlmacen = () => {
         ? { value: formData.autorizo.value, label: formData.autorizo.label }
         : null,
       tipo_movimiento_id: formData.tipoMovimiento
-        ? {
+        ? tipoMovimientoFijo
+        : {
             value: formData.tipoMovimiento.value,
             label: formData.tipoMovimiento.label,
-          }
-        : null,
+          },
     };
 
-    setProductosAgregados((prevProductos) => [...prevProductos, nuevoProducto]);
+    setProductosAgregados((prevProductos) => {
+      const nuevosProductos = [...prevProductos, nuevoProducto];
+      if (nuevosProductos.length > 0) {
+        setTipoMovimientoBloqueado(true);
+      }
+      return nuevosProductos;
+    });
 
     setFormData({
       proveedor: null,
@@ -144,60 +180,154 @@ export const AgregarProductosAlmacen = () => {
       costo_unitario: "",
       tipo: null,
       autorizo: null,
-      tipoMovimiento: null,
+      tipoMovimiento: tipoMovimientoFijo,
     });
 
     setErrors({});
   };
 
+  // * mandar datos a insertar
   const handleGuardarTodo = async () => {
     if (productosAgregados.length === 0) {
-      alert("No hay productos para guardar");
       return;
     }
-
     const usuario_id = localStorage.getItem("idUsuario");
-
     for (let producto of productosAgregados) {
       await agregarInventario({
         ...producto,
         usuario_id,
       });
     }
-
-    alert("Productos guardados correctamente");
     setProductosAgregados([]);
+    setTipoMovimientoBloqueado(false);
+    setTipoMovimientoFijo(null);
   };
+
+  // * efecto para el filtro de productos por proveedores
+  useEffect(() => {
+    console.log("Proveedor seleccionado:", proveedorSeleccionado);
+    console.log("productosFiltrados", listaProductos);
+    if (proveedorSeleccionado) {
+      const productosFiltrados = listaProductos.filter(
+        (producto) => producto.proveedorId === proveedorSeleccionado.value
+      );
+      console.log("productosFiltrados", productosFiltrados);
+      setProductosFiltrados(productosFiltrados);
+    } else {
+      setProductosFiltrados([]);
+    }
+  }, [proveedorSeleccionado, listaProductos]);
+
+  // * efecto para el filtro de tipo de entrada por el tipo de movimiento
+  useEffect(() => {
+    if (formData.tipoMovimiento) {
+      const movimientoSeleccionado =
+        formData.tipoMovimiento.label.toLowerCase();
+
+      if (movimientoSeleccionado === "entrada") {
+        setListaTipoEntradaFiltrada(
+          listaTipoEntrada.filter((t) =>
+            ["compra", "ajuste", "traspaso"].includes(t.label.toLowerCase())
+          )
+        );
+      } else if (movimientoSeleccionado === "salida") {
+        setListaTipoEntradaFiltrada(
+          listaTipoEntrada.filter((t) =>
+            ["devolucion"].includes(t.label.toLowerCase())
+          )
+        );
+      } else {
+        setListaTipoEntradaFiltrada([]); // Si no hay coincidencias, limpiar lista
+      }
+
+      // Reiniciar el campo de tipo de entrada cuando cambie el tipo de movimiento
+      setFormData((prev) => ({ ...prev, tipo: null }));
+    }
+  }, [formData.tipoMovimiento, listaTipoEntrada]);
 
   return (
     <>
       <NavBar />
-      <Button
-        variant="contained"
-        sx={{
-          backgroundColor: "#1f618d",
-          color: "white",
-          ":hover": { opacity: 0.7 },
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "row",
+          justifyContent: "flex-end",
+          gap: "16px", // Espacio entre los botones
           position: "fixed",
           right: 50,
           top: 80,
-          borderRadius: "8px",
-          padding: "10px 20px",
-          display: "flex",
-          alignItems: "center",
-          gap: "8px",
         }}
-        onClick={() => navigate("/almacen/ProductoAlmacenTable")}
       >
-        <WarehouseIcon sx={{ fontSize: 24 }} />
-        Almacén
-      </Button>
+        <Button
+          variant="contained"
+          sx={{
+            backgroundColor: "#1f618d",
+            color: "white",
+            ":hover": { opacity: 0.7 },
+            borderRadius: "8px",
+            padding: "10px 20px",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+          }}
+          onClick={() => navigate("/almacen/ProductoAlmacenTable")}
+        >
+          <WarehouseIcon sx={{ fontSize: 24 }} />
+          Almacén
+        </Button>
+
+        <Button
+          variant="contained"
+          sx={{
+            backgroundColor: "#1f618d",
+            color: "white",
+            ":hover": { opacity: 0.7 },
+            borderRadius: "8px",
+            padding: "10px 20px",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+          }}
+          onClick={() => navigate("/almacen/MovimientosAlmacenTable")}
+        >
+          <MoveToInboxIcon sx={{ fontSize: 24 }} />
+          Movimientos
+        </Button>
+      </div>
 
       <div className="container mt-4">
         <h2>Agregar Entrada</h2>
         <form onSubmit={handleSubmit}>
           <div className="row">
-            <div className="col-md-4">
+            <div className="col-md-3">
+              <label>Tipo Movimiento</label>
+              <Select
+                options={listaTipoMovimiento}
+                value={formData.tipoMovimiento}
+                onChange={(opcion) =>
+                  handleSelectChange("tipoMovimiento", opcion)
+                }
+                isDisabled={tipoMovimientoBloqueado}
+              />
+              {errors.tipoMovimiento && (
+                <div className="text-danger">{errors.tipoMovimiento}</div>
+              )}
+            </div>
+
+            <div className="col-md-3">
+              <label>Tipo de entrada</label>
+              <Select
+                // options={listaTipoEntrada}
+                options={listaTipoEntradaFiltrada}
+                value={formData.tipo}
+                onChange={(opcion) => handleSelectChange("tipo", opcion)}
+              />
+              {errors.tipo && <div className="text-danger">{errors.tipo}</div>}
+            </div>
+
+            {/* proveedores */}
+            <div className="col-md-3">
               <label>Proveedor</label>
               <Select
                 options={listaProveedores}
@@ -209,7 +339,7 @@ export const AgregarProductosAlmacen = () => {
               )}
             </div>
 
-            <div className="col-md-4">
+            <div className="col-md-3">
               <label>Fecha</label>
               <input
                 type="date"
@@ -223,7 +353,21 @@ export const AgregarProductosAlmacen = () => {
               )}
             </div>
 
-            <div className="col-md-4">
+            <div className="col-md-3">
+              <label>Producto</label>
+              <Select
+                options={productosFiltrados}
+                // options={listaProductos}
+                value={formData.producto}
+                onChange={(opcion) => handleSelectChange("producto", opcion)}
+                isDisabled={!proveedorSeleccionado}
+              />
+              {errors.producto && (
+                <div className="text-danger">{errors.producto}</div>
+              )}
+            </div>
+
+            <div className="col-md-3">
               <label>Cantidad</label>
               <input
                 type="number"
@@ -237,19 +381,7 @@ export const AgregarProductosAlmacen = () => {
               )}
             </div>
 
-            <div className="col-md-4">
-              <label>Producto</label>
-              <Select
-                options={listaProductos}
-                value={formData.producto}
-                onChange={(opcion) => handleSelectChange("producto", opcion)}
-              />
-              {errors.producto && (
-                <div className="text-danger">{errors.producto}</div>
-              )}
-            </div>
-
-            <div className="col-md-4">
+            <div className="col-md-3">
               <label>Costo Unitario</label>
               <input
                 type="number"
@@ -263,18 +395,8 @@ export const AgregarProductosAlmacen = () => {
               )}
             </div>
 
-            <div className="col-md-4">
-              <label>Tipo de entrada</label>
-              <Select
-                options={listaTipoEntrada}
-                value={formData.tipo}
-                onChange={(opcion) => handleSelectChange("tipo", opcion)}
-              />
-              {errors.tipo && <div className="text-danger">{errors.tipo}</div>}
-            </div>
-
-            <div className="col-md-4">
-              <label>Autorizó</label>
+            <div className="col-md-3">
+              <label>Autoriza</label>
               <Select
                 options={listaAutorizaciones}
                 value={formData.autorizo}
@@ -284,25 +406,12 @@ export const AgregarProductosAlmacen = () => {
                 <div className="text-danger">{errors.autorizo}</div>
               )}
             </div>
-
-            <div className="col-md-4">
-              <label>Tipo Movimiento</label>
-              <Select
-                options={listaTipoMovimiento}
-                value={formData.tipoMovimiento}
-                onChange={(opcion) =>
-                  handleSelectChange("tipoMovimiento", opcion)
-                }
-              />
-              {errors.tipoMovimiento && (
-                <div className="text-danger">{errors.tipoMovimiento}</div>
-              )}
-            </div>
           </div>
+
           <div
-          className="mt-5"
-          style={{ display: "flex", justifyContent: "flex-end" }}
-        >
+            className="mt-5"
+            style={{ display: "flex", justifyContent: "flex-end" }}
+          >
             <Button type="submit" variant="contained" color="primary">
               Agregar
             </Button>
@@ -310,11 +419,11 @@ export const AgregarProductosAlmacen = () => {
         </form>
       </div>
 
-<hr />
+      <hr />
       <div className="container mt-4">
-      <h3 className="text-center">PRODUCTOS AGREGADOS </h3>
+        <h3 className="text-center">PRODUCTOS AGREGADOS </h3>
         <table className="table mt-3">
-          <thead> 
+          <thead>
             <tr>
               <th>Proveedor</th>
               <th>Fecha</th>
@@ -322,8 +431,9 @@ export const AgregarProductosAlmacen = () => {
               <th>Producto</th>
               <th>C/U</th>
               <th>Tipo Entrada</th>
-              <th>Autorizó</th>
+              <th>Autoriza</th>
               <th>Movimiento</th>
+              <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
@@ -355,6 +465,7 @@ export const AgregarProductosAlmacen = () => {
                     ? producto.tipo_movimiento_id.label
                     : ""}
                 </td>
+                <td> eliminar editar </td>
               </tr>
             ))}
           </tbody>
@@ -369,7 +480,7 @@ export const AgregarProductosAlmacen = () => {
             color="primary"
             disabled={productosAgregados.length === 0}
           >
-            Guardar Todos
+            Guardar
           </Button>
         </div>
       </div>

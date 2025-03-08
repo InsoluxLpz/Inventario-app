@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
+import PlaylistAddCircleIcon from '@mui/icons-material/PlaylistAddCircle';
 import Paper from "@mui/material/Paper";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -15,12 +16,14 @@ import { NavBar } from "../NavBar";
 import { cargarListasCampos } from "../../api/almacenProductosApi";
 import AddchartIcon from "@mui/icons-material/Addchart";
 import InventoryIcon from "@mui/icons-material/Inventory";
+import WarehouseIcon from "@mui/icons-material/Warehouse";
+import MoveToInboxIcon from "@mui/icons-material/MoveToInbox";
 import { EditarProductoAlmacenModal } from "./EditarProductoAlmacenModal";
 import { obtenerProductos } from "../../api/productosApi";
 import { obtenerProveedores } from "../../api/proveedoresApi";
 import { useNavigate } from "react-router";
 
-export const ProductoAlmacenTable = () => {
+export const MovimientosAlmacenTable = () => {
   const navigate = useNavigate();
 
   const [openModalEditar, setOpenModalEditar] = useState(false);
@@ -95,27 +98,53 @@ export const ProductoAlmacenTable = () => {
     <>
       <NavBar onSearch={setSearchTerm} />
 
-      <Button
-        variant="contained"
-        sx={{
-          backgroundColor: "#1f618d",
-          color: "white",
-          ":hover": { opacity: 0.7 },
-          position: "fixed",
-          right: 110,
-          top: 80,
-          borderRadius: "8px",
-          padding: "10px 20px",
+      <div
+        style={{
           display: "flex",
-          alignItems: "center",
-          gap: "8px",
+          flexDirection: "row",
+          justifyContent: "flex-end",
+          gap: "16px", // Espacio entre los botones
+          position: "fixed",
+          right: 50,
+          top: 80,
         }}
-        // onClick={handleModalAgregar}
-        onClick={() => navigate("/almacen/Entradas")}
       >
-        <AddchartIcon sx={{ fontSize: 24}} />
-        Agregar Producto al Almacén
-      </Button>
+        <Button
+          variant="contained"
+          sx={{
+            backgroundColor: "#1f618d",
+            color: "white",
+            ":hover": { opacity: 0.7 },
+            borderRadius: "8px",
+            padding: "10px 20px",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+          }}
+          onClick={() => navigate("/almacen/ProductoAlmacenTable")}
+        >
+          <WarehouseIcon sx={{ fontSize: 24 }} />
+          Almacén
+        </Button>
+
+        <Button
+          variant="contained"
+          sx={{
+            backgroundColor: "#1f618d",
+            color: "white",
+            ":hover": { opacity: 0.7 },
+            borderRadius: "8px",
+            padding: "10px 20px",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+          }}
+          onClick={() => navigate("/almacen/Entradas")}
+        >
+          <PlaylistAddCircleIcon sx={{ fontSize: 24 }} />
+          Agregar Entradas
+        </Button>
+      </div>
 
       <Box width="90%" maxWidth={2000} margin="0 auto" mt={10}>
         <Box
@@ -125,8 +154,8 @@ export const ProductoAlmacenTable = () => {
             borderRadius: "8px 8px 0 0",
           }}
         >
-          <Typography variant="h5" fontWeight="bold" color="white" >
-            Almacén
+          <Typography variant="h5" fontWeight="bold" color="white">
+            Movimientos en el almacen
           </Typography>
         </Box>
 
@@ -165,17 +194,23 @@ export const ProductoAlmacenTable = () => {
                 {filteredInventario.map((producto) => (
                   <TableRow key={producto.id}>
                     <TableCell align="center">{producto.idProducto}</TableCell>
-                    <TableCell align="center">{producto.proveedor_nombre}</TableCell>
+                    <TableCell align="center">
+                      {producto.proveedor_nombre}
+                    </TableCell>
                     <TableCell align="center" sx={{ textAlign: "right" }}>
                       {producto.fecha_movimiento
-                        ? new Date(producto.fecha_movimiento).toLocaleDateString("es-MX")
+                        ? new Date(
+                            producto.fecha_movimiento
+                          ).toLocaleDateString("es-MX")
                         : "Fecha no disponible"}
                     </TableCell>
                     <TableCell align="center">{producto.cantidad}</TableCell>
                     <TableCell align="center">
                       {formatearDinero(Number(producto.costo_unitario) || 0)}
                     </TableCell>
-                    <TableCell align="center">{producto.nombreProducto}</TableCell>
+                    <TableCell align="center">
+                      {producto.nombreProducto}
+                    </TableCell>
                     <TableCell align="center">{producto.autorizo}</TableCell>
                     <TableCell align="center">
                       {/* <IconButton

@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
+import WarehouseIcon from "@mui/icons-material/Warehouse";
+import PlaylistAddCircleIcon from '@mui/icons-material/PlaylistAddCircle';
+import MoveToInboxIcon from "@mui/icons-material/MoveToInbox";
 import Paper from "@mui/material/Paper";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -29,8 +32,8 @@ export const ProductoAlmacenTable = () => {
   const [showInactive, setShowInactive] = useState(false);
 
   // * estados para el modal dinamico
-  const [productos, setProductos] = useState([]);
-  const [proveedores, setProveedores] = useState([]);
+  // const [productos, setProductos] = useState([]);
+  // const [proveedores, setProveedores] = useState([]);
 
   useEffect(() => {
     fetchInventario();
@@ -93,27 +96,53 @@ export const ProductoAlmacenTable = () => {
     <>
       <NavBar onSearch={setSearchTerm} />
 
-      <Button
-        variant="contained"
-        sx={{
-          backgroundColor: "#1f618d",
-          color: "white",
-          ":hover": { opacity: 0.7 },
-          position: "fixed",
-          right: 110,
-          top: 80,
-          borderRadius: "8px",
-          padding: "10px 20px",
+      <div
+        style={{
           display: "flex",
-          alignItems: "center",
-          gap: "8px",
+          flexDirection: "row",
+          justifyContent: "flex-end",
+          gap: "16px", // Espacio entre los botones
+          position: "fixed",
+          right: 50,
+          top: 80,
         }}
-        // onClick={handleModalAgregar}
-        onClick={() => navigate("/almacen/Entradas")}
       >
-        <AddchartIcon sx={{ fontSize: 24}} />
-        Agregar Producto al Almacén
-      </Button>
+        <Button
+          variant="contained"
+          sx={{
+            backgroundColor: "#1f618d",
+            color: "white",
+            ":hover": { opacity: 0.7 },
+            borderRadius: "8px",
+            padding: "10px 20px",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+          }}
+          onClick={() => navigate("/almacen/MovimientosAlmacenTable")}
+        >
+          <WarehouseIcon sx={{ fontSize: 24 }} />
+          Movimientos
+        </Button>
+
+        <Button
+          variant="contained"
+          sx={{
+            backgroundColor: "#1f618d",
+            color: "white",
+            ":hover": { opacity: 0.7 },
+            borderRadius: "8px",
+            padding: "10px 20px",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+          }}
+          onClick={() => navigate("/almacen/entradas")}
+        >
+          <PlaylistAddCircleIcon sx={{ fontSize: 24 }} />
+          Agregar entradas
+        </Button>
+      </div>
 
       <Box width="90%" maxWidth={2000} margin="0 auto" mt={10}>
         <Box

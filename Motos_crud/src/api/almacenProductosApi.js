@@ -210,3 +210,22 @@ export const cargarListasCampos = async () => {
     }
 };
 
+// * funcion para la tabla de movimientos en el almacen
+export const cargarListasMovimientos = async () => {
+    try {
+        const response = await fetch(`${API_URL}/entrada/obtener_movimientos`, {
+            method: "GET",
+            headers: {
+                'Content-Type': 'application/json'
+            },
+        });
+        if (response.ok) {
+            const data = await response.json();
+            return data;
+        }
+    } catch (error) {
+        console.error('Error al realizar la solicitud', error);
+        Swal.fire('Error', 'Hubo un problema al conectar con el servidor.', 'error');
+        return null;
+    }
+};

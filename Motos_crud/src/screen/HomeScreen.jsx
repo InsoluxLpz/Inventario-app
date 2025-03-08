@@ -7,6 +7,7 @@ import CategoryIcon from '@mui/icons-material/Category';
 import { useLocation, useNavigate } from 'react-router-dom';
 import MiscellaneousServicesIcon from '@mui/icons-material/MiscellaneousServices';
 import EngineeringIcon from '@mui/icons-material/Engineering';
+import WarehouseIcon from "@mui/icons-material/Warehouse";
 
 export const HomeScreen = () => {
 
@@ -64,6 +65,15 @@ export const HomeScreen = () => {
                             onClick={() => handleNavigate('/servicios/ListaMantenimientos')}>
                             <EngineeringIcon className="icon-large" />
                             <h6 className="mt-2">Mantenimientos</h6>
+                        </div>
+                    </div>
+
+                    <div className="col-md-3 m-3">
+                        <div
+                            className="card shadow text-center d-flex flex-column align-items-center justify-content-center btn-card"
+                            onClick={() => handleNavigate('/almacen/ProductoAlmacenTable')}>
+                            <WarehouseIcon className="icon-large" />
+                            <h6 className="mt-2">Almacen</h6>
                         </div>
                     </div>
 
