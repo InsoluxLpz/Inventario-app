@@ -111,19 +111,17 @@ export const MotosTable = () => {
   };
 
   const filteredMotos = motos.filter((moto) => {
-    const matchesSearch =
-      moto.placa.toLowerCase().includes(searchPlaca.toLowerCase()) ||
-      moto.no_serie.toLowerCase().includes(searchNoSerie.toLowerCase()) ||
-      moto.inciso.toLowerCase().includes(searchInciso.toLowerCase());
+    const matchesPlaca = searchPlaca.trim() === "" || moto.placa.toLowerCase().includes(searchPlaca.toLowerCase().trim());
+    const matchesNoSerie = searchNoSerie.trim() === "" || moto.no_serie.toLowerCase().includes(searchNoSerie.toLowerCase().trim());
+    const matchesInciso = searchInciso.trim() === "" || moto.inciso.toLowerCase().includes(searchInciso.toLowerCase().trim());
 
-    // Mostrar todas las coincidencias si el filtro de inactivos está activo
-    if (showInactive) {
-      return matchesSearch;
-    }
+    // La moto debe coincidir con TODOS los filtros activos
+    const matchesSearch = matchesPlaca && matchesNoSerie && matchesInciso;
 
-
-    return matchesSearch && moto.status !== 0;
+    // Mostrar todas las coincidencias si se incluyen inactivas
+    return showInactive ? matchesSearch : matchesSearch && moto.status !== 0;
   });
+
 
   useEffect(() => {
     fetchMotos();

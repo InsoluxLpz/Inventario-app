@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import Select from 'react-select';
 import { Button } from '@mui/material';
-import { ActualizarMantenimiento } from '../../api/ServiciosApi';
 import { cargarListasEntradas } from '../../api/almacenProductosApi';
 
-
-export const EditarMantenimiento = ({ modalOpen, onClose, mantenimiento, listaMotos, listaServicios }) => {
+export const VerMantenimientoCancelado = ({ modalOpen, onClose, mantenimiento, listaMotos, listaServicios }) => {
     if (!modalOpen || !mantenimiento) return null;
 
     const motos = listaMotos;
@@ -18,6 +16,7 @@ export const EditarMantenimiento = ({ modalOpen, onClose, mantenimiento, listaMo
 
     const [formData, setFormData] = useState({
         fecha_inicio: "",
+        fecha_cancelacion: "",
         idMoto: "",
         idAutorizo: "",
         odometro: "",
@@ -26,6 +25,7 @@ export const EditarMantenimiento = ({ modalOpen, onClose, mantenimiento, listaMo
         costo_total: "",
         comentario: "",
         status: "",
+        nombre: "",
     });
 
     const [autorizaciones, setAutorizaciones] = useState([]);
@@ -34,6 +34,7 @@ export const EditarMantenimiento = ({ modalOpen, onClose, mantenimiento, listaMo
         if (mantenimiento) {
             setFormData({
                 fecha_inicio: formatFecha(mantenimiento.fecha_inicio),
+                fecha_cancelacion: formatFecha(mantenimiento.fecha_cancelacion),
                 odometro: mantenimiento.odometro || "",
                 idMoto: mantenimiento.idMoto || "",
                 idAutorizo: mantenimiento.idAutorizo || "",
@@ -41,6 +42,7 @@ export const EditarMantenimiento = ({ modalOpen, onClose, mantenimiento, listaMo
                 productos: mantenimiento.productos || [],
                 comentario: mantenimiento.comentario || "",
                 costo_total: mantenimiento.costo_total || 0,
+                nombre: mantenimiento.nombre || "",
             });
         }
         console.log(mantenimiento)
@@ -61,45 +63,6 @@ export const EditarMantenimiento = ({ modalOpen, onClose, mantenimiento, listaMo
         fetchAutorizo();
     }, []);
 
-
-    const validateForm = () => {
-        const newErrors = {};
-
-        Object.keys(formData).forEach((key) => {
-            if (key !== "nota" && (formData[key] === "" || formData[key] === null || formData[key] === undefined)) {
-                newErrors[key] = "Este campo es obligatorio";
-            }
-        });
-
-        setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
-    };
-
-
-    const handleChange = (e) => {
-        setFormData({
-            ...formData,
-            [e.target.name]: e.target.value,
-        });
-    };
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-
-        const MantenimientoData = {
-            servicios: formData.servicio, // Solo los IDs de los servicios
-        };
-
-        const resultado = await ActualizarMantenimiento(mantenimiento.id, MantenimientoData);
-
-        if (resultado && !resultado.error) {
-            onClose(); // Cierra el modal tras éxito
-            window.location.reload();
-        }
-    };
-
-
-
     const opcionesMotos = [...motos]
         .map((moto) => ({ value: moto.id, label: moto.inciso }));
 
@@ -107,31 +70,55 @@ export const EditarMantenimiento = ({ modalOpen, onClose, mantenimiento, listaMo
         .sort((a, b) => a.nombre.localeCompare(b.nombre))
         .map((serv) => ({ value: serv.id, label: serv.nombre }));
 
+
     return (
         <>
             <div className="modal-backdrop">
                 <div className="modal fade show" style={{ display: "block" }} tabIndex="-1" role="dialog">
                     <div className="modal-dialog" role="document" style={{ maxWidth: "60vw", marginTop: 90 }}>
                         <div className="modal-content w-100">
-                            <div className="modal-header" style={{ backgroundColor: '#f1c40f' }}>
-                                <h5 className="modal-title" style={{ color: 'white' }}>Actualizar Servicio</h5>
+                            <div className="modal-header" style={{ backgroundColor: '#c0392b' }}>
+                                <h5 className="modal-title" style={{ color: 'white' }}>Servicio Cancelado</h5>
                             </div>
 
-                            <form style={{ marginTop: 3 }} onSubmit={handleSubmit}>
+                            <form style={{ marginTop: 3 }} >
                                 <div className="row">
                                     <div className="col-md-3 mb-2">
-                                        <label className="form-label">Fecha de inicio</label>
+                                        <label className="form-label">Fecha de registro</label>
                                         <input
                                             name="fecha_inicio"
                                             type='date'
                                             className="form-control form-control-sm"
                                             value={formData.fecha_inicio}
-                                            onChange={handleChange}
                                             readOnly
                                         />
                                     </div>
 
-                                    <div className="col-md-4 mb-2">
+                                    <div className="col-md-3 mb-2">
+                                        <label className="form-label">Fecha de cancelacion</label>
+                                        <input
+                                            name="fecha_inicio"
+                                            type='date'
+                                            className="form-control form-control-sm"
+                                            value={formData.fecha_cancelacion}
+                                            readOnly
+                                        />
+
+                                    </div>
+
+                                    <div className="col-md-3 mb-2">
+                                        <label className="form-label">Usuario Cancelo</label>
+                                        <input
+                                            name="cancelo"
+                                            type='text'
+                                            className="form-control form-control-sm"
+                                            value={formData.nombre}
+                                            readOnly
+                                        />
+
+                                    </div>
+
+                                    <div className="col-md-3 mb-2">
                                         <label className="form-label">Moto</label>
                                         <input
                                             type="text"
@@ -142,18 +129,6 @@ export const EditarMantenimiento = ({ modalOpen, onClose, mantenimiento, listaMo
                                         />
 
                                     </div>
-
-                                    <div className="col-md-4 mb-2">
-                                        <label className="form-label">Odómetro/Horómetro</label>
-                                        <input
-                                            type="text"
-                                            name="odometro"
-                                            className="form-control form-control-sm"
-                                            value={formData.odometro}
-                                            onChange={handleChange}
-                                            readOnly
-                                        />
-                                    </div>
                                 </div>
 
                                 <div className="row">
@@ -163,14 +138,9 @@ export const EditarMantenimiento = ({ modalOpen, onClose, mantenimiento, listaMo
                                             name="servicio"
                                             options={opcionesServicios}
                                             placeholder="SELECCIONA"
-                                            isMulti // Permitir múltiples selecciones
-                                            value={opcionesServicios.filter(op => formData.servicio.includes(op.value))} // Filtrar por IDs seleccionados
-                                            onChange={(selectedOptions) => {
-                                                setFormData({
-                                                    ...formData,
-                                                    servicio: selectedOptions.map(op => op.value) // Guardar solo los IDs seleccionados
-                                                });
-                                            }}
+                                            isMulti
+                                            value={opcionesServicios.filter(op => formData.servicio.includes(op.value))}
+                                            isDisabled
                                         />
 
                                     </div>
@@ -226,22 +196,18 @@ export const EditarMantenimiento = ({ modalOpen, onClose, mantenimiento, listaMo
                                         name="comentario"
                                         className="form-control form-control-sm"
                                         value={formData.comentario}
-                                        onChange={handleChange}
                                         readOnly
                                     />
                                 </div>
 
                                 <div className="modal-footer">
-                                    <Button type="submit" style={{ backgroundColor: "#f1c40f", color: "white" }}>
-                                        Guardar
-                                    </Button>
 
                                     <Button
                                         type="button"
                                         style={{ backgroundColor: "#7f8c8d", color: "white", marginLeft: 7 }}
                                         onClick={onClose}
                                     >
-                                        Cancelar
+                                        Cerrar
                                     </Button>
                                 </div>
                             </form>

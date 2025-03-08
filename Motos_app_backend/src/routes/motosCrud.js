@@ -27,10 +27,11 @@ router.get('/obtener_motos', async (req, res) => {
 });
 
 router.post('/agregar_moto', async (req, res) => {
-    const { inciso, marca, anio, modelo, color, no_serie, motor, placa, propietario, fecha_compra, status, nota } = req.body;
+    const { inciso, idMarca, anio, modelo, color, no_serie, motor, placa, propietario, fecha_compra, status, nota } = req.body;
+    console.log("datos recibidos en el back", req.body)
 
 
-    if (!inciso || !marca || !anio || !modelo || !color || !no_serie || !motor || !placa || !propietario || !fecha_compra || !status) {
+    if (!inciso || !idMarca || !anio || !modelo || !color || !no_serie || !motor || !placa || !propietario || !fecha_compra || !status) {
         return res.status(400).json({ message: 'Hacen falta parámetros para guardar en la tabla' });
     }
 
@@ -61,10 +62,10 @@ router.post('/agregar_moto', async (req, res) => {
 
         const insertQuery = `
             INSERT INTO cat_motocicletas_prueba 
-            (inciso, marca, anio, modelo, color, no_serie, motor, placa, propietario, fecha_compra, status, nota) 
+            (inciso, idMarca, anio, modelo, color, no_serie, motor, placa, propietario, fecha_compra, status, nota) 
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `;
-        const values = [inciso, marca, anio, modelo, color, no_serie, motor, placa, propietario, fecha_compra, status, nota];
+        const values = [inciso, idMarca, anio, modelo, color, no_serie, motor, placa, propietario, fecha_compra, status, nota];
 
         await db.query(insertQuery, values);
 
@@ -79,9 +80,9 @@ router.post('/agregar_moto', async (req, res) => {
 
 router.put('/actualizar_moto/:id', async (req, res) => {
     const motoId = req.params.id;
-    const { inciso, marca, anio, modelo, color, no_serie, motor, placa, propietario, fecha_compra, status, nota } = req.body;
+    const { inciso, idMarca, anio, modelo, color, no_serie, motor, placa, propietario, fecha_compra, status, nota } = req.body;
 
-    if (!inciso || !marca || !anio || !modelo || !color || !no_serie || !motor || !placa || !propietario || !fecha_compra || !status) {
+    if (!inciso || !idMarca || !anio || !modelo || !color || !no_serie || !motor || !placa || !propietario || !fecha_compra || !status) {
         return res.status(400).json({ message: 'Hacen falta parámetros para actualizar la tabla' });
     }
 
@@ -115,10 +116,10 @@ router.put('/actualizar_moto/:id', async (req, res) => {
         // 🔹 Si no hay duplicados, actualizar la moto
         const updateQuery = `
             UPDATE cat_motocicletas_prueba 
-            SET inciso = ?, marca = ?, anio = ?, modelo = ?, color = ?, no_serie = ?, motor = ?, placa = ?, propietario = ?, fecha_compra = ?, status = ?, nota = ?
+            SET inciso = ?, idMarca = ?, anio = ?, modelo = ?, color = ?, no_serie = ?, motor = ?, placa = ?, propietario = ?, fecha_compra = ?, status = ?, nota = ?
             WHERE id = ?
         `;
-        const values = [inciso, marca, anio, modelo, color, no_serie, motor, placa, propietario, fecha_compra, status, nota, motoId];
+        const values = [inciso, idMarca, anio, modelo, color, no_serie, motor, placa, propietario, fecha_compra, status, nota, motoId];
 
         await db.query(updateQuery, values);
 
@@ -183,6 +184,32 @@ router.put('/actualizar_status/:id', async (req, res) => {
     }
 
 })
+
+router.put('/actualizar_status_mant/:id', async (req, res) => {
+    const { id } = req.params;
+
+    if (!id) {
+        return res.status(400).json('Faltan parametros para actualizar el campo');
+    }
+
+    const query = `UPDATE cat_motocicletas_prueba SET status = 2 WHERE id = ?`;
+
+    try {
+        const [results] = await db.query(query, [id]);
+
+        // Verifica si alguna fila fue afectada
+        if (results.affectedRows === 0) {
+            return res.status(404).json('No se encontró la moto con el ID especificado');
+        }
+
+        return res.status(200).json({ message: 'Estado de la moto actualizado a 2 correctamente' });
+
+    } catch (err) {
+        console.error('Error al actualizar el estado:', err);
+        return res.status(500).json({ error: 'Error en el servidor' });
+    }
+});
+
 
 router.get('/marcas', async (req, res) => {
 

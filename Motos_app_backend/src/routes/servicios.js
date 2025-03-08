@@ -3,26 +3,26 @@ const { dbConexion } = require('../database/config');
 const router = express.Router();
 const db = dbConexion();
 
-// router.post('/agregar_servicios', async (req, res) => {
-//     const { nombre, descripcion } = req.body;
+router.post('/agregar_servicio', async (req, res) => {
+    const { nombre, descripcion } = req.body;
 
-//     if (!nombre) {
-//         return res.status(404).json({ message: 'Faltan parametros para guardar en la tabla' });
-//     }
+    if (!nombre) {
+        return res.status(404).json({ message: 'Faltan parametros para guardar en la tabla' });
+    }
 
-//     try {
-//         const query = `INSERT INTO cat_servicios (nombre,descripcion) VALUES (?,?)`;
+    try {
+        const query = `INSERT INTO cat_servicios (nombre,descripcion) VALUES (?,?)`;
 
-//         const values = [nombre, descripcion];
+        const values = [nombre, descripcion];
 
-//         await db.query(query, values);
+        await db.query(query, values);
 
-//         return res.status(200).json({ message: 'Entrada agregada correctamente' });
-//     } catch (error) {
-//         console.error('Error al agregar el producto:', error);
-//         return res.status(500).json({ message: 'Error al agregar el producto' });
-//     }
-// });
+        return res.status(200).json({ message: 'Entrada agregada correctamente' });
+    } catch (error) {
+        console.error('Error al agregar el producto:', error);
+        return res.status(500).json({ message: 'Error al agregar el producto' });
+    }
+});
 
 router.get('/obtener_servicio', async (req, res) => {
 
@@ -85,9 +85,9 @@ router.delete('/eliminar_servicio/:id', async (req, res) => {
 router.post('/agregar_mantenimiento', async (req, res) => {
     console.log("Datos recibidos en el backend:", req.body);
 
-    const { fecha_inicio, moto, odometro, costo, comentario, idUsuario, idCancelo, fecha_cancelacion, servicios, productos } = req.body;
+    const { fecha_inicio, odometro, costo, comentario, moto, idAutorizo, idUsuario, idCancelo, fecha_cancelacion, servicios, productos } = req.body;
 
-    if (!fecha_inicio || !moto || !odometro || !costo || !idUsuario) {
+    if (!fecha_inicio || !moto || !odometro || !costo || !idUsuario || !idAutorizo) {
         return res.status(400).json({ error: "Faltan datos obligatorios" });
     }
 
@@ -96,7 +96,7 @@ router.post('/agregar_mantenimiento', async (req, res) => {
         await connection.beginTransaction();
 
         const [existingService] = await connection.query(
-            "SELECT id FROM servicios WHERE idMoto = ? LIMIT 1",
+            "SELECT id FROM mantenimientos WHERE idMoto = ? LIMIT 1",
             [moto]
         );
 
@@ -107,8 +107,8 @@ router.post('/agregar_mantenimiento', async (req, res) => {
 
         // 🔽 Insertar nuevo servicio si no existe
         const [servicioResult] = await connection.query(
-            "INSERT INTO servicios (fecha_inicio, idMoto, odometro, costo_total, comentario, idUsuario, idCancelo, fecha_cancelacion) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-            [fecha_inicio, moto, odometro, costo, comentario, idUsuario, idCancelo, fecha_cancelacion]
+            "INSERT INTO mantenimientos (fecha_inicio, odometro, costo_total, comentario, idMoto, idAutorizo, idUsuario, idCancelo, fecha_cancelacion) VALUES (?, ?, ?, ?, ?, ?, ?, ?,?)",
+            [fecha_inicio, odometro, costo, comentario, moto, idAutorizo, idUsuario, idCancelo, fecha_cancelacion]
         );
         const idServicio = servicioResult.insertId;
 
@@ -116,7 +116,7 @@ router.post('/agregar_mantenimiento', async (req, res) => {
         if (servicios && servicios.length > 0) {
             const servicioValues = servicios.map(servicio => [idServicio, servicio]);
             await connection.query(
-                "INSERT INTO servicio_servicios (idServicio, idCatServicios) VALUES ?",
+                "INSERT INTO servicio_mantenimientos (idMantenimiento, idServicio) VALUES ?",
                 [servicioValues]
             );
         }
@@ -132,7 +132,7 @@ router.post('/agregar_mantenimiento', async (req, res) => {
             ]);
 
             await connection.query(
-                "INSERT INTO servicios_detalles (idServicio, idProducto, cantidad, costo, subtotal) VALUES ?",
+                "INSERT INTO mantenimientos_detalles (idMantenimiento, idProducto, cantidad, costo, subtotal) VALUES ?",
                 [productoValues]
             );
         }
@@ -155,29 +155,35 @@ router.get('/obtener_mantenimientos', async (req, res) => {
     try {
         const [rows] = await connection.query(`
             SELECT 
-                s.id AS servicio_id,
-                s.fecha_inicio,
-                s.idMoto,
-                m.inciso AS moto_inciso,
-                s.odometro,
-                s.costo_total,
-                s.comentario,
-                s.idUsuario,
-                s.idCancelo,
-                s.fecha_cancelacion,
-                ss.idCatServicios AS servicio_aplicado_id,
+                m.id AS servicio_id,
+                m.fecha_inicio,
+                m.idMoto,
+                m.idAutorizo,
+                m.status,
+                m.idCancelo,
+                m.fecha_cancelacion,
+                mt.id as idMoto,
+                mt.inciso AS moto_inciso,
+                m.odometro,
+                m.costo_total,
+                m.comentario,
+                m.idUsuario,
+                m.fecha_cancelacion,
+                u.nombre,
+                sm.idServicio AS servicio_aplicado_id,
                 cs.nombre AS servicio_aplicado_nombre,
-                sd.idProducto AS producto_id,
+                md.idProducto AS producto_id,
                 p.nombre AS producto_nombre,
-                sd.cantidad,
-                sd.costo,
-                sd.subtotal
-            FROM servicios s
-            JOIN cat_motocicletas_prueba m ON s.idMoto = m.id
-            LEFT JOIN servicio_servicios ss ON s.id = ss.idServicio
-            LEFT JOIN cat_servicios cs ON ss.idCatServicios = cs.id
-            LEFT JOIN servicios_detalles sd ON s.id = sd.idServicio
-            LEFT JOIN productos p ON sd.idProducto = p.id
+                md.cantidad,
+                md.costo,
+                md.subtotal
+            FROM mantenimientos m
+            LEFT JOIN cat_motocicletas_prueba mt ON m.idMoto = mt.id
+            LEFT JOIN servicio_mantenimientos sm ON m.id = sm.idMantenimiento
+            LEFT JOIN cat_servicios cs ON sm.idServicio = cs.id
+            LEFT JOIN usuarios u ON m.idCancelo = u.idUsuario
+            LEFT JOIN mantenimientos_detalles md ON m.id = md.idMantenimiento
+            LEFT JOIN productos p ON md.idProducto = p.id;
         `);
 
         // Agrupar datos por servicio
@@ -189,12 +195,15 @@ router.get('/obtener_mantenimientos', async (req, res) => {
                     id: row.servicio_id,
                     fecha_inicio: row.fecha_inicio,
                     idMoto: row.idMoto,
+                    idAutorizo: row.idAutorizo,
+                    status: row.status,
                     moto_inciso: row.moto_inciso,
                     odometro: row.odometro,
                     costo_total: row.costo_total,
                     comentario: row.comentario,
                     idUsuario: row.idUsuario,
                     idCancelo: row.idCancelo,
+                    nombre: row.nombre,
                     fecha_cancelacion: row.fecha_cancelacion,
                     servicios: [],
                     productos: []
@@ -233,27 +242,98 @@ router.get('/obtener_mantenimientos', async (req, res) => {
     }
 });
 
-router.delete('/actualizar_mantenimiento/:id', async (req, res) => {
+router.put('/actualizar_mantenimiento/:id', async (req, res) => {
+    const { id } = req.params;
+    const { servicios } = req.body;
 
+    if (!id || !servicios || !Array.isArray(servicios)) {
+        return res.status(400).json({ error: "Faltan datos obligatorios o formato incorrecto" });
+    }
+
+    const connection = await db.getConnection();
+    try {
+        await connection.beginTransaction();
+
+        // Verificar si el mantenimiento existe
+        const [mantenimiento] = await connection.query(
+            "SELECT id FROM mantenimientos WHERE id = ?",
+            [id]
+        );
+
+        if (mantenimiento.length === 0) {
+            await connection.rollback();
+            return res.status(404).json({ error: "El mantenimiento no existe" });
+        }
+
+        // Eliminar servicios anteriores del mantenimiento
+        await connection.query(
+            "DELETE FROM servicio_mantenimientos WHERE idMantenimiento = ?",
+            [id]
+        );
+
+        // Insertar los nuevos servicios seleccionados
+        if (servicios.length > 0) {
+            const servicioValues = servicios.map(servicio => [id, servicio]);
+            await connection.query(
+                "INSERT INTO servicio_mantenimientos (idMantenimiento, idServicio) VALUES ?",
+                [servicioValues]
+            );
+        }
+
+        await connection.commit();
+        res.json({ message: "Servicios del mantenimiento actualizados correctamente" });
+
+    } catch (error) {
+        await connection.rollback();
+        console.error("Error al actualizar servicios del mantenimiento:", error);
+        res.status(500).json({ error: "Error al actualizar servicios del mantenimiento" });
+    } finally {
+        connection.release();
+    }
 });
 
 
-router.delete('/eliminar_mantenimiento/:id', async (req, res) => {
-    const { id } = req.params
+router.delete('/cancelar_mantenimiento/:id', async (req, res) => {
+    const { id } = req.params;
+    const { idUsuario } = req.body;
 
-    if (!id || isNaN(id)) {
-        return res.status(400).json({ message: 'No se encontro ningun id' });
+    if (!idUsuario) {
+        return res.status(400).json({ error: 'El idUsuario es obligatorio' });
     }
 
+    const connection = await db.getConnection();
+    await connection.beginTransaction();
+
     try {
-        await db.query('DELETE FROM servicio_motos WHERE id = ?', [id]);
 
-        return res.status(200).json({ ok: true, msg: 'Mantenimiento eliminado correctamente' });
+        const result = await connection.query(
+            `UPDATE mantenimientos 
+             SET idCancelo = ?, fecha_cancelacion = CURDATE(), status = 0 
+             WHERE id = ?`,
+            [idUsuario, id]
+        );
 
+        if (result.affectedRows === 0) {
+            await connection.rollback();
+            return res.status(404).json({ error: 'Mantenimiento no encontrado' });
+        }
+
+        // Si todo fue exitoso, hacer commit de la transacción
+        await connection.commit();
+
+        res.status(200).json({ message: 'Mantenimiento cancelado' });
     } catch (error) {
-        console.error('Error al eliminar el mantenimiento:', error);
-        return res.status(500).json({ ok: false, msg: 'Error en el servidor al eliminar la moto' });
+        // Si ocurre un error, revertir la transacción
+        await connection.rollback();
+        console.error('Error al cancelar mantenimiento:', error);
+        res.status(500).json({ error: 'Error al cancelar mantenimiento' });
+    } finally {
+        // Liberar la conexión
+        connection.release();
     }
 });
 
 module.exports = router;
+
+
+

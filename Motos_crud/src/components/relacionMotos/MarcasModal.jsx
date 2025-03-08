@@ -29,8 +29,6 @@ export const MarcasModal = ({ onClose, modalOpen }) => {
     };
 
     const handleSubmit = async (e) => {
-        e.preventDefault();
-
         if (!validateForm()) return; // Si hay errores, no se envía el formulario
 
         const nuevaMarca = await agregarMarcas(formData);

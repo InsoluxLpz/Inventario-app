@@ -11,7 +11,7 @@ export const AgregarModal = ({ onClose, modalOpen, agregarMotoLista, listaMarcas
 
     const [formData, setFormData] = useState({
         inciso: "",
-        marca: "",
+        idMarca: "",
         anio: "",
         modelo: "",
         color: "",
@@ -40,33 +40,39 @@ export const AgregarModal = ({ onClose, modalOpen, agregarMotoLista, listaMarcas
 
     const opcionesMarcas = [...marcas]
         .sort((a, b) => a.nombre.localeCompare(b.nombre))
-        .map((marca) => ({ value: marca.nombre, label: marca.nombre }));
+        .map((marca) => ({ value: marca.id, label: marca.nombre }));
 
     const validateForm = () => {
         const newErrors = {};
+
         Object.keys(formData).forEach((key) => {
-            // Excluir "nota" de la validación de campos vacíos
-            if (key !== "nota" && !formData[key].trim()) {
+            if (key !== "nota" && (formData[key] === "" || formData[key] === null || formData[key] === undefined)) {
                 newErrors[key] = "Este campo es obligatorio";
             }
         });
+
         setErrors(newErrors);
-        return Object.keys(newErrors).length === 0; // Retorna true si no hay errores
+        return Object.keys(newErrors).length === 0; // Devuelve `true` si no hay errores
     };
+
+
 
 
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        console.log("Enviando formulario...");
 
-        if (!validateForm()) return; // Validación de campos vacíos
+        if (!validateForm()) {
+            console.log("Validación fallida:", errors);
+            return; // Si hay errores, no continúa
+        }
 
         const result = await agregarMoto(formData);
+        console.log("Respuesta del backend:", result);
 
         if (result && result.error) {
-            // Si la API devuelve un error, verificamos si es un problema de duplicado
             const newErrors = {};
-
             if (result.error.includes("El número de serie ya existe.")) {
                 newErrors.no_serie = "Este número de serie ya está registrado.";
             }
@@ -87,6 +93,7 @@ export const AgregarModal = ({ onClose, modalOpen, agregarMotoLista, listaMarcas
         }
     };
 
+
     return (
         <div className="modal-backdrop">
             <div className="modal fade show" style={{ display: "block" }} aria-labelledby="exampleModalLabel" tabIndex="-1" role="dialog">
@@ -106,12 +113,12 @@ export const AgregarModal = ({ onClose, modalOpen, agregarMotoLista, listaMarcas
                                     <div className="col-md-4 mb-3">
                                         <label className="form-label">Marca</label>
                                         <Select
-                                            name="marca"
+                                            name="idMarca"
                                             options={opcionesMarcas}
                                             placeholder="SELECCIONA"
-                                            value={opcionesMarcas.find((op) => op.value === formData.marca)}
+                                            value={opcionesMarcas.find((op) => op.value === formData.idMarca)}
                                             isSearchable={true}
-                                            onChange={(selectedOption) => setFormData({ ...formData, marca: selectedOption.value })}
+                                            onChange={(selectedOption) => setFormData({ ...formData, idMarca: selectedOption.value })}
                                             styles={{
                                                 menuList: (provided) => ({
                                                     ...provided,

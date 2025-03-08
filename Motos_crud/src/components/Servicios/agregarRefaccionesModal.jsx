@@ -15,6 +15,8 @@ export const AgregarRefaccionesModal = ({ onClose, modalOpen, agregarProductoATa
 
     const [refacciones, setRefacciones] = useState([]);
     const [errors, setErrors] = useState({});
+    const [stockDisponible, setStockDisponible] = useState({});
+
 
     useEffect(() => {
         const fetchProductos = async () => {
@@ -32,25 +34,26 @@ export const AgregarRefaccionesModal = ({ onClose, modalOpen, agregarProductoATa
         setFormData((prev) => {
             let nuevoEstado = { ...prev, [name]: value };
 
-            // Si cambia el producto, recalcular el precio total
             if (name === "producto") {
                 const productoSeleccionado = refacciones.find((p) => p.nombre === value);
                 if (productoSeleccionado) {
                     nuevoEstado.precioTotal = productoSeleccionado.precio * (prev.cantidad || 1);
+                    setStockDisponible(productoSeleccionado.stock_disponible); // Guardamos el stock disponible
                 }
             }
 
-            // Si cambia la cantidad, recalcular el precio total
             if (name === "cantidad") {
-                const productoSeleccionado = refacciones.find((p) => p.nombre === prev.producto);
-                if (productoSeleccionado) {
-                    nuevoEstado.precioTotal = productoSeleccionado.precio * value;
+                const cantidadIngresada = Number(value);
+                if (cantidadIngresada > stockDisponible) {
+                    setErrors((prev) => ({ ...prev, cantidad: "Cantidad excede el stock disponible" }));
+                } else {
+                    setErrors((prev) => ({ ...prev, cantidad: "" }));
                 }
+                nuevoEstado.precioTotal = (prev.producto ? refacciones.find((p) => p.nombre === prev.producto).precio : 0) * cantidadIngresada;
             }
 
             return nuevoEstado;
         });
-        setErrors((prev) => ({ ...prev, [name]: "" }));
     };
 
     const opcionesProductos = [...refacciones]
@@ -64,6 +67,7 @@ export const AgregarRefaccionesModal = ({ onClose, modalOpen, agregarProductoATa
         const newErrors = {};
         if (!formData.producto) newErrors.producto = "Elige un producto";
         if (!formData.cantidad || formData.cantidad <= 0) newErrors.cantidad = "Ingresa una cantidad válida";
+        if (formData.cantidad > stockDisponible) newErrors.cantidad = "Cantidad excede el stock disponible";
 
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
@@ -78,7 +82,7 @@ export const AgregarRefaccionesModal = ({ onClose, modalOpen, agregarProductoATa
         if (!productoSeleccionado) return;
 
         const productoData = {
-            id: productoSeleccionado.id,  // Asegura que se pasa el ID
+            id: productoSeleccionado.id,
             producto: formData.producto,
             cantidad: Number(formData.cantidad),
             costo_unitario: productoSeleccionado.precio,
@@ -92,17 +96,16 @@ export const AgregarRefaccionesModal = ({ onClose, modalOpen, agregarProductoATa
             cantidad: "",
             precioTotal: 0,
         });
-
-        onClose();
     };
+
 
 
 
     return (
         <div className="modal-backdrop">
             <div className="modal fade show" style={{ display: "block" }} aria-labelledby="exampleModalLabel" tabIndex="-1" role="dialog">
-                <div className="modal-dialog" role="document" style={{ maxWidth: "60vw", marginTop: 90 }}>
-                    <div className="modal-content w-100" style={{ maxWidth: "60vw" }}>
+                <div className="modal-dialog" role="document" style={{ maxWidth: "20vw", marginTop: 90 }}>
+                    <div className="modal-content w-90" style={{ maxWidth: "60vw" }}>
                         <div className="modal-header" style={{ backgroundColor: '#1f618d' }}>
                             <h5 className="modal-title" style={{ color: 'white' }}>Agregar Mantenimiento</h5>
                         </div>
@@ -148,11 +151,11 @@ export const AgregarRefaccionesModal = ({ onClose, modalOpen, agregarProductoATa
                             </div>
                             <div className="modal-footer">
                                 <Button type="submit" style={{ backgroundColor: "#f1c40f", color: "white" }} onClick={handleSubmit}>
-                                    Guardar
+                                    Agregar
                                 </Button>
 
                                 <Button type="button" style={{ backgroundColor: "#7f8c8d", color: "white", marginLeft: 7 }} onClick={onClose}>
-                                    Cancelar
+                                    Salir
                                 </Button>
                             </div>
                         </form>

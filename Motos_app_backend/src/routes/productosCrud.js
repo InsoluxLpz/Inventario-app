@@ -51,9 +51,10 @@ router.get('/obtener_productos', async (req, res) => {
     console.log(req.body)
     const query = `
 SELECT 
-    p.*, 
+      p.*, 
     g.nombre AS grupo,
     u.nombre AS unidad_medida,
+    COALESCE(st.stock_disponible, 0) AS stock_disponible, 
     JSON_ARRAYAGG(
         JSON_OBJECT('id', pr.id, 'nombre', pr.nombre_proveedor)
     ) AS proveedores
@@ -65,10 +66,19 @@ JOIN
     cat_unidad_medida u ON p.idUnidadMedida = u.id
 LEFT JOIN 
     productos_proveedor pp ON p.id = pp.idProducto
-LEFT JOIN 
-    proveedores pr ON pp.idProveedor = pr.id  
+LEFT JOIN (
+    -- Subconsulta para evitar duplicaciones de proveedores antes del JSON_ARRAYAGG
+    SELECT DISTINCT id, nombre_proveedor FROM proveedores
+) pr ON pp.idProveedor = pr.id
+LEFT JOIN (
+    -- Subconsulta para calcular el stock por producto
+    SELECT producto_id, SUM(cantidad) AS stock_disponible 
+    FROM stock_almacen 
+    GROUP BY producto_id
+) st ON p.id = st.producto_id
 GROUP BY 
-    p.id
+    p.id;
+
 
     `;
 

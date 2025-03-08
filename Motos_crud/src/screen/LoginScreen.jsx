@@ -33,6 +33,7 @@ export const LoginScreen = () => {
                 // Guardar tanto el token de acceso como el refresh token
                 localStorage.setItem('token', data.token);
                 localStorage.setItem('idUsuario', data.id);
+                localStorage.setItem('usuario', data.nombre);
 
                 Swal.fire({
                     position: "center",

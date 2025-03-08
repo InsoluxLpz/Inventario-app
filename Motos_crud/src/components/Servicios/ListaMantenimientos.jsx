@@ -14,16 +14,20 @@ import { EliminarMantenimiento, ObtenerMantenimientos, ObtenerServicios, } from 
 import DeleteIcon from "@mui/icons-material/Delete";
 import { RealizarMantenimiento } from "./RealizarMantenimiento";
 import { EditarMantenimiento } from "./EditarMantenimiento";
-import { obtenerProveedores } from "../../api/proveedoresApi";
 import { obtenerProductos } from "../../api/productosApi";
+import { obtenerMotos } from "../../api/motosApi";
+import InfoIcon from "@mui/icons-material/Info";
+import { VerMantenimientoCancelado } from "./VerMantenimientoCancelado";
 
 export const ListaMantenimientos = () => {
   const [mantenimientos, setMantenimientos] = useState([]);
+  const [mantenimientoSeleccionado, setMantenimientoSeleccionado] = useState(null);
   const [openModalAgregar, setOpenModalAgregar] = useState(false);
   const [openModalEditar, setOpenModalEditar] = useState(false);
-  const [proveedores, setProveedores] = useState([]);
+  const [openModalInfo, setOpenModalInfo] = useState(false);
   const [servicios, setServicios] = useState([]);
   const [productos, setProductos] = useState([]);
+  const [motos, setMotos] = useState([]);
   const [filtro, setFiltro] = useState({
     vehiculo: "",
     fecha: "",
@@ -37,17 +41,27 @@ export const ListaMantenimientos = () => {
     setOpenModalAgregar(false);
   };
 
-  const handleOpenModalEditar = () => {
+  const handleOpenModalEditar = (mantenimiento) => {
     setOpenModalEditar(true);
+    setMantenimientoSeleccionado(mantenimiento);
   };
   const handleCloseModalEditar = () => {
     setOpenModalEditar(false);
   };
 
-  const fetchProveedor = async () => {
-    const data = await obtenerProveedores();
+  const handleOpenModalInfo = (mantenimiento) => {
+    setMantenimientoSeleccionado(mantenimiento);
+    setOpenModalInfo(true);
+  };
+
+  const handleCloseModalInfo = () => {
+    setOpenModalInfo(false);
+  };
+
+  const fetchMotos = async () => {
+    const data = await obtenerMotos();
     if (data) {
-      setProveedores(data);
+      setMotos(data);
     }
   };
 
@@ -65,15 +79,17 @@ export const ListaMantenimientos = () => {
     }
   };
 
-  const handleEliminarMantenimiento = (id) => {
-    EliminarMantenimiento(id, (idEliminado) => {
-      setMantenimientos((MantenimientosActuales) =>
-        MantenimientosActuales.filter(
+  const handleEliminarMantenimiento = async (id) => {
+    await EliminarMantenimiento(id, (idEliminado) => {
+      setMantenimientos((mantenimientosActuales) =>
+        mantenimientosActuales.filter(
           (mantenimiento) => mantenimiento.id !== idEliminado
         )
       );
     });
+    cargarMantenimientos();
   };
+
 
   const actualizarLista = (mantenimientoActualizado) => {
     setMantenimientos((prevMantenimientos) =>
@@ -89,22 +105,29 @@ export const ListaMantenimientos = () => {
       const mantenimientosAdaptados = data.map((servicio) => ({
         id: servicio.id,
         moto_inciso: servicio.moto_inciso || "Desconocido",
+        idMoto: servicio.idMoto || "",
+        idAutorizo: servicio.idAutorizo || "", // <-- CORREGIDO
         fecha_inicio: servicio.fecha_inicio,
+        fecha_cancelacion: servicio.fecha_cancelacion,
         comentario: servicio.comentario,
-        costo: parseFloat(servicio.costo_total) || 0, // Conversión segura a número
+        costo_total: parseFloat(servicio.costo_total) || 0,
         servicios: servicio.servicios || [],
         productos: servicio.productos || [],
+        odometro: servicio.odometro || 0, // Corregido para evitar array vacío
+        status: servicio.status,
+        nombre: servicio.nombre,
       }));
 
+
       setMantenimientos(mantenimientosAdaptados);
+      console.log(data)
     }
   };
 
-
   useEffect(() => {
     cargarMantenimientos();
+    fetchMotos();
     fetchProducto();
-    fetchProveedor();
     fetchServicios();
   }, []);
 
@@ -177,7 +200,8 @@ export const ListaMantenimientos = () => {
         >
         </Box> */}
 
-        <Box width="90%" maxWidth={2000} margin="0 auto" mt={10}>
+        <Box width="90%" maxWidth={2000} margin="0 auto" mt={12}> {/* Aquí he aumentado el mt */}
+
           <Box
             sx={{
               backgroundColor: "#1f618d",
@@ -195,7 +219,7 @@ export const ListaMantenimientos = () => {
               <Table stickyHeader aria-label="sticky table">
                 <TableHead>
                   <TableRow>
-                    {["Vehiculo", "Servicio(s)", "Refacciones Almacen", "Fecha de Inicio", "Comentario", "Costo Total", "Acciones"].map((header) => (
+                    {["Vehiculo", "Servicio(s)", "Refacciones Almacen", "Fecha de Inicio", "Comentario", "Costo Total", "status", "Acciones"].map((header) => (
                       <TableCell key={header} align="center" sx={{ fontWeight: "bold", backgroundColor: "#f4f6f7", color: "black", textAlign: "center", width: "16.66%" }}>
                         {header}
                       </TableCell>
@@ -205,11 +229,14 @@ export const ListaMantenimientos = () => {
                 <TableBody>
                   {mantenimientos.length > 0 ? (
                     mantenimientos.map((mantenimiento) => (
-                      <TableRow key={mantenimiento.id} sx={{
-                        backgroundColor: '#ffff', "&:hover": {
-                          backgroundColor: "#eaecee ",
-                        }
-                      }}
+                      <TableRow
+                        key={mantenimiento.id}
+                        sx={{
+
+                          "&:hover": {
+                            backgroundColor: "#eaecee ",
+                          },
+                        }}
                       >
                         <TableCell align="center" sx={{ textAlign: "right", width: "16.66%" }}>
                           {mantenimiento.moto_inciso}
@@ -231,21 +258,43 @@ export const ListaMantenimientos = () => {
                           {mantenimiento.comentario}
                         </TableCell>
                         <TableCell align="center" sx={{ textAlign: "right", width: "16.66%" }}>
-                          {formatearDinero(mantenimiento.costo)}
+                          {formatearDinero(mantenimiento.costo_total)}
                         </TableCell>
+                        <TableCell align="center" sx={{ textAlign: "right", width: "16.66%", fontWeight: "bold", color: mantenimiento.status === 0 ? "red" : "green" }}>
+                          {mantenimiento.status === 0 ? "Cancelado" : "Activo"}
+                        </TableCell>
+
                         <TableCell align="center" sx={{ textAlign: "right", width: "16.66%" }}>
-                          <IconButton variant="contained" sx={{ color: "black" }} onClick={handleOpenModalEditar}>
-                            <EditIcon sx={{ fontSize: 20 }} />
-                          </IconButton>
-                          <IconButton
-                            variant="contained"
-                            color="error"
-                            style={{ marginLeft: "10px" }}
-                            onClick={() => handleEliminarMantenimiento(mantenimiento.id)}
-                          >
-                            <DeleteIcon sx={{ fontSize: 20 }} />
-                          </IconButton>
+                          {mantenimiento.status === 1 ? (
+                            <>
+                              <IconButton
+                                variant="contained"
+                                sx={{ color: "black" }}
+                                onClick={() => handleOpenModalEditar(mantenimiento)}
+                              >
+                                <EditIcon sx={{ fontSize: 20 }} />
+                              </IconButton>
+                              <IconButton
+                                variant="contained"
+                                color="error"
+                                style={{ marginLeft: "10px" }}
+                                onClick={() => handleEliminarMantenimiento(mantenimiento.id)}
+                              >
+                                <DeleteIcon sx={{ fontSize: 20 }} />
+                              </IconButton>
+                            </>
+                          ) : (
+                            <IconButton
+                              variant="contained"
+                              color="primary"
+                              onClick={() => handleOpenModalInfo(mantenimiento)}
+                            >
+                              <InfoIcon sx={{ fontSize: 20 }} />
+                            </IconButton>
+                          )}
                         </TableCell>
+
+
                       </TableRow>
                     ))
                   ) : (
@@ -267,7 +316,18 @@ export const ListaMantenimientos = () => {
             <EditarMantenimiento
               modalOpen={openModalEditar}
               onClose={handleCloseModalEditar}
-              mantenimiento={mantenimientos}
+              mantenimiento={mantenimientoSeleccionado}
+              listaMotos={motos}
+              listaProductos={productos}
+              listaServicios={servicios}
+            />
+
+            <VerMantenimientoCancelado
+              modalOpen={openModalInfo}
+              onClose={handleCloseModalInfo}
+              mantenimiento={mantenimientoSeleccionado}
+              listaMotos={motos}
+              listaServicios={servicios}
             />
           </Paper>
         </Box>

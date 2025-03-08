@@ -26,7 +26,7 @@ import WarehouseIcon from "@mui/icons-material/Warehouse";
 import LogoutIcon from "@mui/icons-material/Logout";
 import InboxIcon from '@mui/icons-material/Inbox';
 
-const drawerWidth = 240;
+const drawerWidth = 290;
 
 const openedMixin = (theme) => ({
   width: drawerWidth,
@@ -52,10 +52,12 @@ const closedMixin = (theme) => ({
 const DrawerHeader = styled("div")(({ theme }) => ({
   display: "flex",
   alignItems: "center",
-  justifyContent: "flex-end",
+  justifyContent: "space-between",  // Cambié esto para alinear el título
   padding: theme.spacing(0, 1),
   ...theme.mixins.toolbar,
+  backgroundColor: "#f1c40f",  // Color para el header del Drawer
 }));
+
 
 const AppBar = styled(MuiAppBar, {
   shouldForwardProp: (prop) => prop !== "open",
@@ -83,11 +85,17 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== "open" 
     boxSizing: "border-box",
     ...(open && {
       ...openedMixin(theme),
-      "& .MuiDrawer-paper": openedMixin(theme),
+      "& .MuiDrawer-paper": {
+        ...openedMixin(theme),
+        backgroundColor: "#e5e8e8 ", // Color para el drawer completo
+      },
     }),
     ...(!open && {
       ...closedMixin(theme),
-      "& .MuiDrawer-paper": closedMixin(theme),
+      "& .MuiDrawer-paper": {
+        ...closedMixin(theme),
+        backgroundColor: "#e5e8e8 ", // Color para el drawer completo
+      },
     }),
   })
 );
@@ -145,6 +153,10 @@ export const NavBar = ({ onSearch }) => {
     "/servicios/ListaServicios": "Servicios",
     "/almacen/ProductoAlmacenTable": "Almacén de productos",
     "/almacen/MovimientosAlmacenTable": "Movimientos de productos",
+    "/Proveedores": "Catalogo de Proveedores",
+    "/servicios/ListaMantenimientos": "Mantenimientos",
+    "/servicios/CatalogoServicios": "Catalogo de servicios",
+    "/almacen/Entradas": "Entradas"
   };
 
   const currentTitle = routeTitles[location.pathname] || "Inicio";
@@ -176,6 +188,9 @@ export const NavBar = ({ onSearch }) => {
       {/* Drawer */}
       <Drawer variant="permanent" open={open}>
         <DrawerHeader>
+          <Typography variant="h6" style={{ color: 'black' }}>
+            MODULOS
+          </Typography>
           <IconButton onClick={handleDrawerClose}>
             {theme.direction === "rtl" ? <ChevronRightIcon /> : <ChevronLeftIcon />}
           </IconButton>

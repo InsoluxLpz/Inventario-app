@@ -16,7 +16,7 @@ export const EditarModal = ({ onClose, modalOpen, moto, actualizarLista, listaMa
 
     const [formData, setFormData] = useState({
         inciso: moto.inciso,
-        marca: moto.marca,
+        idMarca: moto.idMarca,
         anio: moto.anio,
         modelo: moto.modelo,
         color: moto.color,
@@ -35,7 +35,7 @@ export const EditarModal = ({ onClose, modalOpen, moto, actualizarLista, listaMa
         if (moto) {
             setFormData({
                 inciso: moto.inciso || "",
-                marca: moto.marca || "",
+                idMarca: moto.idMarca || "",
                 anio: moto.anio || "",
                 modelo: moto.modelo || "",
                 color: moto.color || "",
@@ -47,6 +47,7 @@ export const EditarModal = ({ onClose, modalOpen, moto, actualizarLista, listaMa
                 status: moto.status || "",
                 nota: moto.nota || "",
             });
+            console.log(moto)
         }
     }, [moto]);
 
@@ -64,24 +65,19 @@ export const EditarModal = ({ onClose, modalOpen, moto, actualizarLista, listaMa
 
     const opcionesMarcas = [...marcas]
         .sort((a, b) => a.nombre.localeCompare(b.nombre))
-        .map((marca) => ({ value: marca.nombre, label: marca.nombre }));
+        .map((marca) => ({ value: marca.id, label: marca.nombre }));
 
     const validateForm = () => {
         const newErrors = {};
+
         Object.keys(formData).forEach((key) => {
-
-            if (key === "nota") return;
-
-            // Convertimos el valor a string solo si no es null o undefined
-            const value = formData[key] !== null && formData[key] !== undefined ? String(formData[key]).trim() : "";
-
-            if (!value) {
+            if (key !== "nota" && (formData[key] === "" || formData[key] === null || formData[key] === undefined)) {
                 newErrors[key] = "Este campo es obligatorio";
             }
         });
 
         setErrors(newErrors);
-        return Object.keys(newErrors).length === 0; // Retorna true si no hay errores
+        return Object.keys(newErrors).length === 0; // Devuelve `true` si no hay errores
     };
 
 
@@ -137,12 +133,12 @@ export const EditarModal = ({ onClose, modalOpen, moto, actualizarLista, listaMa
                                     <div className="col-md-4 mb-3">
                                         <label className="form-label">Marca</label>
                                         <Select
-                                            name="marca"
+                                            name="idMarca"
                                             options={opcionesMarcas}
                                             placeholder="SELECCIONA"
-                                            value={opcionesMarcas.find((op) => op.value === formData.marca)}
+                                            value={opcionesMarcas.find((op) => op.value === formData.idMarca)}
                                             isSearchable={true}
-                                            onChange={(selectedOption) => setFormData({ ...formData, marca: selectedOption.value })}
+                                            onChange={(selectedOption) => setFormData({ ...formData, idMarca: selectedOption.value })}
                                             styles={{
                                                 menuList: (provided) => ({
                                                     ...provided,

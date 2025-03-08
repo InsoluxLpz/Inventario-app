@@ -5,26 +5,29 @@ import Select from "react-select";
 import { obtenerMotos } from '../../api/motosApi';
 import { AgregarMantenimiento, ObtenerServicios } from '../../api/ServiciosApi';
 import { AgregarRefaccionesModal } from './agregarRefaccionesModal';
+import { cargarListasEntradas } from '../../api/almacenProductosApi';
 
 export const RealizarMantenimiento = ({ modalOpen, onClose }) => {
     if (!modalOpen) return null;
 
+    const idUsuario = localStorage.getItem('idUsuario');
+
+
     const [formData, setFormData] = useState({
-        fecha_inicio: "",
+        fecha_inicio: new Date().toISOString().split('T')[0],
         vehiculo: "",
+        idAutorizo: "",
         odometro: "",
         servicio: [],
-        refacciones_almacen: [],
         costo_total: "",
         comentario: "",
-        status: "",
     });
 
     const [errors, setErrors] = useState({});
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [motos, setMotos] = useState([]);
+    const [autorizaciones, setAutorizaciones] = useState([]);
     const [servicio, setServicio] = useState([]);
-
     const [productosSeleccionados, setProductosSeleccionados] = useState([]);
 
     // Función para agregar un producto y actualizar el costo total
@@ -49,11 +52,20 @@ export const RealizarMantenimiento = ({ modalOpen, onClose }) => {
                 // Si no existe, agregarlo normalmente
                 nuevosProductos = [...prevProductos, productoData];
             }
-
             // Calcular el costo total de todos los productos
             const total = nuevosProductos.reduce((acc, prod) => acc + prod.subtotal, 0);
-
             // Actualizar el costo total en el estado de formData
+            setFormData((prev) => ({ ...prev, costo_total: total.toFixed(2) }));
+
+            return nuevosProductos;
+        });
+    };
+
+    const eliminarProductoDeTabla = (index) => {
+        setProductosSeleccionados((prevProductos) => {
+            const nuevosProductos = prevProductos.filter((_, i) => i !== index);
+            // Calcular el nuevo costo total
+            const total = nuevosProductos.reduce((acc, prod) => acc + prod.subtotal, 0);
             setFormData((prev) => ({ ...prev, costo_total: total.toFixed(2) }));
 
             return nuevosProductos;
@@ -67,9 +79,20 @@ export const RealizarMantenimiento = ({ modalOpen, onClose }) => {
         const data = await obtenerMotos();
         if (data) {
             setMotos(data);
-            console.log(data);
         }
     };
+
+    const fetchAutorizo = async () => {
+        const data = await cargarListasEntradas()
+        if (data.autorizaciones) {
+            setAutorizaciones(
+                data.autorizaciones.map((a) => ({
+                    value: a.idAutorizo,
+                    label: a.nombre,
+                }))
+            );
+        }
+    }
 
     const opcionesVehiculos = motos.map((moto) => ({
         value: moto.id,
@@ -86,6 +109,7 @@ export const RealizarMantenimiento = ({ modalOpen, onClose }) => {
         };
         cargarServicios();
         fetchMotos();
+        fetchAutorizo();
     }, []);
 
     const handleChange = (e) => {
@@ -97,7 +121,7 @@ export const RealizarMantenimiento = ({ modalOpen, onClose }) => {
     const handleSelectChange = (selectedOptions) => {
         setFormData((prev) => ({
             ...prev,
-            servicio: selectedOptions ? selectedOptions.map(option => option.value) : [], // Ahora usamos los IDs
+            servicio: selectedOptions ? selectedOptions.map(option => option.value) : [],
         }));
     };
 
@@ -105,10 +129,19 @@ export const RealizarMantenimiento = ({ modalOpen, onClose }) => {
         const newErrors = {};
 
         Object.keys(formData).forEach((key) => {
-            if (Array.isArray(formData[key])) {
-                if (formData[key].length === 0) {
+            if (key === "comentario") return; // Excluir el comentario de la validación
+
+            const value = formData[key];
+
+
+            if (Array.isArray(value)) {
+                if (value.length === 0) {
                     newErrors[key] = "Este campo es obligatorio";
                 }
+            } else if (typeof value === 'string' && value.trim() === "") {
+                newErrors[key] = "Este campo es obligatorio";
+            } else if (value === "" || value === null || value === undefined) {
+                newErrors[key] = "Este campo es obligatorio";
             }
         });
 
@@ -118,8 +151,7 @@ export const RealizarMantenimiento = ({ modalOpen, onClose }) => {
     };
 
     const handleSubmit = async (e) => {
-        e.preventDefault();
-
+        e.preventDefault()
         if (!validateForm()) return;
 
         const nuevoMantenimiento = {
@@ -128,22 +160,18 @@ export const RealizarMantenimiento = ({ modalOpen, onClose }) => {
             odometro: formData.odometro,
             costo: parseFloat(formData.costo_total) || 0,
             comentario: formData.comentario,
-            idUsuario: 7,
+            idUsuario: idUsuario,
+            idAutorizo: formData.idAutorizo,
             idCancelo: null,
             fecha_cancelacion: null,
             servicios: formData.servicio,
             productos: productosSeleccionados.map(prod => ({
-                idProducto: prod.id, // Asegura que usa "id" en lugar de "producto"
+                idProducto: prod.id,
                 cantidad: prod.cantidad,
                 costo: parseFloat(prod.costo_unitario) || 0,
                 subtotal: parseFloat(prod.subtotal) || 0
             }))
         };
-
-
-
-        console.log("Datos a enviar:", nuevoMantenimiento);
-
         const respuesta = await AgregarMantenimiento(nuevoMantenimiento);
 
         if (respuesta && !respuesta.error) {
@@ -154,16 +182,18 @@ export const RealizarMantenimiento = ({ modalOpen, onClose }) => {
                 vehiculo: "",
                 odometro: "",
                 servicio: [],
-                refacciones_almacen: [],
                 costo_total: "",
                 comentario: "",
-                status: "",
             });
             setProductosSeleccionados([]);
             setErrors({});
+            onClose();
+
+            window.location.reload();
         } else {
             console.error("Error al agregar mantenimiento:", respuesta.error);
         }
+
     };
 
     useEffect(() => {
@@ -184,11 +214,11 @@ export const RealizarMantenimiento = ({ modalOpen, onClose }) => {
                             </div>
 
                             {/* Formulario */}
-                            <form onSubmit={handleSubmit} style={{ marginTop: 3 }}>
+                            <form onSubmit={handleSubmit} style={{ marginTop: 10 }}>
                                 <div className="row">
                                     <div className="col-md-3 mb-2">
                                         <label className="form-label">Fecha de inicio</label>
-                                        <input name="fecha_inicio" type='date' className={`form-control form-control-sm ${errors.fecha_inicio ? "is-invalid" : ""}`} value={formData.fecha_inicio} onChange={handleChange} />
+                                        <input name="fecha_inicio" type='date' className={`form-control form-control-sm ${errors.fecha_inicio ? "is-invalid" : ""}`} value={formData.fecha_inicio} onChange={handleChange} readOnly />
                                         {errors.fecha_inicio && <div className="invalid-feedback">{errors.fecha_inicio}</div>}
                                     </div>
 
@@ -199,10 +229,28 @@ export const RealizarMantenimiento = ({ modalOpen, onClose }) => {
                                             options={opcionesVehiculos}
                                             placeholder="SELECCIONA"
                                             value={opcionesVehiculos.find((op) => op.value === formData.vehiculo)}
-                                            onChange={(selectedOption) => setFormData({ ...formData, vehiculo: selectedOption.value })}
+                                            onChange={(selectedOption) => {
+                                                setFormData({ ...formData, vehiculo: selectedOption.value });
+                                                setErrors((prev) => ({ ...prev, vehiculo: "" })); // Limpiar el error
+                                            }}
+
+                                            styles={{
+                                                control: (base) => ({
+                                                    ...base,
+                                                    minHeight: "45px",
+                                                    height: "45px",
+                                                }),
+                                                menuList: (provided) => ({
+                                                    ...provided,
+                                                    maxHeight: "200px",
+                                                    overflowY: "auto",
+                                                }),
+                                            }}
                                         />
 
-                                        {errors.vehiculo && <div className="invalid-feedback">{errors.vehiculo}</div>}
+                                        {errors.vehiculo && (
+                                            <div className="text-danger">{errors.vehiculo}</div>
+                                        )}
                                     </div>
 
                                     <div className="col-md-4 mb-2">
@@ -224,7 +272,12 @@ export const RealizarMantenimiento = ({ modalOpen, onClose }) => {
                                                 const serv = servicio.find(serv => serv.value === s);
                                                 return serv ? { value: serv.value, label: serv.label } : null;
                                             }).filter(Boolean)}
-                                            onChange={handleSelectChange}
+                                            onChange={(selectedOptions) => {
+                                                const serviciosSeleccionados = selectedOptions ? selectedOptions.map(option => option.value) : [];
+                                                setFormData({ ...formData, servicio: serviciosSeleccionados });
+                                                setErrors((prev) => ({ ...prev, servicio: "" })); // Limpiar el error
+                                            }}
+
                                             styles={{
                                                 control: (base) => ({
                                                     ...base,
@@ -257,33 +310,72 @@ export const RealizarMantenimiento = ({ modalOpen, onClose }) => {
                                     <table className="table">
                                         <thead>
                                             <tr>
-                                                <th>Producto</th>
-                                                <th>Costo Unitario</th>
-                                                <th>Cantidad</th>
-                                                <th>Subtotal</th>
+                                                <th style={{ textAlign: "right", width: "16.66%" }}>Producto</th>
+                                                <th style={{ textAlign: "right", width: "16.66%" }}>Costo Unitario</th>
+                                                <th style={{ textAlign: "right", width: "16.66%" }}>Cantidad</th>
+                                                <th style={{ textAlign: "right", width: "16.66%" }}>Subtotal</th>
+                                                <th style={{ textAlign: "right", width: "16.66%" }}>Acciones</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             {productosSeleccionados.map((producto, index) => (
                                                 <tr key={index}>
-                                                    <td>{producto.producto}</td>
-                                                    <td>${producto.costo_unitario}</td>
-                                                    <td>{producto.cantidad}</td>
-                                                    <td>${producto.subtotal.toFixed(2)}</td>
+                                                    <td style={{ textAlign: "right", width: "16.66%" }}>{producto.producto}</td>
+                                                    <td style={{ textAlign: "right", width: "16.66%" }}>${producto.costo_unitario}</td>
+                                                    <td style={{ textAlign: "right", width: "16.66%" }}>{producto.cantidad}</td>
+                                                    <td style={{ textAlign: "right", width: "16.66%" }}>${producto.subtotal.toFixed(2)}</td>
+                                                    <td style={{ textAlign: "right", width: "16.66%" }}>
+                                                        <button className="btn btn-danger btn-sm" onClick={() => eliminarProductoDeTabla(index)}>
+                                                            Eliminar
+                                                        </button>
+                                                    </td>
+
                                                 </tr>
                                             ))}
                                         </tbody>
+
                                     </table>
                                 </div>
 
                                 <div className="row">
-                                    <div className="col-md-6 mb-2">
+                                    <div className="col-md-4 mb-2">
+                                        <label className="form-label">Autorizó</label>
+                                        <Select
+                                            name="idAutorizo"
+                                            options={autorizaciones}
+                                            value={autorizaciones.find(option => option.value === formData.idAutorizo)}
+                                            placeholder="SELECCIONA"
+                                            onChange={(selectedOption) => {
+                                                setFormData({ ...formData, idAutorizo: selectedOption.value });
+                                                setErrors((prev) => ({ ...prev, idAutorizo: "" })); // Limpiar el error
+                                            }}
+
+                                            styles={{
+                                                control: (base) => ({
+                                                    ...base,
+                                                    minHeight: "45px",
+                                                    height: "45px",
+                                                }),
+                                                menuList: (provided) => ({
+                                                    ...provided,
+                                                    maxHeight: "200px",
+                                                    overflowY: "auto",
+                                                }),
+                                            }}
+                                        />
+                                        {errors.idAutorizo && (
+                                            <div className="text-danger">{errors.idAutorizo}</div>
+                                        )}
+                                    </div>
+
+                                    <div className="col-md-2 offset-md-6 ">
                                         <label className="form-label">Costo Total</label>
-                                        <input type="number" name="costo_refacciones" className={`form-control form-control-sm ${errors.costo_total ? "is-invalid" : ""}`} value={formData.costo_total} readOnly />
+                                        <input type="number" name="costo_total" className={`form-control form-control-sm ${errors.costo_total ? "is-invalid" : ""}`} value={formData.costo_total} onChange={handleChange} />
+                                        {errors.costo_total && <div className="invalid-feedback">{errors.costo_total}</div>}
                                     </div>
                                 </div>
 
-                                <div className="col-md-12 mb-2">
+                                <div className="col-md-12 mb-2 ">
                                     <label className="form-label">Comentario</label>
                                     <textarea name="comentario" className={`form-control form-control-sm`} value={formData.comentario} onChange={handleChange} />
                                 </div>

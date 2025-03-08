@@ -72,8 +72,6 @@ export const AgregarProductoModal = ({ modalOpen, onClose, grupos, unidadMedida 
         const precioNumerico = parseFloat(formData.precio.replace(/[^\d.-]/g, ''));
 
         if (!validateForm()) return;
-
-        // Obtener idUsuario desde el localStorage y convertirlo a número
         const idUsuario = parseInt(localStorage.getItem('idUsuario'), 10);
 
         if (isNaN(idUsuario)) {
@@ -81,7 +79,6 @@ export const AgregarProductoModal = ({ modalOpen, onClose, grupos, unidadMedida 
             return;
         }
 
-        // Agregar idUsuario a los datos del producto
         const formDataConUsuario = {
             ...formData,
             precio: precioNumerico,

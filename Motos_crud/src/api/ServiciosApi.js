@@ -96,8 +96,8 @@ export const EliminarServicio = async (id, actualizarLista) => {
             text: "Esta acción no se puede deshacer.",
             icon: "question",
             showCancelButton: true,
-            confirmButtonColor: "#170250",
-            cancelButtonColor: "#d33",
+            confirmButtonColor: "#f1c40f",
+            cancelButtonColor: "#7f8c8d",
             confirmButtonText: "Sí, eliminar",
             cancelButtonText: "Cancelar"
         });
@@ -220,36 +220,45 @@ export const ActualizarMantenimiento = async (id, MantenimientoData) => {
 export const EliminarMantenimiento = async (id, actualizarLista) => {
     try {
         const result = await Swal.fire({
-            title: "¿Estás seguro de eliminar esta moto?",
-            text: "Esta acción no se puede deshacer.",
-            icon: "question",
+            title: "¿Estás seguro de cancelar este mantenimiento?",
+            text: "El mantenimiento será marcado como cancelado.",
+            icon: "warning",
             showCancelButton: true,
-            confirmButtonColor: "#170250",
-            cancelButtonColor: "#d33",
-            confirmButtonText: "Sí, eliminar",
-            cancelButtonText: "Cancelar"
+            confirmButtonColor: "#f1c40f",
+            cancelButtonColor: "#7f8c8d",
+            confirmButtonText: "Sí, cancelar",
+            cancelButtonText: "No"
         });
 
         if (!result.isConfirmed) {
             return;
         }
 
-        const response = await fetch(`http://192.168.0.104:4000/servicios/eliminar_mantenimiento/${id}`, {
+        // Obtener el idUsuario desde localStorage
+        const idUsuario = localStorage.getItem("idUsuario");
+        if (!idUsuario) {
+            Swal.fire('Error', 'No se encontró el usuario en la sesión.', 'error');
+            return;
+        }
+
+        const response = await fetch(`http://192.168.0.104:4000/servicios/cancelar_mantenimiento/${id}`, {
             method: 'DELETE',
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ idUsuario }) // Enviar el ID del usuario que cancela
         });
 
         if (response.ok) {
             Swal.fire({
                 position: 'center',
                 icon: 'success',
-                title: 'Moto eliminada correctamente',
+                title: 'Mantenimiento cancelado correctamente',
                 showConfirmButton: true,
             });
 
-            // Actualizar la lista de motos después de eliminar
+            // Actualizar la lista eliminando el mantenimiento de la vista
             actualizarLista(id);
         } else {
-            throw new Error('Error al eliminar moto');
+            throw new Error('Error al cancelar mantenimiento');
         }
     } catch (error) {
         console.error('Error al realizar la solicitud:', error);
