@@ -12,7 +12,6 @@ export const RealizarMantenimiento = ({ modalOpen, onClose }) => {
 
     const idUsuario = localStorage.getItem('idUsuario');
 
-
     const [formData, setFormData] = useState({
         fecha_inicio: new Date().toISOString().split('T')[0],
         vehiculo: "",
@@ -30,15 +29,12 @@ export const RealizarMantenimiento = ({ modalOpen, onClose }) => {
     const [servicio, setServicio] = useState([]);
     const [productosSeleccionados, setProductosSeleccionados] = useState([]);
 
-    // Función para agregar un producto y actualizar el costo total
     const agregarProductoATabla = (productoData) => {
         setProductosSeleccionados((prevProductos) => {
-            // Verificar si el producto ya está en la lista
             const productoExistente = prevProductos.find(p => p.producto === productoData.producto);
 
             let nuevosProductos;
             if (productoExistente) {
-                // Si existe, actualizar la cantidad y el subtotal
                 nuevosProductos = prevProductos.map(p =>
                     p.producto === productoData.producto
                         ? {
@@ -49,28 +45,34 @@ export const RealizarMantenimiento = ({ modalOpen, onClose }) => {
                         : p
                 );
             } else {
-                // Si no existe, agregarlo normalmente
                 nuevosProductos = [...prevProductos, productoData];
             }
-            // Calcular el costo total de todos los productos
+
             const total = nuevosProductos.reduce((acc, prod) => acc + prod.subtotal, 0);
-            // Actualizar el costo total en el estado de formData
-            setFormData((prev) => ({ ...prev, costo_total: total.toFixed(2) }));
+            const totalFormateado = total.toLocaleString('es-MX');
+            setFormData((prev) => ({ ...prev, costo_total: totalFormateado }));
 
             return nuevosProductos;
         });
     };
+
 
     const eliminarProductoDeTabla = (index) => {
         setProductosSeleccionados((prevProductos) => {
             const nuevosProductos = prevProductos.filter((_, i) => i !== index);
+
             // Calcular el nuevo costo total
             const total = nuevosProductos.reduce((acc, prod) => acc + prod.subtotal, 0);
-            setFormData((prev) => ({ ...prev, costo_total: total.toFixed(2) }));
+
+            // Formatear el costo total con comas
+            const formattedTotal = new Intl.NumberFormat('es-MX').format(total);
+
+            setFormData((prev) => ({ ...prev, costo_total: formattedTotal }));
 
             return nuevosProductos;
         });
     };
+
 
     const handleOpenModal = () => setIsModalOpen(true);
     const handleCloseModal = () => setIsModalOpen(false);
@@ -114,9 +116,25 @@ export const RealizarMantenimiento = ({ modalOpen, onClose }) => {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData((prev) => ({ ...prev, [name]: value }));
+
+        // Elimina cualquier carácter que no sea un número (excepto el punto y la coma)
+        const numericValue = value.replace(/[^\d]/g, '');
+
+        // Formatea el número con comas
+        const formattedValue = new Intl.NumberFormat('es-MX').format(numericValue);
+
+        // Actualiza el estado con el valor numérico limpio (solo para cálculos)
+        setFormData((prev) => ({ ...prev, [name]: numericValue }));
+
+        // Si es costo_total, también actualiza el valor mostrado con comas
+        if (name === "costo_total") {
+            e.target.value = formattedValue;
+        }
+
         setErrors((prev) => ({ ...prev, [name]: "" }));
     };
+
+
 
     const handleSelectChange = (selectedOptions) => {
         setFormData((prev) => ({
@@ -196,6 +214,10 @@ export const RealizarMantenimiento = ({ modalOpen, onClose }) => {
 
     };
 
+    const formatNumber = (value) => {
+        return parseFloat(value).toLocaleString('es-MX'); // Formato para México (1,500.00)
+    };
+
     useEffect(() => {
         const total = productosSeleccionados.reduce((acc, prod) => acc + prod.subtotal, 0);
         setFormData((prev) => ({ ...prev, costo_total: total }));
@@ -255,9 +277,16 @@ export const RealizarMantenimiento = ({ modalOpen, onClose }) => {
 
                                     <div className="col-md-4 mb-2">
                                         <label className="form-label">Odómetro/Horómetro</label>
-                                        <input type="text" name="odometro" className={`form-control form-control-sm ${errors.odometro ? "is-invalid" : ""}`} value={formData.odometro} onChange={handleChange} />
+                                        <input
+                                            type="text"
+                                            name="odometro"
+                                            className={`form-control form-control-sm ${errors.odometro ? "is-invalid" : ""}`}
+                                            value={new Intl.NumberFormat('es-MX').format(formData.odometro)} // Formatea el valor mostrado
+                                            onChange={handleChange}
+                                        />
                                         {errors.odometro && <div className="invalid-feedback">{errors.odometro}</div>}
                                     </div>
+
                                 </div>
 
                                 <div className="row">
@@ -321,9 +350,9 @@ export const RealizarMantenimiento = ({ modalOpen, onClose }) => {
                                             {productosSeleccionados.map((producto, index) => (
                                                 <tr key={index}>
                                                     <td style={{ textAlign: "right", width: "16.66%" }}>{producto.producto}</td>
-                                                    <td style={{ textAlign: "right", width: "16.66%" }}>${producto.costo_unitario}</td>
+                                                    <td style={{ textAlign: "right", width: "16.66%" }}>${formatNumber(producto.costo_unitario)}</td>
                                                     <td style={{ textAlign: "right", width: "16.66%" }}>{producto.cantidad}</td>
-                                                    <td style={{ textAlign: "right", width: "16.66%" }}>${producto.subtotal.toFixed(2)}</td>
+                                                    <td style={{ textAlign: "right", width: "16.66%" }}>${formatNumber(producto.subtotal)}</td>
                                                     <td style={{ textAlign: "right", width: "16.66%" }}>
                                                         <button className="btn btn-danger btn-sm" onClick={() => eliminarProductoDeTabla(index)}>
                                                             Eliminar
@@ -368,12 +397,24 @@ export const RealizarMantenimiento = ({ modalOpen, onClose }) => {
                                         )}
                                     </div>
 
-                                    <div className="col-md-2 offset-md-6 ">
+                                    <div className="col-md-2 offset-md-6">
                                         <label className="form-label">Costo Total</label>
-                                        <input type="number" name="costo_total" className={`form-control form-control-sm ${errors.costo_total ? "is-invalid" : ""}`} value={formData.costo_total} onChange={handleChange} />
-                                        {errors.costo_total && <div className="invalid-feedback">{errors.costo_total}</div>}
+                                        <div className="input-group">
+                                            <span className="input-group-text" style={{ height: 47 }}>
+                                                $
+                                            </span>
+                                            <input
+                                                type="text"
+                                                name="costo_refacciones"
+                                                className="form-control"
+                                                value={new Intl.NumberFormat('es-MX').format(formData.costo_total)}
+                                                readOnly
+                                            />
+                                            {errors.costo_total && <div className="invalid-feedback">{errors.costo_total}</div>}
+                                        </div>
                                     </div>
                                 </div>
+
 
                                 <div className="col-md-12 mb-2 ">
                                     <label className="form-label">Comentario</label>

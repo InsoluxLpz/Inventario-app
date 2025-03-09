@@ -95,16 +95,6 @@ router.post('/agregar_mantenimiento', async (req, res) => {
     try {
         await connection.beginTransaction();
 
-        const [existingService] = await connection.query(
-            "SELECT id FROM mantenimientos WHERE idMoto = ? LIMIT 1",
-            [moto]
-        );
-
-        if (existingService.length > 0) {
-            await connection.rollback();
-            return res.status(400).json({ error: "Ya existe un servicio registrado para esta moto" });
-        }
-
         // 🔽 Insertar nuevo servicio si no existe
         const [servicioResult] = await connection.query(
             "INSERT INTO mantenimientos (fecha_inicio, odometro, costo_total, comentario, idMoto, idAutorizo, idUsuario, idCancelo, fecha_cancelacion) VALUES (?, ?, ?, ?, ?, ?, ?, ?,?)",

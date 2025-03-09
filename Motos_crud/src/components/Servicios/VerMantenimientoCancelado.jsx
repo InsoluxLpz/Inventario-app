@@ -63,6 +63,12 @@ export const VerMantenimientoCancelado = ({ modalOpen, onClose, mantenimiento, l
         fetchAutorizo();
     }, []);
 
+
+    const formatNumber = (value) => {
+        return parseFloat(value).toLocaleString('es-MX'); // Formato para México (1,500.00)
+    };
+
+
     const opcionesMotos = [...motos]
         .map((moto) => ({ value: moto.id, label: moto.inciso }));
 
@@ -107,7 +113,7 @@ export const VerMantenimientoCancelado = ({ modalOpen, onClose, mantenimiento, l
                                     </div>
 
                                     <div className="col-md-3 mb-2">
-                                        <label className="form-label">Usuario Cancelo</label>
+                                        <label className="form-label">Canceló</label>
                                         <input
                                             name="cancelo"
                                             type='text'
@@ -163,9 +169,9 @@ export const VerMantenimientoCancelado = ({ modalOpen, onClose, mantenimiento, l
                                             {formData.productos.map((producto, index) => (
                                                 <tr key={index}>
                                                     <td style={{ textAlign: "right", width: "16.66%" }}>{producto.nombre}</td>
-                                                    <td style={{ textAlign: "right", width: "16.66%" }}>{producto.costo}</td>
+                                                    <td style={{ textAlign: "right", width: "16.66%" }}>${formatNumber(producto.costo)}</td>
                                                     <td style={{ textAlign: "right", width: "16.66%" }}>{producto.cantidad}</td>
-                                                    <td style={{ textAlign: "right", width: "16.66%" }}>{producto.costo * producto.cantidad}</td>
+                                                    <td style={{ textAlign: "right", width: "16.66%" }}>${formatNumber(producto.costo * producto.cantidad)}</td>
                                                 </tr>
                                             ))}
                                         </tbody>
@@ -184,10 +190,22 @@ export const VerMantenimientoCancelado = ({ modalOpen, onClose, mantenimiento, l
                                         />
 
                                     </div>
-                                    <div className="col-md-2 offset-md-6 ">
+                                    <div className="col-md-2 offset-md-6">
                                         <label className="form-label">Costo Total</label>
-                                        <input type="number" name="costo_refacciones" className={`form-control form-control-sm`} value={formData.costo_total} readOnly />
+                                        <div className="input-group">
+                                            <span className="input-group-text" style={{ height: 47 }}>
+                                                $
+                                            </span>
+                                            <input
+                                                type="text"
+                                                name="costo_refacciones"
+                                                className="form-control"
+                                                value={new Intl.NumberFormat('es-MX').format(formData.costo_total)}
+                                                readOnly
+                                            />
+                                        </div>
                                     </div>
+
                                 </div>
 
                                 <div className="col-md-12 mb-2">
