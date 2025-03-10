@@ -107,61 +107,92 @@ export const ProductoAlmacenTable = () => {
           top: 80,
         }}
       >
-        <Button>
-          <AddchartIcon sx={{ fontSize: 24 }} />
-          Agregar Producto al Almacén
+        <Button
+          variant="contained"
+          sx={{
+            backgroundColor: "#1f618d",
+            color: "white",
+            ":hover": { opacity: 0.7 },
+            borderRadius: "8px",
+            padding: "10px 20px",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+          }}
+          onClick={() => navigate("/almacen/MovimientosAlmacenTable")}
+        >
+          <WarehouseIcon sx={{ fontSize: 24 }} />
+          Movimientos
         </Button>
 
+        <Button
+          variant="contained"
+          sx={{
+            backgroundColor: "#1f618d",
+            color: "white",
+            ":hover": { opacity: 0.7 },
+            borderRadius: "8px",
+            padding: "10px 20px",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+          }}
+          onClick={() => navigate("/almacen/entradas")}
+        >
+          <PlaylistAddCircleIcon sx={{ fontSize: 24 }} />
+          Agregar entradas
+        </Button>
+      </div>
 
-        <Box width="90%" maxWidth={2000} margin="0 auto" mt={10}>
-          <Box
-            sx={{
-              backgroundColor: "#1f618d",
-              padding: "10px 20px",
-              borderRadius: "8px 8px 0 0",
-            }}
-          >
-            <Typography variant="h5" fontWeight="bold" color="white" >
-              Almacén
-            </Typography>
-          </Box>
+      <Box width="90%" maxWidth={2000} margin="0 auto" mt={10}>
+        <Box
+          sx={{
+            backgroundColor: "#1f618d",
+            padding: "10px 20px",
+            borderRadius: "8px 8px 0 0",
+          }}
+        >
+          <Typography variant="h5" fontWeight="bold" color="white" >
+            Almacén
+          </Typography>
+        </Box>
 
-          <Paper sx={{ width: "100%" }}>
-            <TableContainer sx={{ maxHeight: 700, backgroundColor: "#eaeded" }}>
-              <Table stickyHeader>
-                <TableHead>
-                  <TableRow>
-                    {[
-                      "id",
-                      "Codigo",
-                      "Producto",
-                      "Cantidad",
-                      "Acciones",
-                    ].map((header) => (
-                      <TableCell
-                        key={header}
-                        align="center"
-                        sx={{
-                          fontWeight: "bold",
-                          backgroundColor: "#f4f6f7",
-                          color: "black",
-                        }}
-                      >
-                        {header}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                </TableHead>
+        <Paper sx={{ width: "100%" }}>
+          <TableContainer sx={{ maxHeight: 700, backgroundColor: "#eaeded" }}>
+            <Table stickyHeader>
+              <TableHead>
+                <TableRow>
+                  {[
+                    "id",
+                    "Codigo",
+                    "Producto",
+                    "Cantidad",
+                    // "Acciones",
+                  ].map((header) => (
+                    <TableCell
+                      key={header}
+                      align="center"
+                      sx={{
+                        fontWeight: "bold",
+                        backgroundColor: "#f4f6f7",
+                        color: "black",
+                      }}
+                    >
+                      {header}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              </TableHead>
 
-                <TableBody>
-                  {filteredInventario.map((producto) => (
-                    <TableRow key={producto.id}>
-                      <TableCell align="center">{producto.idProducto}</TableCell>
-                      <TableCell align="center">{producto.codigo}</TableCell>
-                      <TableCell align="center">{producto.nombreProducto}</TableCell>
-                      <TableCell align="center">{Math.round(producto.cantidad)}</TableCell>
-                      <TableCell align="center">
-                        {/* <IconButton
+              <TableBody>
+                {filteredInventario.map((producto) => (
+                  <TableRow key={producto.id}>
+                    <TableCell align="center">{producto.idProducto}</TableCell>
+                    <TableCell align="center">{producto.codigo}</TableCell>
+                    <TableCell align="center">{producto.nombreProducto}</TableCell>
+                    <TableCell align="center">{Math.round(producto.cantidad)}</TableCell>
+                    {/* <TableCell align="center">
+                      <IconButton
                         sx={{ color: "black" }}
                         onClick={() => {
                           setProductoSeleccionado(producto);
@@ -169,32 +200,31 @@ export const ProductoAlmacenTable = () => {
                         }}
                       >
                         <EditIcon sx={{ fontSize: 20 }} />
-                      </IconButton> */}
+                      </IconButton>
 
-                        <IconButton
-                          variant="contained"
-                          color="error"
-                          style={{ marginLeft: "10px" }}
-                          onClick={() => handleActualizarStatus(producto.id)}
-                        >
-                          <InventoryIcon sx={{ fontSize: 20 }} />
-                        </IconButton>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </Paper>
-        </Box>
+                      <IconButton
+                        variant="contained"
+                        color="error"
+                        style={{ marginLeft: "10px" }}
+                        onClick={() => handleActualizarStatus(producto.id)}
+                      >
+                        <InventoryIcon sx={{ fontSize: 20 }} />
+                      </IconButton>
+                    </TableCell> */}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Paper>
+      </Box>
 
-        <EditarProductoAlmacenModal
-          modalOpen={openModalEditar}
-          onClose={() => setOpenModalEditar(false)}
-          producto={productoSeleccionado}
-          actualizarLista={actualizarLista}
-        />
-      </div>
+      <EditarProductoAlmacenModal
+        modalOpen={openModalEditar}
+        onClose={() => setOpenModalEditar(false)}
+        producto={productoSeleccionado}
+        actualizarLista={actualizarLista}
+      />
     </>
   );
 };

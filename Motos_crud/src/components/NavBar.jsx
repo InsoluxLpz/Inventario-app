@@ -270,7 +270,7 @@ export const NavBar = ({ onSearch }) => {
                 <ListItemIcon>
                   <MoveToInboxIcon sx={{ fontSize: 18 }} />
                 </ListItemIcon>
-                <ListItemText primary="Movimientos" />
+                <ListItemText primary="Movimientos almacen" />
               </ListItem>
               <ListItem button sx={{ pl: 4 }} onClick={() => handleNavigate("/almacen/ProductoAlmacenTable")}>
                 <ListItemIcon>

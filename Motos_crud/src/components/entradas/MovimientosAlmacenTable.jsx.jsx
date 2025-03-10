@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
-import PlaylistAddCircleIcon from '@mui/icons-material/PlaylistAddCircle';
+import PlaylistAddCircleIcon from "@mui/icons-material/PlaylistAddCircle";
 import Paper from "@mui/material/Paper";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -13,14 +13,12 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import { Box, Button, Typography, IconButton } from "@mui/material";
 import { NavBar } from "../NavBar";
-import { cargarListasCampos } from "../../api/almacenProductosApi";
-import AddchartIcon from "@mui/icons-material/Addchart";
+import { cargarListasMovimientos } from "../../api/almacenProductosApi";
+import { ModalMovimientosDetalles } from "./ModalMovimientosDetalles";
 import InventoryIcon from "@mui/icons-material/Inventory";
 import WarehouseIcon from "@mui/icons-material/Warehouse";
-import MoveToInboxIcon from "@mui/icons-material/MoveToInbox";
+import FeedIcon from "@mui/icons-material/Feed";
 import { EditarProductoAlmacenModal } from "./EditarProductoAlmacenModal";
-import { obtenerProductos } from "../../api/productosApi";
-import { obtenerProveedores } from "../../api/proveedoresApi";
 import { useNavigate } from "react-router";
 
 export const MovimientosAlmacenTable = () => {
@@ -33,9 +31,19 @@ export const MovimientosAlmacenTable = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [showInactive, setShowInactive] = useState(false);
 
-  // * estados para el modal dinamico
-  const [productos, setProductos] = useState([]);
-  const [proveedores, setProveedores] = useState([]);
+  // * modal movimientos detalles
+  const [openModal, setOpenModal] = useState(false);
+  const [selectedMovimiento, setSelectedMovimiento] = useState(null);
+
+  const handleOpenModal = (id) => {
+    setSelectedMovimiento(id);
+    setOpenModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setOpenModal(false);
+    setSelectedMovimiento(null);
+  };
 
   useEffect(() => {
     fetchInventario();
@@ -43,7 +51,7 @@ export const MovimientosAlmacenTable = () => {
 
   const fetchInventario = async () => {
     try {
-      const data = await cargarListasCampos();
+      const data = await cargarListasMovimientos();
       console.log("datos de la peticion inventario", data);
       if (data) {
         setInventario(data);
@@ -165,15 +173,12 @@ export const MovimientosAlmacenTable = () => {
               <TableHead>
                 <TableRow>
                   {[
-                    "Codigo",
-                    "Proveedor",
+                    "No.Movimiento",
                     "Fecha",
-                    "Cantidad",
-                    "Costo Unitario",
-                    // "Tipo",
-                    "Producto",
+                    "Realizo Mov.",
                     "Autorizo",
-                    "acciones",
+                    "Detalles",
+                    "Acciones",
                   ].map((header) => (
                     <TableCell
                       key={header}
@@ -193,25 +198,31 @@ export const MovimientosAlmacenTable = () => {
               <TableBody>
                 {filteredInventario.map((producto) => (
                   <TableRow key={producto.id}>
-                    <TableCell align="center">{producto.idProducto}</TableCell>
                     <TableCell align="center">
-                      {producto.proveedor_nombre}
+                      {producto.idMovimiento}
                     </TableCell>
-                    <TableCell align="center" sx={{ textAlign: "right" }}>
+                    <TableCell align="center">
                       {producto.fecha_movimiento
                         ? new Date(
                             producto.fecha_movimiento
                           ).toLocaleDateString("es-MX")
                         : "Fecha no disponible"}
                     </TableCell>
-                    <TableCell align="center">{producto.cantidad}</TableCell>
                     <TableCell align="center">
-                      {formatearDinero(Number(producto.costo_unitario) || 0)}
+                      {producto.nombreUsuario}
                     </TableCell>
                     <TableCell align="center">
-                      {producto.nombreProducto}
+                      {producto.nombreAutorizo}
                     </TableCell>
-                    <TableCell align="center">{producto.autorizo}</TableCell>
+                    {/* boton para ver los detalles del movimiento ( informacion completa) */}
+                    <TableCell align="center">
+                      <IconButton
+                        sx={{ color: "black" }}
+                        onClick={() => handleOpenModal(producto.idMovimiento)}
+                      >
+                        <FeedIcon sx={{fontSize: 29 }}/>
+                      </IconButton>
+                    </TableCell>
                     <TableCell align="center">
                       {/* <IconButton
                         sx={{ color: "black" }}
@@ -245,6 +256,12 @@ export const MovimientosAlmacenTable = () => {
         onClose={() => setOpenModalEditar(false)}
         producto={productoSeleccionado}
         actualizarLista={actualizarLista}
+      />
+
+      <ModalMovimientosDetalles
+        open={openModal}
+        onClose={handleCloseModal}
+        idMovimiento={selectedMovimiento}
       />
     </>
   );

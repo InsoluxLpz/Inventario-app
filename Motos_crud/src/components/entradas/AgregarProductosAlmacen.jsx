@@ -1,10 +1,10 @@
-import { Button } from "@mui/material";
+import { Button, IconButton, Box } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { NavBar } from "../NavBar";
 import Select from "react-select";
 import WarehouseIcon from "@mui/icons-material/Warehouse";
 import MoveToInboxIcon from "@mui/icons-material/MoveToInbox";
-
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import {
   cargarListasEntradas,
   agregarInventario,
@@ -25,12 +25,24 @@ export const AgregarProductosAlmacen = () => {
   const [proveedorSeleccionado, setProveedorSeleccionado] = useState("");
   const [productosFiltrados, setProductosFiltrados] = useState([]);
 
+  // * filtro para el tipo de entrada con el tipo de movimiento
+  const [listaTipoEntradaFiltrada, setListaTipoEntradaFiltrada] = useState([]);
+
   // * desactivar el select de movimiento despues de agregar un tiopo de entrada hasta que se guarde
   const [tipoMovimientoBloqueado, setTipoMovimientoBloqueado] = useState(false);
   const [tipoMovimientoFijo, setTipoMovimientoFijo] = useState(null);
 
-  // * filtro para el tipo de entrada con el tipo de movimiento
-  const [listaTipoEntradaFiltrada, setListaTipoEntradaFiltrada] = useState([]);
+  // * desactivar select de tipo de entrada
+  const [tipoEntradaBloqueado, setTipoEntradaBloqueado] = useState(false);
+  const [tipoEntradaFijo, setTipoEntradaFijo] = useState(null);
+
+  // * desactivar select de Proveedor
+  const [proveedorBloqueado, setProveedorBloqueado] = useState(false);
+  const [proveedorFijo, setProveedorFijo] = useState(null);
+
+  // * desactivar select de Fecha
+  const [FechaBloqueado, setFechaBloqueado] = useState(false);
+  const [fechaFijo, setFechaFijo] = useState(null);
 
   const [formData, setFormData] = useState({
     proveedor: null,
@@ -102,6 +114,11 @@ export const AgregarProductosAlmacen = () => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
     setErrors((prev) => ({ ...prev, [name]: "" }));
+
+    // Si el campo cambiado es "fecha", actualizamos fechaFijo también
+    if (name === "fecha") {
+      setFechaFijo(value);
+    }
   };
 
   // * funcion para los campos de seleccion
@@ -114,6 +131,20 @@ export const AgregarProductosAlmacen = () => {
     // * funcion para guardar el tipo de movimiento
     if (name === "tipoMovimiento" && !tipoMovimientoFijo) {
       setTipoMovimientoFijo(option); // Guardar el primer tipo de movimiento seleccionado
+    }
+    // * funcion para guardar el tipo de Entrada
+    if (name === "tipo" && !tipoEntradaFijo) {
+      setTipoEntradaFijo(option); // Guardar el primer tipo de entrada seleccionado
+    }
+
+    // * funcion para guardar el proveedor
+    if (name === "proveedor" && !proveedorFijo) {
+      setProveedorFijo(option); // Guardar el primer tipo de entrada seleccionado
+    }
+
+    // * funcion para guardar la fecha
+    if (name === "fecha") {
+      setFechaFijo(value); // Guarda la fecha siempre que se seleccione
     }
 
     // * funcion para guardar el proveedor seleccionado y mostrar producto en su funcion
@@ -142,17 +173,20 @@ export const AgregarProductosAlmacen = () => {
 
     const nuevoProducto = {
       proveedor_id: formData.proveedor
-        ? { value: formData.proveedor.value, label: formData.proveedor.label }
-        : null,
-      fecha: formData.fecha,
+        ? proveedorFijo
+        : { value: formData.proveedor.value, label: formData.proveedor.label },
+      fecha: fechaFijo ?? formData.fecha,
       cantidad: formData.cantidad,
       producto_id: formData.producto
         ? { value: formData.producto.value, label: formData.producto.label }
         : null,
       costo_unitario: formData.costo_unitario,
       tipo_entrada_id: formData.tipo
-        ? { value: formData.tipo.value, label: formData.tipo.label }
-        : null,
+        ? tipoEntradaFijo
+        : {
+            value: formData.tipo.value,
+            label: formData.tipo.label,
+          },
       autorizo_id: formData.autorizo
         ? { value: formData.autorizo.value, label: formData.autorizo.label }
         : null,
@@ -168,17 +202,20 @@ export const AgregarProductosAlmacen = () => {
       const nuevosProductos = [...prevProductos, nuevoProducto];
       if (nuevosProductos.length > 0) {
         setTipoMovimientoBloqueado(true);
+        setTipoEntradaBloqueado(true);
+        setProveedorBloqueado(true);
+        setFechaBloqueado(true);
       }
       return nuevosProductos;
     });
 
     setFormData({
-      proveedor: null,
-      fecha: "",
+      proveedor: proveedorFijo,
+      fecha: fechaFijo,
       cantidad: "",
       producto: null,
       costo_unitario: "",
-      tipo: null,
+      tipo: tipoEntradaFijo,
       autorizo: null,
       tipoMovimiento: tipoMovimientoFijo,
     });
@@ -198,9 +235,20 @@ export const AgregarProductosAlmacen = () => {
         usuario_id,
       });
     }
+    // * reset formualrio
     setProductosAgregados([]);
+    // * tipo de movimientos
     setTipoMovimientoBloqueado(false);
     setTipoMovimientoFijo(null);
+    // * tipo de entrada
+    setTipoEntradaBloqueado(false);
+    setTipoEntradaFijo(null);
+    // * proveedor
+    setProveedorBloqueado(false);
+    setProveedorFijo(null);
+    // * fecha
+    setFechaBloqueado(false);
+    setFechaFijo(null);
   };
 
   // * efecto para el filtro de productos por proveedores
@@ -224,26 +272,55 @@ export const AgregarProductosAlmacen = () => {
       const movimientoSeleccionado =
         formData.tipoMovimiento.label.toLowerCase();
 
+      let nuevaLista = [];
+
       if (movimientoSeleccionado === "entrada") {
-        setListaTipoEntradaFiltrada(
-          listaTipoEntrada.filter((t) =>
-            ["compra", "ajuste", "traspaso"].includes(t.label.toLowerCase())
-          )
+        nuevaLista = listaTipoEntrada.filter((t) =>
+          ["compra", "ajuste", "traspaso"].includes(t.label.toLowerCase())
         );
       } else if (movimientoSeleccionado === "salida") {
-        setListaTipoEntradaFiltrada(
-          listaTipoEntrada.filter((t) =>
-            ["devolucion"].includes(t.label.toLowerCase())
-          )
+        nuevaLista = listaTipoEntrada.filter((t) =>
+          ["devolucion"].includes(t.label.toLowerCase())
         );
-      } else {
-        setListaTipoEntradaFiltrada([]); // Si no hay coincidencias, limpiar lista
       }
 
-      // Reiniciar el campo de tipo de entrada cuando cambie el tipo de movimiento
-      setFormData((prev) => ({ ...prev, tipo: null }));
+      setListaTipoEntradaFiltrada(nuevaLista);
+
+      // Verificar si el tipo actual sigue en la lista filtrada
+      const tipoActualValido = nuevaLista.some(
+        (t) => t.label === formData.tipo?.label
+      );
+
+      if (!tipoActualValido) {
+        setFormData((prev) => ({ ...prev, tipo: null }));
+      }
     }
   }, [formData.tipoMovimiento, listaTipoEntrada]);
+
+  // * funcion para limpiar el inventario
+  const eliminarProductoInventario = (index) => {
+    setProductosAgregados((prevProductos) =>
+      prevProductos.filter((_, i) => i !== index)
+    );
+
+    // Si ya no hay productos, desbloquea la selección de tipo de movimiento
+    if (productosAgregados.length === 1) {
+      // * tipo de movimiento
+      setTipoMovimientoBloqueado(false);
+      setTipoMovimientoFijo(null);
+      // * tipo de entrada
+      setTipoEntradaBloqueado(false);
+      setTipoEntradaFijo(null);
+      // * proveedor
+      setProveedorBloqueado(false);
+      setProveedorFijo(null);
+      // * fecha
+      setFechaBloqueado(false);
+      setFechaFijo(null);
+    }
+  };
+
+  const miniDrawerWidth = 50;
 
   return (
     <>
@@ -300,6 +377,7 @@ export const AgregarProductosAlmacen = () => {
         <h2>Agregar Entrada</h2>
         <form onSubmit={handleSubmit}>
           <div className="row">
+            {/* TIPO DE MOVIMIENTO */}
             <div className="col-md-3">
               <label>Tipo Movimiento</label>
               <Select
@@ -315,30 +393,32 @@ export const AgregarProductosAlmacen = () => {
               )}
             </div>
 
+            {/* TIPO DE ENTRADA */}
             <div className="col-md-3">
               <label>Tipo de entrada</label>
               <Select
-                // options={listaTipoEntrada}
                 options={listaTipoEntradaFiltrada}
                 value={formData.tipo}
                 onChange={(opcion) => handleSelectChange("tipo", opcion)}
+                isDisabled={tipoEntradaBloqueado}
               />
               {errors.tipo && <div className="text-danger">{errors.tipo}</div>}
             </div>
 
-            {/* proveedores */}
+            {/* PROVEEDORES */}
             <div className="col-md-3">
               <label>Proveedor</label>
               <Select
                 options={listaProveedores}
                 value={formData.proveedor}
                 onChange={(opcion) => handleSelectChange("proveedor", opcion)}
+                isDisabled={proveedorBloqueado}
               />
               {errors.proveedor && (
                 <div className="text-danger">{errors.proveedor}</div>
               )}
             </div>
-
+            {/* FECHA */}
             <div className="col-md-3">
               <label>Fecha</label>
               <input
@@ -347,6 +427,7 @@ export const AgregarProductosAlmacen = () => {
                 className="form-control"
                 value={formData.fecha}
                 onChange={handleChange}
+                disabled={FechaBloqueado}
               />
               {errors.fecha && (
                 <div className="text-danger">{errors.fecha}</div>
@@ -357,7 +438,6 @@ export const AgregarProductosAlmacen = () => {
               <label>Producto</label>
               <Select
                 options={productosFiltrados}
-                // options={listaProductos}
                 value={formData.producto}
                 onChange={(opcion) => handleSelectChange("producto", opcion)}
                 isDisabled={!proveedorSeleccionado}
@@ -420,70 +500,83 @@ export const AgregarProductosAlmacen = () => {
       </div>
 
       <hr />
-      <div className="container mt-4">
-        <h3 className="text-center">PRODUCTOS AGREGADOS </h3>
-        <table className="table mt-3">
-          <thead>
-            <tr>
-              <th>Proveedor</th>
-              <th>Fecha</th>
-              <th>Cantidad</th>
-              <th>Producto</th>
-              <th>C/U</th>
-              <th>Tipo Entrada</th>
+      <Box
+        sx={{
+          backgroundColor: "#f2f3f4",
+          minHeight: "100vh",
+          paddingBottom: 4,
+          transition: "margin 0.3s ease-in-out",
+          marginLeft: `${miniDrawerWidth}px`,
+        }}
+      >
+        {/* <Box width="90%" maxWidth={2000} margin="0 auto" mt={4}></Box> */}
+        <div className="container mt-4">
+          <h3 className="text-center">PRODUCTOS AGREGADOS</h3>
+          <table className="table mt-3">
+            <thead>
+              <tr>
+                <th>Proveedor</th>
+                <th>Producto</th>
+                <th>Cantidad</th>
+                <th>Fecha</th>
+                <th>Costo unitario</th>
+                {/* <th>Tipo Entrada</th>
               <th>Autoriza</th>
-              <th>Movimiento</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {productosAgregados.map((producto, index) => (
-              <tr key={`${producto}-${index}`}>
-                <td>
-                  {producto.proveedor_id ? producto.proveedor_id.label : ""}
-                </td>
-                <td align="center" sx={{ textAlign: "right" }}>
-                  {producto.fecha
-                    ? new Date(producto.fecha).toLocaleDateString("es-MX")
-                    : "Fecha no disponible"}
-                </td>
-                <td>{producto.cantidad}</td>
-                <td>
-                  {producto.producto_id ? producto.producto_id.label : ""}
-                </td>
-                <td>{producto.costo_unitario}</td>
-                <td>
-                  {producto.tipo_entrada_id
-                    ? producto.tipo_entrada_id.label
-                    : ""}
-                </td>
-                <td>
-                  {producto.autorizo_id ? producto.autorizo_id.label : ""}
-                </td>
-                <td>
-                  {producto.tipo_movimiento_id
-                    ? producto.tipo_movimiento_id.label
-                    : ""}
-                </td>
-                <td> eliminar editar </td>
+              <th>Movimiento</th> */}
+                <th>Acciones</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-        <div
-          className="mt-5"
-          style={{ display: "flex", justifyContent: "flex-end" }}
-        >
-          <Button
-            onClick={handleGuardarTodo}
-            variant="contained"
-            color="primary"
-            disabled={productosAgregados.length === 0}
+            </thead>
+            <tbody>
+              {productosAgregados.map((producto, index) => (
+                <tr key={`${producto}-${index}`}>
+                  <td>
+                    {producto.proveedor_id ? producto.proveedor_id.label : ""}
+                  </td>
+                  <td>
+                    {producto.producto_id ? producto.producto_id.label : ""}
+                  </td>
+                  <td>{producto.cantidad}</td>
+                  <td>
+                    {producto.fecha
+                      ? new Date(producto.fecha).toLocaleDateString("es-MX")
+                      : "Fecha no disponible"}
+                  </td>
+                  <td>{producto.costo_unitario}</td>
+                  <td>
+                    {/* Botón para eliminar el producto agregado en el estado */}
+                    <IconButton
+                      sx={{ color: "black" }}
+                      onClick={() => eliminarProductoInventario(index)} // Pasar el índice del producto a eliminar
+                    >
+                      <DeleteOutlineIcon sx={{ fontSize: 29 }} />
+                    </IconButton>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <div
+            className="mt-5"
+            style={{ display: "flex", justifyContent: "flex-end" }}
           >
-            Guardar
-          </Button>
+            <Button
+              onClick={handleGuardarTodo}
+              variant="contained"
+              color="primary"
+              disabled={productosAgregados.length === 0}
+            >
+              Guardar
+            </Button>
+            <Button
+              variant="outlined"
+              color="primary"
+              onClick={() => window.location.reload()}
+            >
+              Cancelar
+            </Button>
+          </div>
         </div>
-      </div>
+      </Box>
     </>
   );
 };

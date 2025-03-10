@@ -152,26 +152,15 @@ router.get('/obtener_listas', async (req, res) => {
 router.get('/obtener_movimientos', async (req, res) => {
     try {
         const [result] = await db.query(`                
-                    SELECT 
-                    ma.fecha fecha_movimiento, cantidad , costo_unitario, proveedor_id,
-                    p.id AS idProducto,
-                    p.nombre AS nombreProducto,
-                    pr.id AS proveedor_id,
-                    pr.nombre_proveedor AS proveedor_nombre,
-                    a.idAutorizo AS autorizacion_id,
-                    a.nombre AS autorizo,
-                    t.id AS tipo_entrada_id,
-                    t.tipo_entrada AS tipo_entrada,
-                    tm.idMovimiento AS tipo_movimiento_id,
-                    tm.movimiento AS tipo_movimiento
-                FROM 
-                    movimientos_almacen ma
-                LEFT JOIN productos p ON ma.producto_id = p.id
-                LEFT JOIN productos_proveedor pp ON pp.idProducto = p.id
-                LEFT JOIN proveedores pr ON pr.id = pp.idProveedor
-                LEFT JOIN autorizaciones a ON a.idAutorizo = ma.autorizo_id
-                LEFT JOIN tipo_entrada t ON t.id = ma.tipo_movimiento_id
-                LEFT JOIN tipo_movimiento tm ON tm.idMovimiento = ma.tipo_movimiento_id;
+                select 
+                mad.id_movimiento as idMovimiento,
+                ma.fecha as fecha_movimiento,
+                u.nombre as nombreUsuario,
+                a.nombre as nombreAutorizo
+            from movimientos_almacen ma
+            left join movimientos_almacen_detalle mad on ma.id = mad.id_movimiento
+            left join autorizaciones a on ma.autorizo_id = a.idAutorizo
+            left join usuarios u on u.idUsuario = ma.usuario_id;
         `);
         
         res.status(200).json(result);
@@ -181,6 +170,44 @@ router.get('/obtener_movimientos', async (req, res) => {
     }
     
 });
+
+// * consulta para la tabla movimientos almacen detalles
+router.get('/obtener_movimientos_detalles/:idMovimiento', async (req, res) => {
+    const { idMovimiento } = req.params; // Obtener el parámetro de la URL
+    
+    try {
+        const [result] = await db.query(`
+            SELECT 
+                ma.id AS movimiento_id,
+                ma.fecha,
+                tm.movimiento AS tipo_movimiento,
+                te.tipo_entrada,
+                a.nombre AS autorizado_por,
+                u.nombre AS usuario,
+                p.nombre AS producto,
+                pr.nombre_empresa AS proveedor,
+                mad.cantidad,
+                mad.costo_unitario,
+                mad.subtotal
+            FROM movimientos_almacen ma
+            JOIN tipo_movimiento tm ON ma.tipo_movimiento_id = tm.idMovimiento
+            JOIN tipo_entrada te ON ma.tipo_entrada_id = te.id
+            JOIN autorizaciones a ON ma.autorizo_id = a.idAutorizo
+            JOIN usuarios u ON ma.usuario_id = u.idUsuario  
+            JOIN movimientos_almacen_detalle mad ON ma.id = mad.id_movimiento
+            JOIN productos p ON mad.producto_id = p.id
+            JOIN proveedores pr ON mad.proveedor_id = pr.id
+            WHERE ma.id = ?  -- Filtrar por el ID del movimiento
+            ORDER BY ma.fecha DESC;
+        `, [idMovimiento]);
+        
+        res.status(200).json(result);
+    } catch (error) {
+        console.error("Error al obtener datos:", error);
+        res.status(500).json({ message: "Error en el servidor" });
+    }
+});
+
 
 // * consulta buena falta la autorizacion
 router.get('/obtener_inventario', async (req, res) => {

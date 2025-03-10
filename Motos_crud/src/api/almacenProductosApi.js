@@ -229,3 +229,23 @@ export const cargarListasMovimientos = async () => {
         return null;
     }
 };
+
+//  * consulta para tener los movimientos_almacen_detalle
+export const cargarListasMovimientosDetalles = async (idMovimiento) => {
+    try {
+        const response = await fetch(`${API_URL}/entrada/obtener_movimientos_detalles/${idMovimiento}`, {
+            method: "GET",
+            headers: {
+                'Content-Type': 'application/json'
+            },
+        });
+        if (response.ok) {
+            const data = await response.json();
+            return data;
+        }
+    } catch (error) {
+        console.error('Error al realizar la solicitud', error);
+        Swal.fire('Error', 'Hubo un problema al conectar con el servidor.', 'error');
+        return null;
+    }
+};
