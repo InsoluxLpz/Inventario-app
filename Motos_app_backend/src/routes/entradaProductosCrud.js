@@ -122,13 +122,7 @@ router.delete('/eliminar_inventario/:id', async (req, res) => {
 router.get('/obtener_listas', async (req, res) => {
     try {
             const [proveedores] = await db.query("SELECT id, nombre_proveedor FROM proveedores");
-            const [productos] = await db.query(`
-                SELECT 
-                p.id,
-                p.nombre as nombre,
-                pp.idProveedor as id_proveedor
-            FROM productos p
-            left join productos_proveedor pp on p.id = pp.idProducto`);
+            const [productos] = await db.query(`SELECT * from productos`);
             const [autorizaciones] = await db.query("SELECT idAutorizo, nombre FROM autorizaciones");
             const [tiposEntrada] = await db.query("SELECT id, tipo_entrada FROM tipo_entrada");
             const [tipoMovimiento] = await db.query("SELECT idMovimiento, movimiento FROM tipo_movimiento");
@@ -147,6 +141,27 @@ router.get('/obtener_listas', async (req, res) => {
 
 });
 
+// * consulta buena falta la autorizacion
+router.get('/obtener_inventario', async (req, res) => {
+    try {
+        const [result] = await db.query(`                
+                    
+SELECT 
+	sa.producto_id as idProducto,
+	sa.cantidad as cantidad,
+	p.nombre as nombreProducto,
+	p.codigo as codigo
+FROM inventario_almacen sa
+left join productos p on p.id = sa.producto_id;
+        `);
+        
+        res.status(200).json(result);
+    } catch (error) {
+        console.error("Error al obtener datos:", error);
+        res.status(500).json({ message: "Error en el servidor" });
+    }
+    
+});
 
 // * consulta que se puede pedir mas adelante para la tabla movimientos almacen
 router.get('/obtener_movimientos', async (req, res) => {
@@ -209,26 +224,24 @@ router.get('/obtener_movimientos_detalles/:idMovimiento', async (req, res) => {
 });
 
 
-// * consulta buena falta la autorizacion
-router.get('/obtener_inventario', async (req, res) => {
-    try {
-        const [result] = await db.query(`                
-                    
-SELECT 
-	sa.producto_id as idProducto,
-	sa.cantidad as cantidad,
-	p.nombre as nombreProducto,
-	p.codigo as codigo
-FROM stock_almacen sa
-left join productos p on p.id = sa.producto_id;
-        `);
-        
-        res.status(200).json(result);
-    } catch (error) {
-        console.error("Error al obtener datos:", error);
-        res.status(500).json({ message: "Error en el servidor" });
-    }
+// * buscar productos por codigo de producto
+router.get('/buscar_producto/:codigo', async (req, res) => {
+    const { codigo } = req.params;
     
+    const query = `SELECT * FROM productos WHERE codigo = ? AND status = 1`;
+
+    try {
+        const [results] = await db.query(query, [codigo]);
+
+        if (results.length === 0) {
+            return res.status(404).json({ message: 'Producto no encontrado' });
+        }
+
+        return res.status(200).json(results[0]); // Retorna solo un producto
+    } catch (error) {
+        console.error('Error al obtener el producto:', error);
+        return res.status(500).json({ message: 'Error al obtener el producto' });
+    }
 });
 
 

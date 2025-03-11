@@ -73,7 +73,7 @@ LEFT JOIN (
 LEFT JOIN (
     -- Subconsulta para calcular el stock por producto
     SELECT producto_id, SUM(cantidad) AS stock_disponible 
-    FROM stock_almacen 
+    FROM inventario_almacen 
     GROUP BY producto_id
 ) st ON p.id = st.producto_id
 GROUP BY 
@@ -321,4 +321,8 @@ router.get('/obtener_unidad_medida', async (req, res) => {
 
 });
 
+
+
+
 module.exports = router;
+

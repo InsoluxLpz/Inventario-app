@@ -249,3 +249,23 @@ export const cargarListasMovimientosDetalles = async (idMovimiento) => {
         return null;
     }
 };
+
+
+// * consulta para buscar productos por codigo
+export const buscarProducto = async (codigo) => {
+    try {
+        const response = await fetch(`${API_URL}/entrada/buscar_producto/${codigo}`, {
+            method: "GET",
+            headers: { 'Content-Type': 'application/json' }
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            return data;
+        }
+    } catch (error) {
+        console.error('Error al realizar la solicitud', error);
+        Swal.fire('Error', 'Hubo un problema al conectar con el servidor.', 'error');
+        return null;
+    }
+};

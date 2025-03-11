@@ -5,11 +5,14 @@ import Select from "react-select";
 import WarehouseIcon from "@mui/icons-material/Warehouse";
 import MoveToInboxIcon from "@mui/icons-material/MoveToInbox";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import FindInPageIcon from "@mui/icons-material/FindInPage";
+import ContentPasteSearchIcon from "@mui/icons-material/ContentPasteSearch";
 import {
   cargarListasEntradas,
   agregarInventario,
 } from "../../api/almacenProductosApi";
 import { useNavigate } from "react-router";
+import { ModalBuscarProductos } from "./ModalBuscarProductos";
 
 export const AgregarProductosAlmacen = () => {
   const navigate = useNavigate();
@@ -23,8 +26,7 @@ export const AgregarProductosAlmacen = () => {
   const [productosAgregados, setProductosAgregados] = useState([]);
   // * filtro producto por proveedores
   const [proveedorSeleccionado, setProveedorSeleccionado] = useState("");
-  const [productosFiltrados, setProductosFiltrados] = useState([]);
-
+  // const [productosFiltrados, setProductosFiltrados] = useState([]);
   // * filtro para el tipo de entrada con el tipo de movimiento
   const [listaTipoEntradaFiltrada, setListaTipoEntradaFiltrada] = useState([]);
 
@@ -44,6 +46,15 @@ export const AgregarProductosAlmacen = () => {
   const [FechaBloqueado, setFechaBloqueado] = useState(false);
   const [fechaFijo, setFechaFijo] = useState(null);
 
+  // * desactivar select de Autorizo
+  const [autorizoBloqueado, setAutorizoBloqueado] = useState(false);
+  const [autorizoFijo, setAutorizoFijo] = useState(null);
+
+  // * estado del modal
+  const [openModal, setOpenModal] = useState(false);
+  const [productoSeleccionado, setProductoSeleccionado] = useState(null);
+  const [selectedMovimiento, setSelectedMovimiento] = useState(null);
+
   const [formData, setFormData] = useState({
     proveedor: null,
     fecha: "",
@@ -54,6 +65,28 @@ export const AgregarProductosAlmacen = () => {
     autorizo: null,
     tipoMovimiento: null,
   });
+
+  // * funciones para el modal
+  const handleOpenModal = (codigo) => {
+    setSelectedMovimiento(codigo);
+    setOpenModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setOpenModal(false);
+    setSelectedMovimiento(null);
+  };
+
+  // * funcion para actualizar el estado cuando un usaurio elija un producto desde el modal
+  const handleProductoSeleccionado = (producto) => {
+    setProductoSeleccionado(producto);
+    setFormData((prev) => ({
+      ...prev,
+      producto: { value: producto.id, label: producto.nombre },
+      costo_unitario: producto.precio || "",
+    }));
+    setOpenModal(false); // Cierra el modal después de seleccionar un producto
+  };
 
   // * peticion a la db
   useEffect(() => {
@@ -75,6 +108,7 @@ export const AgregarProductosAlmacen = () => {
               value: p.id,
               label: p.nombre,
               proveedorId: p.id_proveedor,
+              costoUnitario: p.precio,
             }))
           );
         }
@@ -142,6 +176,11 @@ export const AgregarProductosAlmacen = () => {
       setProveedorFijo(option); // Guardar el primer tipo de entrada seleccionado
     }
 
+    // * funcion para guardar el Autorizador
+    if (name === "autorizo" && !autorizoFijo) {
+      setAutorizoFijo(option); // Guardar el primer tipo de entrada seleccionado
+    }
+
     // * funcion para guardar la fecha
     if (name === "fecha") {
       setFechaFijo(value); // Guarda la fecha siempre que se seleccione
@@ -151,6 +190,15 @@ export const AgregarProductosAlmacen = () => {
     if (name === "proveedor") {
       setProveedorSeleccionado(option); // Guardar proveedor seleccionado
       setFormData((prev) => ({ ...prev, producto: null })); // Limpiar selección de producto
+    }
+
+    // * funcion para cargar el costo_unitario cuando se seleccione el producto
+    if (name === "producto" && option) {
+      setFormData((prev) => ({
+        ...prev,
+        producto: option,
+        costo_unitario: option.costoUnitario || "", // Llenar costo unitario
+      }));
     }
   };
 
@@ -188,8 +236,8 @@ export const AgregarProductosAlmacen = () => {
             label: formData.tipo.label,
           },
       autorizo_id: formData.autorizo
-        ? { value: formData.autorizo.value, label: formData.autorizo.label }
-        : null,
+        ? autorizoFijo
+        : { value: formData.autorizo.value, label: formData.autorizo.label },
       tipo_movimiento_id: formData.tipoMovimiento
         ? tipoMovimientoFijo
         : {
@@ -205,6 +253,7 @@ export const AgregarProductosAlmacen = () => {
         setTipoEntradaBloqueado(true);
         setProveedorBloqueado(true);
         setFechaBloqueado(true);
+        setAutorizoBloqueado(true);
       }
       return nuevosProductos;
     });
@@ -216,7 +265,7 @@ export const AgregarProductosAlmacen = () => {
       producto: null,
       costo_unitario: "",
       tipo: tipoEntradaFijo,
-      autorizo: null,
+      autorizo: autorizoFijo,
       tipoMovimiento: tipoMovimientoFijo,
     });
 
@@ -249,22 +298,37 @@ export const AgregarProductosAlmacen = () => {
     // * fecha
     setFechaBloqueado(false);
     setFechaFijo(null);
+    // * autorizo
+    setAutorizoBloqueado(false);
+    setAutorizoFijo(null);
+
+    // * resetear el estado de todo despues de mandar a guardar los valores
+    setFormData({
+      proveedor: null,
+      fecha: "",
+      cantidad: "",
+      producto: null,
+      costo_unitario: "",
+      tipo: null,
+      autorizo: null,
+      tipoMovimiento: null,
+    });
   };
 
   // * efecto para el filtro de productos por proveedores
-  useEffect(() => {
-    console.log("Proveedor seleccionado:", proveedorSeleccionado);
-    console.log("productosFiltrados", listaProductos);
-    if (proveedorSeleccionado) {
-      const productosFiltrados = listaProductos.filter(
-        (producto) => producto.proveedorId === proveedorSeleccionado.value
-      );
-      console.log("productosFiltrados", productosFiltrados);
-      setProductosFiltrados(productosFiltrados);
-    } else {
-      setProductosFiltrados([]);
-    }
-  }, [proveedorSeleccionado, listaProductos]);
+  // useEffect(() => {
+  //   console.log("Proveedor seleccionado:", proveedorSeleccionado);
+  //   console.log("productosFiltrados", listaProductos);
+  //   if (proveedorSeleccionado) {
+  //     const productosFiltrados = listaProductos.filter(
+  //       (producto) => producto.proveedorId === proveedorSeleccionado.value
+  //     );
+  //     console.log("productosFiltrados", productosFiltrados);
+  //     setProductosFiltrados(productosFiltrados);
+  //   } else {
+  //     setProductosFiltrados([]);
+  //   }
+  // }, [proveedorSeleccionado, listaProductos]);
 
   // * efecto para el filtro de tipo de entrada por el tipo de movimiento
   useEffect(() => {
@@ -276,11 +340,11 @@ export const AgregarProductosAlmacen = () => {
 
       if (movimientoSeleccionado === "entrada") {
         nuevaLista = listaTipoEntrada.filter((t) =>
-          ["compra", "ajuste", "traspaso"].includes(t.label.toLowerCase())
+          ["compra", "ajuste"].includes(t.label.toLowerCase())
         );
       } else if (movimientoSeleccionado === "salida") {
         nuevaLista = listaTipoEntrada.filter((t) =>
-          ["devolucion"].includes(t.label.toLowerCase())
+          ["devolucion", "traspaso"].includes(t.label.toLowerCase())
         );
       }
 
@@ -317,11 +381,21 @@ export const AgregarProductosAlmacen = () => {
       // * fecha
       setFechaBloqueado(false);
       setFechaFijo(null);
+      // * autorizo
+      setAutorizoBloqueado(false);
+      setAutorizoFijo(null);
     }
   };
 
   const miniDrawerWidth = 50;
 
+  // * funcion para formato de dinero
+  const formatearDinero = (valor) => {
+    return new Intl.NumberFormat("es-MX", {
+      style: "currency",
+      currency: "MXN",
+    }).format(valor);
+  };
   return (
     <>
       <NavBar />
@@ -395,7 +469,7 @@ export const AgregarProductosAlmacen = () => {
 
             {/* TIPO DE ENTRADA */}
             <div className="col-md-3">
-              <label>Tipo de entrada</label>
+              <label>Metodo</label>
               <Select
                 options={listaTipoEntradaFiltrada}
                 value={formData.tipo}
@@ -427,6 +501,7 @@ export const AgregarProductosAlmacen = () => {
                 className="form-control"
                 value={formData.fecha}
                 onChange={handleChange}
+                onFocus={(e) => e.target.showPicker()} // Abre el calendario al hacer clic en el input
                 disabled={FechaBloqueado}
               />
               {errors.fecha && (
@@ -434,10 +509,19 @@ export const AgregarProductosAlmacen = () => {
               )}
             </div>
 
+            {/* PRODUCTOS */}
             <div className="col-md-3">
               <label>Producto</label>
+              <IconButton
+                color="primary"
+                onClick={handleOpenModal}
+                flexDirection={"flex-end"}
+                disabled={!proveedorSeleccionado}
+              >
+                <ContentPasteSearchIcon sx={{ fontSize: 29 }} />
+              </IconButton>
               <Select
-                options={productosFiltrados}
+                options={listaProductos}
                 value={formData.producto}
                 onChange={(opcion) => handleSelectChange("producto", opcion)}
                 isDisabled={!proveedorSeleccionado}
@@ -447,7 +531,7 @@ export const AgregarProductosAlmacen = () => {
               )}
             </div>
 
-            <div className="col-md-3">
+            <div className="col-md-3" style={{ marginTop: "20px" }}>
               <label>Cantidad</label>
               <input
                 type="number"
@@ -461,7 +545,7 @@ export const AgregarProductosAlmacen = () => {
               )}
             </div>
 
-            <div className="col-md-3">
+            <div className="col-md-3" style={{ marginTop: "20px" }}>
               <label>Costo Unitario</label>
               <input
                 type="number"
@@ -475,12 +559,13 @@ export const AgregarProductosAlmacen = () => {
               )}
             </div>
 
-            <div className="col-md-3">
+            <div className="col-md-3" style={{ marginTop: "20px" }}>
               <label>Autoriza</label>
               <Select
                 options={listaAutorizaciones}
                 value={formData.autorizo}
                 onChange={(opcion) => handleSelectChange("autorizo", opcion)}
+                isDisabled={autorizoBloqueado}
               />
               {errors.autorizo && (
                 <div className="text-danger">{errors.autorizo}</div>
@@ -515,37 +600,44 @@ export const AgregarProductosAlmacen = () => {
           <table className="table mt-3">
             <thead>
               <tr>
-                <th>Proveedor</th>
+                {/* <th>Proveedor</th> */}
                 <th>Producto</th>
                 <th>Cantidad</th>
-                <th>Fecha</th>
+                {/* <th>Fecha</th> */}
                 <th>Costo unitario</th>
+                <th>Subtotal</th> {/* Nueva columna para el subtotal */}
                 {/* <th>Tipo Entrada</th>
-              <th>Autoriza</th>
-              <th>Movimiento</th> */}
+        <th>Autoriza</th>
+        <th>Movimiento</th> */}
                 <th>Acciones</th>
               </tr>
             </thead>
             <tbody>
               {productosAgregados.map((producto, index) => (
                 <tr key={`${producto}-${index}`}>
-                  <td>
-                    {producto.proveedor_id ? producto.proveedor_id.label : ""}
-                  </td>
+                  {/* <td>
+            {producto.proveedor_id ? producto.proveedor_id.label : ""}
+          </td> */}
                   <td>
                     {producto.producto_id ? producto.producto_id.label : ""}
                   </td>
                   <td>{producto.cantidad}</td>
-                  <td>
+                  {/* <td>
                     {producto.fecha
                       ? new Date(producto.fecha).toLocaleDateString("es-MX")
                       : "Fecha no disponible"}
-                  </td>
-                  <td>{producto.costo_unitario}</td>
+                  </td> */}
+                  <td>{formatearDinero(producto.costo_unitario)}</td>
+                  <td>
+                    {formatearDinero(
+                      (producto.cantidad * producto.costo_unitario).toFixed(2)
+                    )}
+                  </td>{" "}
+                  {/* Cálculo del subtotal */}
                   <td>
                     {/* Botón para eliminar el producto agregado en el estado */}
                     <IconButton
-                      sx={{ color: "black" }}
+                      sx={{ color: "red" }}
                       onClick={() => eliminarProductoInventario(index)} // Pasar el índice del producto a eliminar
                     >
                       <DeleteOutlineIcon sx={{ fontSize: 29 }} />
@@ -555,6 +647,7 @@ export const AgregarProductosAlmacen = () => {
               ))}
             </tbody>
           </table>
+
           <div
             className="mt-5"
             style={{ display: "flex", justifyContent: "flex-end" }}
@@ -571,12 +664,20 @@ export const AgregarProductosAlmacen = () => {
               variant="outlined"
               color="primary"
               onClick={() => window.location.reload()}
+              disabled={productosAgregados.length === 0}
             >
               Cancelar
             </Button>
           </div>
         </div>
       </Box>
+
+      <ModalBuscarProductos
+        open={openModal}
+        onClose={handleCloseModal}
+        onSelect={handleProductoSeleccionado}
+        productos={listaProductos}
+      />
     </>
   );
 };
