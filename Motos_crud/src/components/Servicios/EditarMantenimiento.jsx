@@ -185,10 +185,10 @@ export const EditarMantenimiento = ({ modalOpen, onClose, mantenimiento, listaMo
                                     <table className="table">
                                         <thead>
                                             <tr>
-                                                <th style={{ textAlign: "right", width: "16.66%" }}>Producto</th>
-                                                <th style={{ textAlign: "right", width: "16.66%" }}>Costo Unitario</th>
-                                                <th style={{ textAlign: "right", width: "16.66%" }}>Cantidad</th>
-                                                <th style={{ textAlign: "right", width: "16.66%" }}>Subtotal</th>
+                                                <th style={{ textAlign: "center", width: "16.66%" }}>Producto</th>
+                                                <th style={{ textAlign: "center", width: "16.66%" }}>Costo Unitario</th>
+                                                <th style={{ textAlign: "center", width: "16.66%" }}>Cantidad</th>
+                                                <th style={{ textAlign: "center", width: "16.66%" }}>Subtotal</th>
                                             </tr>
                                         </thead>
                                         <tbody>

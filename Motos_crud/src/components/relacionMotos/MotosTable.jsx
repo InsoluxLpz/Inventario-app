@@ -149,16 +149,15 @@ export const MotosTable = () => {
                 <TextField fullWidth label="Buscar por N.Serie" variant="outlined" sx={{ backgroundColor: "white" }} value={searchNoSerie} onChange={(e) => setSearchNoSerie(e.target.value)} />
               </Grid>
 
-              <Grid item xs={12} sm={6} md={3}>
+              <Grid item xs={12} sm={4} md={3}>
                 <TextField fullWidth label="Buscar por Placa" variant="outlined" sx={{ backgroundColor: "white" }} value={searchPlaca} onChange={(e) => setSearchPlaca(e.target.value)} />
               </Grid>
 
               <Grid item xs={12} sm={6} md={3} display="flex" justifyContent="center">
                 <Button
                   variant="contained"
-                  sx={{ backgroundColor: "#1f618d", color: "white", ":hover": { opacity: 0.7 }, borderRadius: "8px", padding: "10px 20px", display: "flex", alignItems: "center", gap: "8px", marginLeft: 18 }}
-                  onClick={handleOpenModalAdd}
-                >
+                  sx={{ backgroundColor: "#1f618d", color: "white", ":hover": { opacity: 0.7 }, right: 20, borderRadius: "8px", padding: "10px 20px", display: "flex", alignItems: "center", gap: "8px", marginRight: 8 }}
+                  onClick={handleOpenModalAdd}>
                   <AddchartIcon sx={{ fontSize: 24 }} />
                   Agregar Motos
                 </Button>

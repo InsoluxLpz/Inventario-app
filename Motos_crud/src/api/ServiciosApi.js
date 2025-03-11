@@ -131,9 +131,16 @@ export const EliminarServicio = async (id, actualizarLista) => {
 
 // *<===================================== SERVICIOS MOTOS ====================================================================>
 
-export const ObtenerMantenimientos = async () => {
+export const ObtenerMantenimientos = async ({ filtro }) => {
+
+    const params = new URLSearchParams();
+
+    if (filtro.fecha_inicio) params.append("fecha_inicio", filtro.fecha_inicio);
+    if (filtro.fecha_final) params.append("fecha_final", filtro.fecha_final);
+    if (filtro.servicio) params.append("servicio", filtro.servicio);
+
     try {
-        const response = await fetch(`${API_URL}/servicios/obtener_mantenimientos`, {
+        const response = await fetch(`${API_URL}/servicios/obtener_mantenimientos?${params.toString()}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json'

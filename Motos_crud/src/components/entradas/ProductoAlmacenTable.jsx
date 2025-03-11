@@ -109,16 +109,7 @@ export const ProductoAlmacenTable = () => {
       >
         <Button
           variant="contained"
-          sx={{
-            backgroundColor: "#1f618d",
-            color: "white",
-            ":hover": { opacity: 0.7 },
-            borderRadius: "8px",
-            padding: "10px 20px",
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
-          }}
+          sx={{ backgroundColor: "#1f618d", color: "white", ":hover": { opacity: 0.7 }, position: "absolute", right: 20, borderRadius: "8px", padding: "10px 20px", display: "flex", alignItems: "center", gap: "8px", marginRight: 8 }}
           onClick={() => navigate("/almacen/MovimientosAlmacenTable")}
         >
           <WarehouseIcon sx={{ fontSize: 24 }} />

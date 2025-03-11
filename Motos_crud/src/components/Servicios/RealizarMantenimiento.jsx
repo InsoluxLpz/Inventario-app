@@ -245,7 +245,7 @@ export const RealizarMantenimiento = ({ modalOpen, onClose }) => {
                                     </div>
 
                                     <div className="col-md-4 mb-2">
-                                        <label className="form-label">Vehiculo</label>
+                                        <label className="form-label">Moto</label>
                                         <Select
                                             name="vehiculo"
                                             options={opcionesVehiculos}
@@ -339,11 +339,11 @@ export const RealizarMantenimiento = ({ modalOpen, onClose }) => {
                                     <table className="table">
                                         <thead>
                                             <tr>
-                                                <th style={{ textAlign: "right", width: "16.66%" }}>Producto</th>
-                                                <th style={{ textAlign: "right", width: "16.66%" }}>Costo Unitario</th>
-                                                <th style={{ textAlign: "right", width: "16.66%" }}>Cantidad</th>
-                                                <th style={{ textAlign: "right", width: "16.66%" }}>Subtotal</th>
-                                                <th style={{ textAlign: "right", width: "16.66%" }}>Acciones</th>
+                                                <th style={{ textAlign: "center", width: "16.66%" }}>Producto</th>
+                                                <th style={{ textAlign: "center", width: "16.66%" }}>Costo Unitario</th>
+                                                <th style={{ textAlign: "center", width: "16.66%" }}>Cantidad</th>
+                                                <th style={{ textAlign: "center", width: "16.66%" }}>Subtotal</th>
+                                                <th style={{ textAlign: "center", width: "16.66%" }}>Acciones</th>
                                             </tr>
                                         </thead>
                                         <tbody>

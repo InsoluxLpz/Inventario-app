@@ -118,20 +118,24 @@ export const ProductoTable = () => {
         <NavBar onSearch={setSearchTerm} />
         <Box sx={{ width: "100%", display: "flex", justifyContent: "center", marginTop: 3 }}>
           <Grid container spacing={2} alignItems="center" sx={{ maxWidth: 1200 }}>
-            <Grid item xs={12} sm={8} display="flex" justifyContent="flex-start">
+            <Grid item xs={12} sm={7}>
               <TextField
                 label="Buscar por nombre"
                 variant="outlined"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                sx={{ width: 500, backgroundColor: "white", marginLeft: 12 }}
+                sx={{
+                  width: 450,
+                  backgroundColor: "white",
+                  marginRight: 40 // Elimina el margen innecesario
+                }}
                 InputProps={{
                   sx: { height: "40px" }
                 }}
               />
             </Grid>
 
-            <Grid item xs={12} sm={4} display="flex" justifyContent="flex-end">
+            <Grid item xs={12} sm={3} display="flex" justifyContent="flex-end">
               <Button
                 variant="contained"
                 sx={{
@@ -140,10 +144,12 @@ export const ProductoTable = () => {
                   ":hover": { opacity: 0.7 },
                   borderRadius: "8px",
                   padding: "10px 20px",
+                  position: "absolute",
+                  right: 20,
                   display: "flex",
                   alignItems: "center",
                   gap: "8px",
-                  marginLeft: 39
+                  marginRight: 8 // Asegura que quede bien alineado con el margen derecho
                 }}
                 onClick={handleModalAgregar}
               >
@@ -154,7 +160,9 @@ export const ProductoTable = () => {
           </Grid>
         </Box>
 
-        <Box width="90%" maxWidth={2000} margin="0 auto" mt={2}>
+
+
+        <Box width="90%" maxWidth={2000} margin="0 auto" mt={4}>
           <Box sx={{ backgroundColor: "#1f618d", padding: "10px 20px", borderRadius: "8px 8px 0 0" }}>
             <Typography variant="h5" color="white">
               Lista de Productos

@@ -99,17 +99,17 @@ export const ProveedoresTable = () => {
       <Box
         sx={{ backgroundColor: "#f2f3f4", minHeight: "100vh", paddingBottom: 4, transition: "margin 0.3s ease-in-out", marginLeft: `${miniDrawerWidth}px`, }}
       >
-        <NavBar onSearch={setSearchTerm} />
+        <NavBar />
 
         <Button
           variant="contained"
-          sx={{ backgroundColor: "#1f618d", color: "white", ":hover": { opacity: 0.7 }, position: "fixed", right: 50, top: 80, borderRadius: "8px", padding: "10px 20px", display: "flex", alignItems: "right", gap: "8px", }}
+          sx={{ backgroundColor: "#1f618d", color: "white", ":hover": { opacity: 0.7 }, position: "absolute", right: 20, borderRadius: "8px", padding: "10px 20px", display: "flex", alignItems: "center", gap: "8px", marginTop: 2, marginRight: 8 }}
           onClick={handleOpenModalAgregar}>
           <AddchartIcon sx={{ fontSize: 24 }} />
           Agregar Proveedor
         </Button>
 
-        <Box width="90%" maxWidth={2000} margin="0 auto" mt={12}>
+        <Box width="90%" maxWidth={2000} margin="0 auto" mt={9}>
           {/* Header alineado a la izquierda con fondo */}
           <Box sx={{ backgroundColor: "#1f618d", padding: "10px 20px", borderRadius: "8px 8px 0 0" }}>
             <Typography variant="h5" color="white">

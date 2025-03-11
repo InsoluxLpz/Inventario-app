@@ -71,7 +71,7 @@ export const CatalogoServicios = () => {
     return (
         <>
             <Box
-                sx={{ backgroundColor: "#d6dbdf", minHeight: "100vh", paddingBottom: 4, transition: "margin 0.3s ease-in-out", marginLeft: `${miniDrawerWidth}px`, }}
+                sx={{ backgroundColor: "#f2f3f4", minHeight: "100vh", paddingBottom: 4, transition: "margin 0.3s ease-in-out", marginLeft: `${miniDrawerWidth}px`, }}
             >
                 <NavBar />
 
@@ -84,30 +84,24 @@ export const CatalogoServicios = () => {
                 </Button>
 
 
-                <Box width="100%" maxWidth={1800} margin="0 auto" mt={9}>
+                <Box width="90%" maxWidth={2000} margin="0 auto" mt={9}>
                     {/* Header alineado a la izquierda con fondo */}
-                    <Box
-                        sx={{
-                            backgroundColor: "#1f618d",
-                            padding: "10px 20px",
-                            borderRadius: "8px 8px 0 0",
-                        }}
-                    >
-                        <Typography variant="h5" fontWeight="bold" color="white">
-                            Lista de Servicios
+                    <Box sx={{ backgroundColor: "#1f618d", padding: "10px 20px", borderRadius: "8px 8px 0 0" }}>
+                        <Typography variant="h5" color="white">
+                            Lista Servicios
                         </Typography>
                     </Box>
                 </Box>
 
-                <Paper sx={{ width: "100%", maxWidth: "1800px", margin: "0 auto", backgroundColor: "white", padding: 2 }}>
-                    <TableContainer sx={{ maxHeight: 800, backgroundColor: "#f4f6f7 " }}>
-                        <Table stickyHeader>
+                <Paper sx={{ width: "90%", maxWidth: "2000px", margin: "0 auto", backgroundColor: "white", padding: 2 }}>
+                    <TableContainer sx={{ maxHeight: 800, backgroundColor: "#ffff", border: "1px solid #d7dbdd", borderRadius: "2px" }}>
+                        <Table stickyHeader aria-label="sticky table">
                             <TableHead>
                                 <TableRow>
-                                    <TableCell align="center" sx={{ fontWeight: "bold", color: "black", textAlign: "center", width: "16.66%" }}>Id</TableCell>
-                                    <TableCell align="center" sx={{ fontWeight: "bold", color: "black", textAlign: "center", width: "16.66%" }}>Nombre</TableCell>
-                                    <TableCell align="center" sx={{ fontWeight: "bold", color: "black", textAlign: "center", width: "16.66%" }}>Descripción</TableCell>
-                                    <TableCell align="center" sx={{ fontWeight: "bold", color: "black", textAlign: "center", width: "16.66%" }}>Opciones</TableCell>
+                                    <TableCell align="center" sx={{ fontWeight: "bold", color: "black", textAlign: "center", width: "16.66%", backgroundColor: "#f4f6f7" }}>Id</TableCell>
+                                    <TableCell align="center" sx={{ fontWeight: "bold", color: "black", textAlign: "center", width: "16.66%", backgroundColor: "#f4f6f7" }}>Nombre</TableCell>
+                                    <TableCell align="center" sx={{ fontWeight: "bold", color: "black", textAlign: "center", width: "16.66%", backgroundColor: "#f4f6f7" }}>Descripción</TableCell>
+                                    <TableCell align="center" sx={{ fontWeight: "bold", color: "black", textAlign: "center", width: "16.66%", backgroundColor: "#f4f6f7" }}>Opciones</TableCell>
                                 </TableRow>
                             </TableHead>
                             <TableBody>

@@ -141,9 +141,26 @@ router.post('/agregar_mantenimiento', async (req, res) => {
 
 
 router.get('/obtener_mantenimientos', async (req, res) => {
+    let { fecha_inicio, fecha_final, servicio } = req.query;
     const connection = await db.getConnection();
+
     try {
-        const [rows] = await connection.query(`
+        // Si no hay fechas en el filtro, se calculan las fechas de la semana actual
+        if (!fecha_inicio && !fecha_final) {
+            const hoy = new Date();
+            const diaSemana = hoy.getDay(); // 0 = Domingo, 6 = Sábado
+
+            const inicioSemana = new Date(hoy);
+            inicioSemana.setDate(hoy.getDate() - diaSemana); // Inicio de la semana (domingo)
+
+            const finSemana = new Date(inicioSemana);
+            finSemana.setDate(inicioSemana.getDate() + 6); // Fin de la semana (sábado)
+
+            fecha_inicio = inicioSemana.toISOString().split('T')[0];
+            fecha_final = finSemana.toISOString().split('T')[0];
+        }
+
+        let query = `
             SELECT 
                 m.id AS servicio_id,
                 m.fecha_inicio,
@@ -173,10 +190,29 @@ router.get('/obtener_mantenimientos', async (req, res) => {
             LEFT JOIN cat_servicios cs ON sm.idServicio = cs.id
             LEFT JOIN usuarios u ON m.idCancelo = u.idUsuario
             LEFT JOIN mantenimientos_detalles md ON m.id = md.idMantenimiento
-            LEFT JOIN productos p ON md.idProducto = p.id;
-        `);
+            LEFT JOIN productos p ON md.idProducto = p.id
+            WHERE 1 = 1
+        `;
 
-        // Agrupar datos por servicio
+        const queryParams = [];
+
+        if (fecha_inicio) {
+            query += ` AND m.fecha_inicio >= ?`;
+            queryParams.push(fecha_inicio);
+        }
+
+        if (fecha_final) {
+            query += ` AND m.fecha_inicio <= ?`;
+            queryParams.push(fecha_final);
+        }
+
+        if (servicio) {
+            query += ` AND cs.id = ?`;
+            queryParams.push(servicio);
+        }
+
+        const [rows] = await connection.query(query, queryParams);
+
         const serviciosMap = new Map();
 
         rows.forEach(row => {
@@ -202,7 +238,6 @@ router.get('/obtener_mantenimientos', async (req, res) => {
 
             const servicio = serviciosMap.get(row.servicio_id);
 
-            // Agregar los servicios aplicados sin duplicados
             if (row.servicio_aplicado_id && !servicio.servicios.some(s => s.id === row.servicio_aplicado_id)) {
                 servicio.servicios.push({
                     id: row.servicio_aplicado_id,
@@ -210,7 +245,6 @@ router.get('/obtener_mantenimientos', async (req, res) => {
                 });
             }
 
-            // Agregar los productos sin duplicados
             if (row.producto_id && !servicio.productos.some(p => p.id === row.producto_id)) {
                 servicio.productos.push({
                     id: row.producto_id,
@@ -231,6 +265,7 @@ router.get('/obtener_mantenimientos', async (req, res) => {
         connection.release();
     }
 });
+
 
 router.put('/actualizar_mantenimiento/:id', async (req, res) => {
     const { id } = req.params;
