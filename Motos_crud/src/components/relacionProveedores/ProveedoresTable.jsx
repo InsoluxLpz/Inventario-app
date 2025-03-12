@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Box, IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, FormControlLabel, Switch, Button, } from "@mui/material";
+import { Box, IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, FormControlLabel, Switch, Button, Grid2, TextField, } from "@mui/material";
 import AddchartIcon from '@mui/icons-material/Addchart';
 import InventoryIcon from "@mui/icons-material/Inventory";
 import EditIcon from "@mui/icons-material/Edit";
@@ -11,7 +11,9 @@ import { EditarProveedoresModal } from "./EditarProveedoresModal";
 export const ProveedoresTable = () => {
   const [proveedores, setProveedores] = useState([]);
   const [proveedorSeleccionado, setProveedorSeleccionado] = useState(null);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchEmpresa, setSearchEmpresa] = useState("");
+  const [searchNombre, setSearchNombre] = useState("");
+  const [searchTelefono, setSearchTelefono] = useState("");
   const [openModalAgregar, setOpenModalAgregar] = useState(false);
   const [openModalEditar, setOpenModalEditar] = useState(false);
   const [showInactive, setShowInactive] = useState(false);
@@ -74,21 +76,40 @@ export const ProveedoresTable = () => {
   };
 
   // * buscador
-  const filteredProveedores = proveedores.filter((proveedor) => {
-    const matchesSearchTerm = proveedor.nombre_proveedor
-      ?.toLowerCase()
-      .includes(searchTerm.toLowerCase());
-    const matchesStatus = showInactive || proveedor.status !== 0;
+  const filteredProveedores = proveedores
+    .filter((proveedor) => {
+      const empresaMatch =
+        !searchEmpresa ||
+        (proveedor.nombre_empresa &&
+          proveedor.nombre_empresa.toLowerCase() === searchEmpresa.toLowerCase());
 
-    return matchesSearchTerm && matchesStatus;
-  });
+      const nombreMatch =
+        !searchNombre ||
+        (proveedor.nombre_proveedor &&
+          proveedor.nombre_proveedor.toLowerCase() === searchNombre.toLowerCase());
+
+      const telefonoMatch =
+        !searchTelefono ||
+        (proveedor.telefono_empresa &&
+          proveedor.telefono_empresa === searchTelefono);
+
+      const matchesStatus = showInactive || proveedor.status !== 0;
+
+      return empresaMatch && nombreMatch && telefonoMatch && matchesStatus;
+    })
+    .sort((a, b) => {
+      if (a.nombre_empresa.toLowerCase() < b.nombre_empresa.toLowerCase()) return -1;
+      if (a.nombre_empresa.toLowerCase() > b.nombre_empresa.toLowerCase()) return 1;
+      return 0;
+    });
+
 
   const getStatusColor = (status) => {
     switch (status) {
       case 0:
-        return "#f5b7b1"; // Amarillo claro para "inactiva"
+        return "#f5b7b1";
       default:
-        return "transparent"; // Fondo transparente si no coincide
+        return "transparent";
     }
   };
 
@@ -100,16 +121,56 @@ export const ProveedoresTable = () => {
         sx={{ backgroundColor: "#f2f3f4", minHeight: "100vh", paddingBottom: 4, transition: "margin 0.3s ease-in-out", marginLeft: `${miniDrawerWidth}px`, }}
       >
         <NavBar />
+        <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", marginTop: 3, marginLeft: 12 }}>
+          <Box sx={{ flexGrow: 1 }}>
+            <Grid2 container spacing={2} justifyContent="center" alignItems="center">
+              <Grid2 item sm={6} md={3}>
+                <TextField
+                  label="Buscar por Empresa"
+                  variant="outlined"
+                  sx={{ backgroundColor: "white", width: 400 }}
+                  value={searchEmpresa}
+                  onChange={(e) => setSearchEmpresa(e.target.value)}
+                />
+              </Grid2>
 
-        <Button
-          variant="contained"
-          sx={{ backgroundColor: "#1f618d", color: "white", ":hover": { opacity: 0.7 }, position: "absolute", right: 20, borderRadius: "8px", padding: "10px 20px", display: "flex", alignItems: "center", gap: "8px", marginTop: 2, marginRight: 8 }}
-          onClick={handleOpenModalAgregar}>
-          <AddchartIcon sx={{ fontSize: 24 }} />
-          Agregar Proveedor
-        </Button>
+              <Grid2 item sm={6} md={3}>
+                <TextField
+                  label="Buscar por proveedor"
+                  variant="outlined"
+                  sx={{ backgroundColor: "white", width: 400 }}
+                  value={searchNombre}
+                  onChange={(e) => setSearchNombre(e.target.value)}
+                />
+              </Grid2>
 
-        <Box width="90%" maxWidth={2000} margin="0 auto" mt={9}>
+              <Grid2 item sm={6} md={3}>
+                <TextField
+                  label="Buscar por Tel.Empresa"
+                  variant="outlined"
+                  type="number"
+                  sx={{ backgroundColor: "white", width: 400, marginRight: 3 }}
+                  value={searchTelefono}
+                  onChange={(e) => setSearchTelefono(e.target.value)}
+                />
+              </Grid2>
+
+              <Grid2 item sm={6} md={3}>
+                <Box sx={{ display: "flex", gap: 1 }}>
+                  <Button
+                    variant="contained"
+                    sx={{ backgroundColor: "#1f618d", color: "white", ":hover": { opacity: 0.7 }, right: 20, borderRadius: "8px", padding: "5px 10px", display: "flex", alignItems: "center", gap: "8px", marginRight: 8 }}
+                    onClick={handleOpenModalAgregar}>
+                    <AddchartIcon sx={{ fontSize: 24 }} />
+                    Agregar Proveedor
+                  </Button>
+                </Box>
+              </Grid2>
+            </Grid2>
+          </Box>
+        </Box>
+
+        <Box width="90%" maxWidth={2000} margin="0 auto" mt={2}>
           {/* Header alineado a la izquierda con fondo */}
           <Box sx={{ backgroundColor: "#1f618d", padding: "10px 20px", borderRadius: "8px 8px 0 0" }}>
             <Typography variant="h5" color="white">
@@ -141,7 +202,7 @@ export const ProveedoresTable = () => {
                         sx={{
                           backgroundColor: "#f4f6f7",
                           color: "black",
-                          textAlign: "center",
+                          textAlign: "left",
                           width: "16.66%",
                           fontWeight: 'bold'
                         }}
@@ -163,12 +224,12 @@ export const ProveedoresTable = () => {
                         }
                       }}
                     >
-                      <TableCell sx={{ textAlign: "right", width: "16.66%" }}>{proveedor.nombre_empresa}</TableCell>
-                      <TableCell sx={{ textAlign: "right", width: "16.66%" }}>{proveedor.nombre_proveedor}</TableCell>
-                      <TableCell sx={{ textAlign: "right", width: "16.66%" }}>{proveedor.telefono_contacto}</TableCell>
-                      <TableCell sx={{ textAlign: "right", width: "16.66%" }}>{proveedor.rfc}</TableCell>
-                      <TableCell sx={{ textAlign: "right", width: "16.66%" }}>{proveedor.telefono_empresa}</TableCell>
-                      <TableCell sx={{ textAlign: "right", width: "16.66%" }}>
+                      <TableCell sx={{ textAlign: "left", width: "16.66%" }}>{proveedor.nombre_empresa}</TableCell>
+                      <TableCell sx={{ textAlign: "left", width: "16.66%" }}>{proveedor.nombre_proveedor}</TableCell>
+                      <TableCell sx={{ textAlign: "left", width: "16.66%" }}>{proveedor.telefono_contacto}</TableCell>
+                      <TableCell sx={{ textAlign: "left", width: "16.66%" }}>{proveedor.rfc}</TableCell>
+                      <TableCell sx={{ textAlign: "left", width: "16.66%" }}>{proveedor.telefono_empresa}</TableCell>
+                      <TableCell sx={{ textAlign: "left", width: "16.66%" }}>
                         <IconButton sx={{ color: "black" }} onClick={() => handleOpenModalEditar(proveedor)}>
                           <EditIcon sx={{ fontSize: 20 }} />
                         </IconButton>

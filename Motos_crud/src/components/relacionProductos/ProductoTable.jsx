@@ -5,16 +5,16 @@ import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
+import InventoryIcon from "@mui/icons-material/Inventory";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
-import { Box, Button, IconButton, TextField, Typography } from "@mui/material";
+import { Box, Button, FormControlLabel, Grid2, IconButton, Switch, TextField, Typography } from "@mui/material";
 import { NavBar } from "../NavBar";
 import { obtenerProductos, ActualizarStatus, obtenerUnidadMedidas, obtenerGrupos } from "../../api/productosApi";
 import { EditarProductoModal } from "../relacionProductos/EditarProductoModal";
 import { AgregarProductoModal } from "./AgregarProductoModal";
 import AddchartIcon from '@mui/icons-material/Addchart';
 import { obtenerProveedores } from "../../api/proveedoresApi";
-import { Grid } from "@mui/material";
 
 export const ProductoTable = () => {
   const [openModalEditar, setOpenModalEditar] = useState(false);
@@ -23,8 +23,11 @@ export const ProductoTable = () => {
   const [productoSeleccionado, setProductoSeleccionado] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [proveedores, setProveedores] = useState([]);
+  const [showInactive, setShowInactive] = useState(false);
   const [grupos, setGrupos] = useState([]);
   const [unidadMedida, setUnidadMedida] = useState([]);
+  const [searchNombre, setSearchNombre] = useState("");  // Filtro por nombre
+  const [searchDescripcion, setSearchDescripcion] = useState(""); // Filtro por descripción
 
   const fetchProductos = async () => {
     const data = await obtenerProductos();
@@ -64,33 +67,56 @@ export const ProductoTable = () => {
     setOpenModalAgregar(false);
   };
 
+
+  const handleActualizarStatus = (id) => {
+    ActualizarStatus(id, (idActualizado) => {
+      setProductos((productosActuales) =>
+        productosActuales.map((producto) =>
+          producto.id === idActualizado ? { ...producto, status: 0 } : producto
+        )
+      );
+    });
+  };
+
+
   const actualizarLista = (productoActualizado) => {
     setProductos((prevProductos) =>
       prevProductos.map((m) => (m.idProducto === productoActualizado.idProducto ? productoActualizado : m))
     );
   };
 
-  const handleActualizarStatus = (id) => {
-    ActualizarStatus(id, (idActualizado) => {
-      setProductos((productosActuales) =>
-        productosActuales.map((producto) =>
-          producto.idProducto === idActualizado ? { ...producto, status: 0 } : producto
-        )
-      );
-    });
+  const agregarProducto = (producto) => {
+    setProductos(prevProductos => [...prevProductos, producto]);
   };
 
-  const filteredProductos = productos.filter((producto) => {
+
+
+  const productosFiltrados = productos.filter((producto) => {
+    if (showInactive) {
+      return true;
+    }
+
+    return producto.status !== 0;
+  });
+
+  // **Filtro de productos**
+  const filteredProductos = productosFiltrados.filter((producto) => {
     const nombre = producto.nombre ? producto.nombre.toLowerCase() : "";
-    const codigo = producto.codigo ? producto.codigo.toLowerCase() : "";
-    const grupo = producto.grupo ? producto.grupo.toString().toLowerCase() : "";
+    const descripcion = producto.descripcion ? producto.descripcion.toLowerCase() : "";
 
-    const matchesSearch =
-      nombre.includes(searchTerm.toLowerCase()) ||
-      codigo.includes(searchTerm.toLowerCase()) ||
-      grupo.includes(searchTerm.toLowerCase());
+    return (
+      nombre.includes(searchNombre.toLowerCase()) &&
+      descripcion.includes(searchDescripcion.toLowerCase())
+    );
+  });
 
-    return matchesSearch;
+
+  // * Ordenar los productos por nombre alfabéticamente
+  const productosOrdenados = filteredProductos.sort((a, b) => {
+    if (a.nombre && b.nombre) {
+      return a.nombre.toLowerCase().localeCompare(b.nombre.toLowerCase());
+    }
+    return 0;
   });
 
   // * formato de dinero 
@@ -110,110 +136,121 @@ export const ProductoTable = () => {
 
   const miniDrawerWidth = 50;
 
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 0:
+        return "#f5b7b1"; // Amarillo claro para "inactiva"
+      default:
+        return "transparent"; // Fondo transparente si no coincide
+    }
+  };
+
   return (
     <>
       <Box
         sx={{ backgroundColor: "#f2f3f4", minHeight: "100vh", paddingBottom: 4, transition: "margin 0.3s ease-in-out", marginLeft: `${miniDrawerWidth}px` }}
       >
         <NavBar onSearch={setSearchTerm} />
-        <Box sx={{ width: "100%", display: "flex", justifyContent: "center", marginTop: 3 }}>
-          <Grid container spacing={2} alignItems="center" sx={{ maxWidth: 1200 }}>
-            <Grid item xs={12} sm={7}>
-              <TextField
-                label="Buscar por nombre"
-                variant="outlined"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                sx={{
-                  width: 450,
-                  backgroundColor: "white",
-                  marginRight: 40 // Elimina el margen innecesario
-                }}
-                InputProps={{
-                  sx: { height: "40px" }
-                }}
-              />
-            </Grid>
+        <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", marginTop: 3, marginLeft: 12 }}>
+          <Box sx={{ flexGrow: 1 }}>
+            <Grid2 container spacing={2} justifyContent="center" alignItems="center">
 
-            <Grid item xs={12} sm={3} display="flex" justifyContent="flex-end">
-              <Button
-                variant="contained"
-                sx={{
-                  backgroundColor: "#1f618d",
-                  color: "white",
-                  ":hover": { opacity: 0.7 },
-                  borderRadius: "8px",
-                  padding: "10px 20px",
-                  position: "absolute",
-                  right: 20,
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "8px",
-                  marginRight: 8 // Asegura que quede bien alineado con el margen derecho
-                }}
-                onClick={handleModalAgregar}
-              >
-                <AddchartIcon sx={{ fontSize: 24 }} />
-                Agregar Productos
-              </Button>
-            </Grid>
-          </Grid>
+              <Grid2 item sm={6} md={3}>
+                <TextField
+                  label="Buscar por nombre"
+                  variant="outlined"
+                  sx={{ backgroundColor: "white", width: 400, marginRight: 3 }}
+                  value={searchNombre}
+                  onChange={(e) => setSearchNombre(e.target.value)}
+                />
+              </Grid2>
+
+              <Grid2 item sm={6} md={3}>
+                <TextField
+                  label="Buscar por descripción"
+                  variant="outlined"
+                  sx={{ backgroundColor: "white", width: 400, marginRight: 3 }}
+                  value={searchDescripcion}
+                  onChange={(e) => setSearchDescripcion(e.target.value)}
+                />
+              </Grid2>
+
+              <Grid2 item sm={6} md={3}>
+                <Box sx={{ display: "flex", gap: 1 }}>
+                  <Button
+                    variant="contained"
+                    sx={{ backgroundColor: "#1f618d", color: "white", ":hover": { opacity: 0.7 }, left: 20, borderRadius: "8px", padding: "5px 10px", display: "flex", alignItems: "center", gap: "8px", marginRight: 8 }}
+                    onClick={handleModalAgregar}
+                  >
+                    <AddchartIcon sx={{ fontSize: 24 }} />
+                    Agregar Productos
+                  </Button>
+                </Box>
+              </Grid2>
+            </Grid2>
+          </Box>
         </Box>
 
-
-
         <Box width="90%" maxWidth={2000} margin="0 auto" mt={4}>
+
           <Box sx={{ backgroundColor: "#1f618d", padding: "10px 20px", borderRadius: "8px 8px 0 0" }}>
             <Typography variant="h5" color="white">
               Lista de Productos
             </Typography>
           </Box>
-
+          <Box sx={{ display: "flex", justifyContent: "flex-end", backgroundColor: 'white' }}>
+            <Box sx={{ display: "flex", justifyContent: "flex-end", marginLeft: 2 }}>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={showInactive}
+                    onChange={(e) => setShowInactive(e.target.checked)}
+                    color="default"
+                  />
+                }
+                label="Mostrar inactivas"
+              />
+            </Box>
+          </Box>
           <Paper sx={{ width: "100%", maxWidth: "2000px", margin: "0 auto", backgroundColor: "white", padding: 2 }}>
             <TableContainer sx={{ maxHeight: 700, backgroundColor: "#ffff", border: "1px solid #d7dbdd", borderRadius: "2px" }}>
               <Table stickyHeader>
                 <TableHead>
                   <TableRow>
-                    {["Código", "Nombre", "Grupo", "Unidad de medida", "Proveedor", "Precio", "Descripción", "Acciones"].map((header) => (
-                      <TableCell key={header} align="center" sx={{ backgroundColor: "#f4f6f7", color: "black", textAlign: "center", width: "16.66%", fontWeight: "bold" }}>
+                    {["Código", "Nombre", "Descripción", "Unidad de medida", "Grupo", "Precio", "Acciones"].map((header) => (
+                      <TableCell key={header} align="center" sx={{ backgroundColor: "#f4f6f7", color: "black", textAlign: "left", width: "16.66%", fontWeight: "bold" }}>
                         {header}
                       </TableCell>
                     ))}
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {filteredProductos.map((producto) => (
+                  {productosOrdenados.map((producto) => (
                     <TableRow key={producto.id} sx={{
-                      backgroundColor: '#ffff', "&:hover": {
+                      backgroundColor: getStatusColor(producto.status), "&:hover": {
                         backgroundColor: "#eaecee ",
                       }
                     }}
                     >
-                      <TableCell align="center" sx={{ textAlign: "right", width: "16.66%", }}>
+                      <TableCell align="center" sx={{ textAlign: "left", width: "16.66%", }}>
                         {producto.codigo}
                       </TableCell>
-                      <TableCell align="center" sx={{ textAlign: "right", width: "16.66%", }}>
+                      <TableCell align="center" sx={{ textAlign: "left", width: "16.66%", }}>
                         {producto.nombre}
                       </TableCell>
-                      <TableCell align="center" sx={{ textAlign: "right", width: "16.66%", }}>
-                        {producto.grupo}
-                      </TableCell>
-                      <TableCell align="center" sx={{ textAlign: "right", width: "16.66%", }}>
-                        {producto.unidad_medida}
-                      </TableCell>
-                      <TableCell align="center" sx={{ textAlign: "right", width: "16.66%", }}>
-                        {Array.isArray(producto.proveedores) && producto.proveedores.length > 0
-                          ? producto.proveedores.map((prov) => prov.nombre).join(", ")
-                          : "Sin proveedores"}
-                      </TableCell>
-
-                      <TableCell align="center" sx={{ textAlign: "right" }}>
-                        {formatearDinero(producto.precio)}
-                      </TableCell>
-                      <TableCell align="center" sx={{ textAlign: "right" }}>
+                      <TableCell align="center" sx={{ textAlign: "left", width: "16.66%", }}>
                         {producto.descripcion}
                       </TableCell>
-                      <TableCell align="center" sx={{ textAlign: "right" }}>
+                      <TableCell align="center" sx={{ textAlign: "left", width: "16.66%", }}>
+                        {producto.unidad_medida}
+                      </TableCell>
+                      <TableCell align="center" sx={{ textAlign: "left", width: "16.66%", }}>
+                        {producto.grupo}
+                      </TableCell>
+                      <TableCell align="center" sx={{ textAlign: "left", width: "16.66%", }}>
+                        {formatearDinero(producto.precio)}
+                      </TableCell>
+                      <TableCell align="center" sx={{ textAlign: "left", width: "16.66%", }}>
                         <IconButton
                           sx={{ color: 'black' }}
                           onClick={() => {
@@ -222,6 +259,9 @@ export const ProductoTable = () => {
                           }}
                         >
                           <EditIcon sx={{ fontSize: 20 }} />
+                        </IconButton>
+                        <IconButton color="error" sx={{ marginLeft: 1 }} onClick={() => handleActualizarStatus(producto.id)}>
+                          <InventoryIcon sx={{ fontSize: 20 }} />
                         </IconButton>
                       </TableCell>
                     </TableRow>
@@ -247,6 +287,7 @@ export const ProductoTable = () => {
           onClose={handleCloseModalAgregar}
           grupos={grupos}
           unidadMedida={unidadMedida}
+          agregarProducto={agregarProducto}
         />
       </Box >
     </>

@@ -28,7 +28,6 @@ export const obtenerProveedores = async () => {
 
 export const agregarProveedor = async (proveedoresData) => {
     try {
-
         const response = await fetch(`${API_URL}/proveedores/agregar_proveedor`, {
             method: "POST",
             headers: {
@@ -42,21 +41,20 @@ export const agregarProveedor = async (proveedoresData) => {
         if (response.ok) {
             Swal.fire({
                 title: 'Éxito',
-                text: 'proveedores agregado correctamente.',
+                text: 'Proveedor agregado correctamente.',
                 icon: 'success',
                 confirmButtonText: 'Aceptar'
             });
             return data;
         } else {
-            Swal.fire('Error', data.message || 'Hubo un problema al agregar el proveedores.', 'error');
-            return { error: data.message || 'Hubo un problema al agregar la moto.' };
+            return { error: data.message || 'Hubo un problema al agregar el proveedor.' };
         }
     } catch (error) {
         console.error('Error al realizar la solicitud:', error);
-        Swal.fire('Error', 'Hubo un problema al conectar con el servidor.', 'error');
-        return null;
+        return { error: 'Hubo un problema al conectar con el servidor.' };
     }
 };
+
 
 export const actualizarProovedor = async (id, proveedoresData) => {
     try {

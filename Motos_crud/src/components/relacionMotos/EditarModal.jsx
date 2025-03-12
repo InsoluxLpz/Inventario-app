@@ -201,7 +201,7 @@ export const EditarModal = ({ onClose, modalOpen, moto, actualizarLista, listaMa
                                 <div className="row">
                                     <div className="col-md-4 mb-3">
                                         <label className="form-label">Fecha de Compra</label>
-                                        <input type="date" name="fecha_compra" className={`form-control ${errors.fecha_compra ? "is-invalid" : ""}`} value={formData.fecha_compra} onChange={handleChange} />
+                                        <input type="date" name="fecha_compra" onFocus={(e) => e.target.showPicker()} className={`form-control ${errors.fecha_compra ? "is-invalid" : ""}`} value={formData.fecha_compra} onChange={handleChange} />
                                         {errors.fecha_compra && <div className="invalid-feedback">{errors.fecha_compra}</div>}
                                     </div>
                                     <div className="col-md-4 mb-3">

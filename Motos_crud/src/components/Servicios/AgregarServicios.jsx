@@ -3,22 +3,19 @@ import { Box, Button } from "@mui/material";
 import { AgregarServicio } from "../../api/ServiciosApi";
 import { useNavigate } from "react-router";
 
-export const AgregarServicios = ({ modalOpen, onClose }) => {
+export const AgregarServicios = ({ modalOpen, onClose, agregarServicioLista }) => {
     if (!modalOpen) return null;
 
     const [servicio, setServicio] = useState({
         nombre: "",
         descripcion: ""
     });
-
     const [errors, setErrors] = useState({});
-    const handleNavigate = (path) => navigate(path);
-    const navigate = useNavigate();
 
     const handleChange = (event) => {
         setServicio({
             ...servicio,
-            [event.target.name]: event.target.value
+            [event.target.name]: event.target.value.trimStart()
         });
     };
 
@@ -41,23 +38,30 @@ export const AgregarServicios = ({ modalOpen, onClose }) => {
         return Object.keys(newErrors).length === 0;
     };
 
-    // Manejar el envío del formulario
     const handleSubmit = async (event) => {
-        event.preventDefault(); // Evitar que la página se recargue
+        event.preventDefault();
+        // Eliminar los espacios al final solo al momento de enviar
+        const servicioSinEspaciosFinales = {
+            ...servicio,
+            nombre: servicio.nombre.trimEnd()
+        };
 
         if (!validateForm()) return;
-        const response = await AgregarServicio(servicio);
+
+        const response = await AgregarServicio(servicioSinEspaciosFinales);
 
         if (response && !response.error) {
-            console.log(response);
-            setFormData({
+            // Agregar el nuevo servicio a la lista sin necesidad de recargar la página
+            agregarServicioLista(response); // Llamamos a la función para agregarlo a la lista
+            setServicio({
                 nombre: "",
                 descripcion: "",
             });
             setErrors({});
-            navigate("/servicios/CatalogoServicios");
+            onClose(); // Cerramos el modal después de agregar el servicio
         }
     };
+
 
     return (
         <>

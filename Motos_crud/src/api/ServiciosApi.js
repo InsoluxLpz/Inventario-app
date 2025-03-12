@@ -149,6 +149,7 @@ export const ObtenerMantenimientos = async ({ filtro }) => {
 
         if (response.ok) {
             const data = await response.json()
+            console.log("Respuesta del backend:", data);
             return data;
         }
 
@@ -160,7 +161,7 @@ export const ObtenerMantenimientos = async ({ filtro }) => {
 
 };
 
-export const AgregarMantenimiento = async (mantenimientoData) => {
+export const AgregarMantenimiento = async (mantenimientoData, actualizarLista) => {
     try {
 
         const response = await fetch(`${API_URL}/servicios/agregar_mantenimiento`, {

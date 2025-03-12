@@ -39,13 +39,20 @@ export const AgregarProveedoresModal = ({ onClose, modalOpen, agregarProveedorHa
     if (!validateForm()) return;
 
     const result = await agregarProveedor(formData);
-    if (result && result.error) {
-      setErrors({ nombre_proveedor: "Error al agregar proveedor" });
+
+    if (result?.error) {
+      if (result.error.includes("Ya existe un proveedor con este nombre de empresa")) {
+        setErrors((prev) => ({ ...prev, nombre_empresa: result.error }));
+      } else {
+        Swal.fire('Error', result.error, 'error');
+      }
       return;
     }
+
     agregarProveedorHandler(formData);
     onClose();
   };
+
 
   return (
     <div className="modal-backdrop">

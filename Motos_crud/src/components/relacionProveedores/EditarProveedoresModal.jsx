@@ -40,10 +40,15 @@ export const EditarProveedoresModal = ({ onClose, modalOpen, proveedor, actualiz
   const validateForm = () => {
     const newErrors = {};
     Object.keys(formData).forEach((key) => {
-      if (!formData[key].trim()) {
+      const value = formData[key];
+
+      if (typeof value === "string" && !value.trim()) {
+        newErrors[key] = "Este campo es obligatorio";
+      } else if (value === "") {
         newErrors[key] = "Este campo es obligatorio";
       }
     });
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -123,7 +128,7 @@ export const EditarProveedoresModal = ({ onClose, modalOpen, proveedor, actualiz
                   <div className="col-md-6 mb-3">
                     <label className="form-label">Teléfono de Contacto</label>
                     <input
-                      type="text"
+                      type="number"
                       name="telefono_contacto"
                       className={`form-control ${errors.telefono_contacto ? "is-invalid" : ""
                         }`}
@@ -155,7 +160,7 @@ export const EditarProveedoresModal = ({ onClose, modalOpen, proveedor, actualiz
                   <div className="col-md-6 mb-3">
                     <label className="form-label">Teléfono de la Empresa</label>
                     <input
-                      type="text"
+                      type="number"
                       name="telefono_empresa"
                       className={`form-control ${errors.telefono_empresa ? "is-invalid" : ""
                         }`}

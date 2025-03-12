@@ -8,10 +8,11 @@ import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
-import { Box, Button, IconButton, TextField, Typography } from "@mui/material";
+import { Box, Button, Grid2, IconButton, TableFooter, TextField, Typography } from "@mui/material";
 import { NavBar } from "../NavBar";
 import { EliminarMantenimiento, ObtenerMantenimientos, ObtenerServicios, } from "../../api/ServiciosApi";
 import DeleteIcon from "@mui/icons-material/Delete";
+import CleaningServicesIcon from '@mui/icons-material/CleaningServices';
 import { RealizarMantenimiento } from "./RealizarMantenimiento";
 import { EditarMantenimiento } from "./EditarMantenimiento";
 import { obtenerProductos } from "../../api/productosApi";
@@ -19,7 +20,6 @@ import { obtenerMotos } from "../../api/motosApi";
 import InfoIcon from "@mui/icons-material/Info";
 import { VerMantenimientoCancelado } from "./VerMantenimientoCancelado";
 import SearchIcon from '@mui/icons-material/Search';
-import { Grid } from "@mui/material";
 import Select from "react-select";
 
 export const ListaMantenimientos = () => {
@@ -35,6 +35,7 @@ export const ListaMantenimientos = () => {
     fecha_inicio: "",
     fecha_final: "",
     servicio: "",
+    moto: "",
   });
 
   const handleOpenModalAgregar = () => setOpenModalAgregar(true);
@@ -55,6 +56,7 @@ export const ListaMantenimientos = () => {
   const fetchMotos = async () => {
     const data = await obtenerMotos();
     if (data) setMotos(data);
+    console.log(data)
   };
 
   const fetchServicios = async () => {
@@ -87,7 +89,15 @@ export const ListaMantenimientos = () => {
   };
 
   const cargarMantenimientos = async () => {
-    const data = await ObtenerMantenimientos({ filtro });
+    const data = await ObtenerMantenimientos({
+      filtro: {
+        ...filtro,
+        servicio: filtro.servicio?.value || "",
+        moto: filtro.moto ? filtro.moto.value : ""
+      }
+    });
+    console.log("Valor de moto antes de enviar:", filtro.moto);
+
     if (data) {
       const mantenimientosAdaptados = data.map((servicio) => ({
         id: servicio.id,
@@ -105,9 +115,13 @@ export const ListaMantenimientos = () => {
         nombre: servicio.nombre,
       }));
       setMantenimientos(mantenimientosAdaptados);
+      console.log(filtro)
     }
   };
 
+  const limpiarFiltros = () => {
+    window.location.reload();
+  };
 
   useEffect(() => {
     cargarMantenimientos();
@@ -116,6 +130,31 @@ export const ListaMantenimientos = () => {
     fetchServicios();
   }, []);
 
+  const obtenerInicioYFinSemana = () => {
+    const fechaActual = new Date();
+    const primerDiaSemana = fechaActual.getDate() - fechaActual.getDay();
+    const ultimoDiaSemana = primerDiaSemana + 6;
+
+    // Crear las fechas de inicio y fin de la semana
+    const inicioSemana = new Date(fechaActual.setDate(primerDiaSemana));
+    const finSemana = new Date(fechaActual.setDate(ultimoDiaSemana));
+
+    const fechaInicioFormateada = inicioSemana.toISOString().split("T")[0];
+    const fechaFinFormateada = finSemana.toISOString().split("T")[0];
+
+    return { fechaInicioFormateada, fechaFinFormateada };
+  };
+
+  useEffect(() => {
+    const { fechaInicioFormateada, fechaFinFormateada } = obtenerInicioYFinSemana();
+    setFiltro({
+      ...filtro,
+      fecha_inicio: fechaInicioFormateada,
+      fecha_final: fechaFinFormateada,
+    });
+  }, []);
+
+
   const formatearDinero = (valor) => {
     return new Intl.NumberFormat("es-MX", {
       style: "currency",
@@ -123,9 +162,24 @@ export const ListaMantenimientos = () => {
     }).format(valor);
   };
 
+  const calcularTotales = () => {
+    const activos = mantenimientos.filter(m => m.status === 1); // Activos
+    const cancelados = mantenimientos.filter(m => m.status === 0); // Cancelados
+
+    const totalActivos = activos.reduce((total, mantenimiento) => total + mantenimiento.costo_total, 0);
+    const totalCancelados = cancelados.reduce((total, mantenimiento) => total + mantenimiento.costo_total, 0);
+
+    return { totalActivos, totalCancelados };
+  };
+
+  const { totalActivos, totalCancelados } = calcularTotales();
+
   const opcionesServicios = [...servicios]
     .sort((a, b) => a.nombre.localeCompare(b.nombre))
     .map((serv) => ({ value: serv.id, label: serv.nombre }));
+
+  const opcionesMotos = [...motos]
+    .map((mot) => ({ value: mot.id, label: mot.inciso }));
 
   const miniDrawerWidth = 50;
 
@@ -138,23 +192,24 @@ export const ListaMantenimientos = () => {
 
         <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", marginTop: 3, marginLeft: 12 }}>
           <Box sx={{ flexGrow: 1 }}>
-            <Grid container spacing={2} justifyContent="center" alignItems="center">
+            <Grid2 container spacing={2} justifyContent="center" alignItems="center">
 
-              <Grid item xs={12} sm={4} md={3}>
+              <Grid2 item sm={6} md={3}>
                 <Select
-                  name="servicios"
-                  options={opcionesServicios}
-                  isMulti
-                  placeholder="SELECCIONA"
-                  value={opcionesServicios.filter(s => filtro.servicio.includes(s.value))}
-                  onChange={(selectedOptions) =>
-                    setFiltro({ ...filtro, servicio: selectedOptions.map((s) => s.value) })
+                  name="motos"
+                  options={opcionesMotos}
+                  isMulti={false}
+                  placeholder="SELECCIONA VEHÍCULO"
+                  value={filtro.moto}
+                  onChange={(selectedOption) =>
+                    setFiltro({ ...filtro, moto: selectedOption })
                   }
                   styles={{
                     control: (base) => ({
                       ...base,
                       minHeight: "45px",
                       height: "55px",
+                      width: 200
                     }),
                     menuList: (provided) => ({
                       ...provided,
@@ -163,55 +218,86 @@ export const ListaMantenimientos = () => {
                     }),
                   }}
                 />
+              </Grid2>
 
-              </Grid>
 
-              <Grid item xs={12} sm={4} md={3}>
+              <Grid2 item sm={6} md={3}>
+                <Select
+                  name="servicios"
+                  options={opcionesServicios}
+                  isMulti={false}
+                  placeholder="SELECCIONA SERVICIO"
+                  value={filtro.servicio}
+                  onChange={(selectedOption) =>
+                    setFiltro({ ...filtro, servicio: selectedOption })
+                  }
+                  styles={{
+                    control: (base) => ({
+                      ...base,
+                      minHeight: "45px",
+                      height: "55px",
+                      width: 200
+                    }),
+                    menuList: (provided) => ({
+                      ...provided,
+                      maxHeight: "200px",
+                      overflowY: "auto",
+                    }),
+                  }}
+                />
+              </Grid2>
+
+              <Grid2 item sm={6} md={3}>
                 <TextField
-                  fullWidth
                   label="Fecha desde"
                   type="date"
                   variant="outlined"
-                  sx={{ backgroundColor: "white" }}
+                  sx={{ backgroundColor: "white", width: 200 }}
                   name="fecha_inicio"
                   value={filtro.fecha_inicio}
+                  onFocus={(e) => e.target.showPicker()}
                   onChange={(e) => setFiltro({ ...filtro, fecha_inicio: e.target.value })}
                   InputLabelProps={{ shrink: true }}
                 />
-              </Grid>
-              <Grid item xs={12} sm={4} md={3}>
+              </Grid2>
+              <Grid2 item sm={6} md={3}>
                 <TextField
                   fullWidth
                   label="Fecha hasta"
                   type="date"
                   variant="outlined"
-                  sx={{ backgroundColor: "white" }}
+                  sx={{ backgroundColor: "white", width: 200 }}
                   name="fecha_final"
                   value={filtro.fecha_final}
+                  onFocus={(e) => e.target.showPicker()}
                   onChange={(e) => setFiltro({ ...filtro, fecha_final: e.target.value })}
                   InputLabelProps={{ shrink: true }}
                 />
-              </Grid>
+              </Grid2>
 
-              <Grid item xs={12} sm={4} md={3}>
-                <Button
-                  variant="contained"
-                  sx={{ backgroundColor: "#196f3d", color: "white", ":hover": { opacity: 0.7 }, borderRadius: "8px", padding: "5px 10px", display: "flex", alignItems: "center", gap: "8px" }} onClick={cargarMantenimientos}>
-                  <SearchIcon sx={{ fontSize: 24 }} />
-                  Buscar
-                </Button>
-              </Grid>
+              <Grid2 item sm={6} md={3}>
+                <Box sx={{ display: "flex", gap: 1 }}>
+                  <Button variant="contained" sx={{ backgroundColor: "#196f3d", color: "white", ":hover": { opacity: 0.7 }, borderRadius: "8px", padding: "5px 10px", display: "flex", alignItems: "center", gap: "8px" }}
+                    onClick={cargarMantenimientos}
+                  >
+                    <SearchIcon sx={{ fontSize: 24 }} />
+                  </Button>
 
-              <Grid item xs={12} sm={6} md={3} display="flex" justifyContent="center">
-                <Button
-                  variant="contained"
-                  sx={{ backgroundColor: "#1f618d", color: "white", ":hover": { opacity: 0.7 }, right: 20, borderRadius: "8px", padding: "10px 20px", display: "flex", alignItems: "center", gap: "8px", marginRight: 8 }}
-                  onClick={handleOpenModalAgregar}>
-                  <AddchartIcon sx={{ fontSize: 24 }} />
-                  Agregar Mantenimiento
-                </Button>
-              </Grid>
-            </Grid>
+                  <Button variant="contained" sx={{ backgroundColor: "#566573", color: "white", ":hover": { opacity: 0.7 }, borderRadius: "8px", padding: "5px 10px", display: "flex", alignItems: "center", gap: "8px", marginRight: 4 }}
+                    onClick={limpiarFiltros}
+                  >
+                    <CleaningServicesIcon sx={{ fontSize: 24 }} />
+                  </Button>
+                  <Button
+                    variant="contained"
+                    sx={{ backgroundColor: "#1f618d", color: "white", ":hover": { opacity: 0.7 }, right: 20, borderRadius: "8px", padding: "5px 10px", display: "flex", alignItems: "center", gap: "8px", marginRight: 8 }}
+                    onClick={handleOpenModalAgregar}>
+                    <AddchartIcon sx={{ fontSize: 24 }} />
+                    Agregar Mantenimiento
+                  </Button>
+                </Box>
+              </Grid2>
+            </Grid2>
           </Box>
         </Box>
 
@@ -225,7 +311,7 @@ export const ListaMantenimientos = () => {
 
           <Paper sx={{ width: "100%", maxWidth: "2000px", margin: "0 auto", backgroundColor: "white", padding: 2 }}>
             <TableContainer sx={{ maxHeight: 800, backgroundColor: "#ffff ", border: "1px solid #d7dbdd", borderRadius: "2px" }}>
-              <Table stickyHeader aria-label="sticky table">
+              <Table >
                 <TableHead>
                   <TableRow>
                     {["Vehiculo", "Servicio(s)", "Refacciones Almacen", "Fecha de Inicio", "Comentario", "Costo Total", "status", "Acciones"].map((header) => (
@@ -314,6 +400,22 @@ export const ListaMantenimientos = () => {
                     </TableRow>
                   )}
                 </TableBody>
+
+                {/* Footer con totales */}
+                <TableFooter>
+                  <TableRow>
+                    <TableCell colSpan={6} align="right" sx={{ fontWeight: "bold", color: "green" }}>Total Activos:</TableCell>
+                    <TableCell align="center" sx={{ fontWeight: "bold" }}>
+                      {formatearDinero(totalActivos)}
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell colSpan={6} align="right" sx={{ fontWeight: "bold", color: "red" }}>Total Cancelados:</TableCell>
+                    <TableCell align="center" sx={{ fontWeight: "bold" }}>
+                      {formatearDinero(totalCancelados)}
+                    </TableCell>
+                  </TableRow>
+                </TableFooter>
 
               </Table>
             </TableContainer>

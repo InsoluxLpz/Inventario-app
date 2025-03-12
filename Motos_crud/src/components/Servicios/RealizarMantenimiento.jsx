@@ -3,7 +3,7 @@ import { Button } from '@mui/material';
 import { NavBar } from '../NavBar'
 import Select from "react-select";
 import { obtenerMotos } from '../../api/motosApi';
-import { AgregarMantenimiento, ObtenerServicios } from '../../api/ServiciosApi';
+import { AgregarMantenimiento, ObtenerMantenimientos, ObtenerServicios } from '../../api/ServiciosApi';
 import { AgregarRefaccionesModal } from './agregarRefaccionesModal';
 import { cargarListasEntradas } from '../../api/almacenProductosApi';
 
@@ -204,10 +204,10 @@ export const RealizarMantenimiento = ({ modalOpen, onClose }) => {
                 comentario: "",
             });
             setProductosSeleccionados([]);
+            ObtenerMantenimientos()
             setErrors({});
             onClose();
 
-            window.location.reload();
         } else {
             console.error("Error al agregar mantenimiento:", respuesta.error);
         }
@@ -215,7 +215,7 @@ export const RealizarMantenimiento = ({ modalOpen, onClose }) => {
     };
 
     const formatNumber = (value) => {
-        return parseFloat(value).toLocaleString('es-MX'); // Formato para México (1,500.00)
+        return parseFloat(value).toLocaleString('es-MX');
     };
 
     useEffect(() => {

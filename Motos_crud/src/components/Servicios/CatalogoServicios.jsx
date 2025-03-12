@@ -37,7 +37,6 @@ export const CatalogoServicios = () => {
         setOpenModalAgregar(false);
     };
 
-
     const handleEliminarServicio = (id) => {
         EliminarServicio(id, (idEliminado) => {
             setServicios((serviciosActuales) => serviciosActuales.filter((servicio) => servicio.id !== idEliminado));
@@ -53,6 +52,7 @@ export const CatalogoServicios = () => {
             prevServicios.map((s) => (s.id === servicioActualizado.id ? servicioActualizado : s))
         );
     };
+
 
     const cargarServicios = async () => {
         const data = await ObtenerServicios();
@@ -128,7 +128,7 @@ export const CatalogoServicios = () => {
 
             <EditarServiciosModal onClose={handleCloseModalEdit} modalOpen={openModalEditar} servicio={servicioSeleccionado} actualizarLista={actualizarLista} />
 
-            <AgregarServicios onClose={handleCloseModalAgregar} modalOpen={openModalAgregar} />
+            <AgregarServicios onClose={handleCloseModalAgregar} modalOpen={openModalAgregar} agregarServicioLista={agregarServicioLista} />
         </>
     );
 };

@@ -215,71 +215,47 @@ export const NavBar = ({ onSearch }) => {
             <ListItemIcon>
               <TwoWheelerIcon />
             </ListItemIcon>
-            <ListItemText primary="Motos" />
+            <ListItemText primary="Flotilla" />
           </ListItem>
 
-          <ListItem button onClick={handleProductsClick}>
-            <ListItemIcon>{openProducts ? <ArrowDropDownIcon /> : <ArrowRightIcon />}</ListItemIcon>
-            <ListItemText primary="Productos" />
+          <ListItem button onClick={() => handleNavigate("/productos")}>
+            <ListItemIcon>
+              <InventoryTwoToneIcon sx={{ fontSize: 18 }} />
+            </ListItemIcon>
+            <ListItemText primary="Lista de Productos" />
           </ListItem>
-          <Collapse in={openProducts} timeout="auto" unmountOnExit>
-            <List component="div" disablePadding>
-              <ListItem button sx={{ pl: 4 }} onClick={() => handleNavigate("/productos")}>
-                <ListItemIcon>
-                  <InventoryTwoToneIcon sx={{ fontSize: 18 }} />
-                </ListItemIcon>
-                <ListItemText primary="Lista de Productos" />
-              </ListItem>
-            </List>
-          </Collapse>
 
-          <ListItem button onClick={handleServicesClick}>
-            <ListItemIcon>{openServices ? <ArrowDropDownIcon /> : <ArrowRightIcon />}</ListItemIcon>
-            <ListItemText primary="Servicios" />
+          <ListItem button onClick={() => handleNavigate("/servicios/ListaMantenimientos")}>
+            <ListItemIcon>
+              <CategoryIcon sx={{ fontSize: 18 }} />
+            </ListItemIcon>
+            <ListItemText primary="Lista de Mantenimientos" />
           </ListItem>
-          <Collapse in={openServices} timeout="auto" unmountOnExit>
-            <List component="div" disablePadding>
-              <ListItem button sx={{ pl: 4 }} onClick={() => handleNavigate("/servicios/ListaMantenimientos")}>
-                <ListItemIcon>
-                  <CategoryIcon sx={{ fontSize: 18 }} />
-                </ListItemIcon>
-                <ListItemText primary="Lista de Mantenimientos" />
-              </ListItem>
-              <ListItem button sx={{ pl: 4 }} onClick={() => handleNavigate("/servicios/CatalogoServicios")}>
-                <ListItemIcon>
-                  <InventoryTwoToneIcon sx={{ fontSize: 18 }} />
-                </ListItemIcon>
-                <ListItemText primary="Catalogo Servicios" />
-              </ListItem>
-            </List>
-          </Collapse>
+          <ListItem button onClick={() => handleNavigate("/servicios/CatalogoServicios")}>
+            <ListItemIcon>
+              <InventoryTwoToneIcon sx={{ fontSize: 18 }} />
+            </ListItemIcon>
+            <ListItemText primary="Catalogo Servicios" />
+          </ListItem>
 
-          <ListItem button onClick={handleAlmacenClick}>
-            <ListItemIcon>{openAlmacen ? <ArrowDropDownIcon /> : <ArrowRightIcon />}</ListItemIcon>
-            <ListItemText primary="Almacen" />
+          <ListItem button onClick={() => handleNavigate("/almacen/Entradas")}>
+            <ListItemIcon>
+              <WarehouseIcon sx={{ fontSize: 18 }} />
+            </ListItemIcon>
+            <ListItemText primary="Entradas" />
           </ListItem>
-          <Collapse in={openAlmacen} timeout="auto" unmountOnExit>
-            <List component="div" disablePadding>
-              <ListItem button sx={{ pl: 4 }} onClick={() => handleNavigate("/almacen/Entradas")}>
-                <ListItemIcon>
-                  <WarehouseIcon sx={{ fontSize: 18 }} />
-                </ListItemIcon>
-                <ListItemText primary="Entradas" />
-              </ListItem>
-              <ListItem button sx={{ pl: 4 }} onClick={() => handleNavigate("/almacen/MovimientosAlmacenTable")}>
-                <ListItemIcon>
-                  <MoveToInboxIcon sx={{ fontSize: 18 }} />
-                </ListItemIcon>
-                <ListItemText primary="Movimientos almacen" />
-              </ListItem>
-              <ListItem button sx={{ pl: 4 }} onClick={() => handleNavigate("/almacen/ProductoAlmacenTable")}>
-                <ListItemIcon>
-                  <CategoryIcon sx={{ fontSize: 18 }} />
-                </ListItemIcon>
-                <ListItemText primary="Almacén" />
-              </ListItem>
-            </List>
-          </Collapse>
+          <ListItem button onClick={() => handleNavigate("/almacen/MovimientosAlmacenTable")}>
+            <ListItemIcon>
+              <MoveToInboxIcon sx={{ fontSize: 18 }} />
+            </ListItemIcon>
+            <ListItemText primary="Movimientos almacen" />
+          </ListItem>
+          <ListItem button onClick={() => handleNavigate("/almacen/ProductoAlmacenTable")}>
+            <ListItemIcon>
+              <CategoryIcon sx={{ fontSize: 18 }} />
+            </ListItemIcon>
+            <ListItemText primary="Almacén" />
+          </ListItem>
 
           <Divider />
           <ListItem button onClick={handleLogout}>

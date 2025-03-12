@@ -48,14 +48,17 @@ export const EditarServiciosModal = ({ onClose, modalOpen, servicio, actualizarL
 
         if (!validateForm()) return;
 
-        const nuevoProducto = await ActualizarServicio(servicio.id, formData);
+        // Hacer la solicitud PUT al backend para actualizar el servicio
+        const response = await ActualizarServicio(servicio.id, formData);
 
-        if (nuevoProducto) {
-            actualizarLista(nuevoProducto);
-            onClose();
+        if (response) {
+            // Actualizar la lista en el componente principal con el servicio actualizado
+            actualizarLista(response);  // Pasar el servicio actualizado
+            onClose();  // Cerrar el modal
         }
-
     };
+
+
 
     return (
         <div className="modal-backdrop">

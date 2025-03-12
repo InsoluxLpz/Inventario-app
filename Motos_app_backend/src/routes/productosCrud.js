@@ -16,7 +16,17 @@ router.post('/agregar_producto', async (req, res) => {
     try {
         await connection.beginTransaction();
 
-        // Insertar producto
+        const checkQuery = `
+        SELECT codigo, nombre FROM productos WHERE codigo = ? OR nombre = ?`;
+        const [existingProduct] = await connection.query(checkQuery, [codigo, nombre]);
+
+        if (existingProduct.length > 0) {
+            const message = existingProduct[0].codigo === codigo ? 'El código del producto ya existe.' : 'El nombre del producto ya existe.';
+            await connection.rollback();
+            return res.status(400).json({ message });
+        }
+
+
         const insertProductoQuery = `
             INSERT INTO productos (codigo, nombre, precio, descripcion, idGrupo, idUnidadMedida, idUsuario, fecha_registro) 
             VALUES (?, ?, ?, ?, ?, ?, ?, CURDATE())`;
@@ -27,7 +37,16 @@ router.post('/agregar_producto', async (req, res) => {
 
         console.log("idProducto:", idProducto);
 
-        // Insertar proveedores asociados al producto
+        // Obtener el producto recién insertado
+        const getProductoQuery = `
+            SELECT p.id, p.codigo, p.nombre, p.precio, p.descripcion, p.idGrupo, p.idUnidadMedida, p.idUsuario, p.fecha_registro,
+                   g.nombre AS grupoNombre, u.nombre AS unidadMedidaNombre
+            FROM productos p
+            JOIN cat_grupos_prueba g ON p.idGrupo = g.id
+            JOIN cat_unidad_medida u ON p.idUnidadMedida = u.id
+            WHERE p.id = ?`;
+        const [producto] = await connection.query(getProductoQuery, [idProducto]);
+
         if (proveedores.length > 0) {
             const valuesProveedores = proveedores.map(idProveedor => [idProducto, idProveedor]);
             const insertProveedorQuery = `INSERT INTO productos_proveedor (idProducto, idProveedor) VALUES ?`;
@@ -35,7 +54,7 @@ router.post('/agregar_producto', async (req, res) => {
         }
 
         await connection.commit();
-        return res.status(200).json({ message: 'Producto agregado correctamente', idProducto });
+        return res.status(200).json({ message: 'Producto agregado correctamente', producto });
 
     } catch (error) {
         await connection.rollback();
@@ -45,6 +64,7 @@ router.post('/agregar_producto', async (req, res) => {
         connection.release();
     }
 });
+
 
 
 router.get('/obtener_productos', async (req, res) => {
@@ -78,10 +98,7 @@ LEFT JOIN (
 ) st ON p.id = st.producto_id
 GROUP BY 
     p.id;
-
-
     `;
-
 
     try {
         const [results] = await db.query(query);
@@ -142,10 +159,32 @@ router.put('/actualizar_producto/:id', async (req, res) => {
     }
 });
 
+router.put('/actualizar_status_productos/:id', async (req, res) => {
+    const { id } = req.params
 
-router.delete('/eliminar_producto/:id', async (req, res) => {
+    if (!id) {
+        return res.status(400).json('Faltan parametros para actualizar el campo');
+    }
 
-});
+    const query = `UPDATE productos SET status = 0 WHERE id = ?`
+
+    try {
+        const [results] = await db.query(query, [id]);
+
+        if (results.length === 0) {
+            return res.status(404).json('No hay datos en la tabla');
+        }
+        return res.status(200).json(results);
+
+    } catch (err) {
+        console.error('Error al obtener el crédito:', err);
+        return res.status(500).json({ errors: ['Error en el servidor'] });
+    }
+
+})
+
+
+
 
 router.post('/agregar_entrada', async (req, res) => {
     const { producto, fecha, cantidad, costo_unitario, tipo, autorizo, proveedor } = req.body
@@ -230,13 +269,6 @@ router.get('/obtener_unidad_medida', async (req, res) => {
 
 });
 
-
-
-
-
-router.delete('/eliminar_producto/:id', async (req, res) => {
-
-});
 
 router.post('/agregar_entrada', async (req, res) => {
     const { producto, fecha, cantidad, costo_unitario, tipo, autorizo, proveedor } = req.body

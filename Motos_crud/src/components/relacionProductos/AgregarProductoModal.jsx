@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from 'react'
-import { Button, IconButton, Tooltip } from '@mui/material';
-import { NavBar } from '../NavBar';
+import { Button } from '@mui/material';
 import Select from "react-select";
 import { agregarProductos } from '../../api/productosApi';
 import { obtenerProveedores } from '../../api/proveedoresApi';
 
 
-export const AgregarProductoModal = ({ modalOpen, onClose, grupos, unidadMedida }) => {
+export const AgregarProductoModal = ({ modalOpen, onClose, grupos, unidadMedida, agregarProducto }) => {
     if (!modalOpen) return null;
 
     const [formData, setFormData] = useState({
@@ -85,25 +84,45 @@ export const AgregarProductoModal = ({ modalOpen, onClose, grupos, unidadMedida 
             idUsuario
         };
 
-        const nuevoProducto = await agregarProductos(formDataConUsuario);
+        try {
+            const nuevoProducto = await agregarProductos(formDataConUsuario);
 
-        if (nuevoProducto && !nuevoProducto.error) {
-            setFormData({
-                codigo: "",
-                nombre: "",
-                grupo: "",
-                precio: "",
-                descripcion: "",
-                unidad_medida: "",
-                proveedores: [],
-            });
-            setErrors({});
-            onClose();
-        } else if (nuevoProducto?.error) {
-            setErrors((prev) => ({ ...prev, codigo: nuevoProducto.error }));
+            if (nuevoProducto && nuevoProducto.producto && nuevoProducto.producto.length > 0) {
+                const producto = nuevoProducto.producto[0]; // Accede al primer producto del arreglo
+
+                const grupoSeleccionado = opcionesGrupos.find(gr => gr.value === producto.idGrupo);
+                const unidadSeleccionada = opcionesUnidad.find(uni => uni.value === producto.idUnidadMedida);
+
+                // Crear el objeto de producto con los nombres de grupo y unidad de medida
+                const productoCompleto = {
+                    ...producto,
+                    grupo: grupoSeleccionado ? grupoSeleccionado.label : "No disponible",
+                    unidad_medida: unidadSeleccionada ? unidadSeleccionada.label : "No disponible",
+                };
+
+                if (productoCompleto.nombre && productoCompleto.precio && productoCompleto.grupo && productoCompleto.unidad_medida) {
+                    setFormData({
+                        codigo: "",
+                        nombre: "",
+                        grupo: "",
+                        precio: "",
+                        descripcion: "",
+                        unidad_medida: "",
+                        proveedores: [],
+                    });
+                    setErrors({});
+                    agregarProducto(productoCompleto);
+                    onClose();
+                } else {
+                    console.error("Producto incompleto:", productoCompleto);
+                }
+            }
+
+        } catch (error) {
+            console.error("Error al agregar producto:", error);
+            setErrors((prev) => ({ ...prev, general: "Ocurrió un error al agregar el producto. Inténtelo de nuevo." }));
         }
     };
-
 
 
     return (
@@ -158,7 +177,7 @@ export const AgregarProductoModal = ({ modalOpen, onClose, grupos, unidadMedida 
                                     <div className="col-md-6 mb-3">
                                         <label className="form-label">Precio</label>
                                         <input
-                                            type="text"
+                                            type="number"
                                             name="precio"
                                             className={`form-control ${errors.precio ? "is-invalid" : ""}`}
                                             value={formData.precio}

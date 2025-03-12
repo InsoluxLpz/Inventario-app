@@ -11,18 +11,29 @@ router.post('/agregar_servicio', async (req, res) => {
     }
 
     try {
-        const query = `INSERT INTO cat_servicios (nombre,descripcion) VALUES (?,?)`;
+        const checkQuery = 'SELECT * FROM cat_servicios WHERE nombre = ?';
+        const [existingService] = await db.query(checkQuery, [nombre]);
 
+        if (existingService.length > 0) {
+            return res.status(400).json({ message: 'El servicio con ese nombre ya existe' });
+        }
+
+        const query = `INSERT INTO cat_servicios (nombre,descripcion) VALUES (?,?)`;
         const values = [nombre, descripcion];
 
         await db.query(query, values);
 
-        return res.status(200).json({ message: 'Entrada agregada correctamente' });
+        const [nuevoServicio] = await db.query("SELECT * FROM cat_servicios WHERE nombre = ?",
+            [nombre]
+        )
+
+        return res.status(200).json(nuevoServicio[0]);
     } catch (error) {
-        console.error('Error al agregar el producto:', error);
-        return res.status(500).json({ message: 'Error al agregar el producto' });
+        console.error('Error al agregar el servicio:', error);
+        return res.status(500).json({ message: 'Error al agregar el servicio' });
     }
 });
+
 
 router.get('/obtener_servicio', async (req, res) => {
 
@@ -50,17 +61,23 @@ router.put('/actualizar_servicio/:id', async (req, res) => {
         return res.status(400).json({ message: 'No se encuentra id en la petición' })
     }
     try {
-        const query = `UPDATE cat_servicios SET nombre = ?, descripcion = ? WHERE id = ?`
-        const values = [nombre, descripcion, id]
+        // Actualizamos el servicio
+        const query = `UPDATE cat_servicios SET nombre = ?, descripcion = ? WHERE id = ?`;
+        const values = [nombre, descripcion, id];
         await db.query(query, values);
 
-        return res.status(200).json({ message: 'servicio actualizado correctamente' })
+        // Obtener el servicio actualizado
+        const [rows] = await db.query('SELECT * FROM cat_servicios WHERE id = ?', [id]);
+        const servicioActualizado = rows[0];
+
+        return res.status(200).json(servicioActualizado);  // Enviar el servicio actualizado
 
     } catch (error) {
         console.error('Error al actualizar el producto:', error);
         res.status(500).json({ error: 'Error interno del servidor' });
     }
 });
+
 
 router.delete('/eliminar_servicio/:id', async (req, res) => {
     const { id } = req.params
@@ -141,20 +158,21 @@ router.post('/agregar_mantenimiento', async (req, res) => {
 
 
 router.get('/obtener_mantenimientos', async (req, res) => {
-    let { fecha_inicio, fecha_final, servicio } = req.query;
+    console.log("Datos recibidos en el backend:", req.query);
+
+    let { fecha_inicio, fecha_final, servicio, moto } = req.query;
     const connection = await db.getConnection();
+    console.log("moto recibido en backend:", moto);
 
     try {
-        // Si no hay fechas en el filtro, se calculan las fechas de la semana actual
-        if (!fecha_inicio && !fecha_final) {
+        if (!fecha_inicio && !fecha_final && !servicio && !moto) {
             const hoy = new Date();
-            const diaSemana = hoy.getDay(); // 0 = Domingo, 6 = Sábado
-
+            const diaSemana = hoy.getDay();
             const inicioSemana = new Date(hoy);
-            inicioSemana.setDate(hoy.getDate() - diaSemana); // Inicio de la semana (domingo)
+            inicioSemana.setDate(hoy.getDate() - diaSemana);
 
             const finSemana = new Date(inicioSemana);
-            finSemana.setDate(inicioSemana.getDate() + 6); // Fin de la semana (sábado)
+            finSemana.setDate(inicioSemana.getDate() + 6);
 
             fecha_inicio = inicioSemana.toISOString().split('T')[0];
             fecha_final = finSemana.toISOString().split('T')[0];
@@ -196,6 +214,7 @@ router.get('/obtener_mantenimientos', async (req, res) => {
 
         const queryParams = [];
 
+        // Agregar condiciones de fecha SOLO si no se está filtrando por servicio
         if (fecha_inicio) {
             query += ` AND m.fecha_inicio >= ?`;
             queryParams.push(fecha_inicio);
@@ -205,9 +224,17 @@ router.get('/obtener_mantenimientos', async (req, res) => {
             query += ` AND m.fecha_inicio <= ?`;
             queryParams.push(fecha_final);
         }
+        if (moto) {
+            query += ` AND m.idMoto = ?`;
+            queryParams.push(moto);
+        }
 
         if (servicio) {
-            query += ` AND cs.id = ?`;
+            query += ` AND m.id IN (
+                    SELECT idMantenimiento 
+                    FROM servicio_mantenimientos 
+                    WHERE idServicio = ?
+                )`;
             queryParams.push(servicio);
         }
 
@@ -265,6 +292,7 @@ router.get('/obtener_mantenimientos', async (req, res) => {
         connection.release();
     }
 });
+
 
 
 router.put('/actualizar_mantenimiento/:id', async (req, res) => {

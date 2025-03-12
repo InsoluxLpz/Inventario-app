@@ -118,7 +118,6 @@ export const MotosTable = () => {
     // La moto debe coincidir con TODOS los filtros activos
     const matchesSearch = matchesPlaca && matchesNoSerie && matchesInciso;
 
-    // Mostrar todas las coincidencias si se incluyen inactivas
     return showInactive ? matchesSearch : matchesSearch && moto.status !== 0;
   });
 
@@ -205,7 +204,7 @@ export const MotosTable = () => {
                 <TableHead>
                   <TableRow>
                     {["Inciso", "Modelo", "N.Serie", "Placa", "Propietario", "Nota", "Acciones"].map((col) => (
-                      <TableCell key={col} sx={{ backgroundColor: "#f4f6f7", color: "black", textAlign: "center", fontWeight: "bold" }}>
+                      <TableCell key={col} sx={{ backgroundColor: "#f4f6f7", color: "black", textAlign: "left", fontWeight: "bold" }}>
                         {col}
                       </TableCell>
                     ))}
@@ -218,13 +217,13 @@ export const MotosTable = () => {
                         backgroundColor: "#eaecee ",
                       }
                     }}>
-                      <TableCell sx={{ textAlign: "center" }}>{moto.inciso}</TableCell>
-                      <TableCell sx={{ textAlign: "center" }}>{moto.modelo}</TableCell>
-                      <TableCell sx={{ textAlign: "center" }}>{moto.no_serie}</TableCell>
-                      <TableCell sx={{ textAlign: "center" }}>{moto.placa}</TableCell>
-                      <TableCell sx={{ textAlign: "center" }}>{moto.propietario}</TableCell>
-                      <TableCell sx={{ textAlign: "center" }}>{moto.nota}</TableCell>
-                      <TableCell sx={{ textAlign: "center" }}>
+                      <TableCell sx={{ textAlign: "left" }}>{moto.inciso}</TableCell>
+                      <TableCell sx={{ textAlign: "left" }}>{moto.modelo}</TableCell>
+                      <TableCell sx={{ textAlign: "left" }}>{moto.no_serie}</TableCell>
+                      <TableCell sx={{ textAlign: "left" }}>{moto.placa}</TableCell>
+                      <TableCell sx={{ textAlign: "left" }}>{moto.propietario}</TableCell>
+                      <TableCell sx={{ textAlign: "left" }}>{moto.nota}</TableCell>
+                      <TableCell sx={{ textAlign: "left" }}>
                         <IconButton onClick={() => handleOpenModalEdit(moto)}>
                           <EditIcon sx={{ fontSize: 20 }} />
                         </IconButton>

@@ -6,18 +6,26 @@ const db = dbConexion();
 // * Agregar proveedor
 router.post('/agregar_proveedor', async (req, res) => {
     const { nombre_empresa, nombre_proveedor, rfc, telefono_contacto, telefono_empresa } = req.body;
-    console.log("llego la peticion");
+    console.log("Llegó la petición para agregar proveedor");
 
     if (!nombre_empresa || !nombre_proveedor || !rfc) {
-        return res.status(400).json({ message: 'El nombre del proveedor es obligatorio' });
+        return res.status(400).json({ message: 'El nombre de la empresa, nombre del proveedor y RFC son obligatorios' });
     }
 
     try {
-        const query = `INSERT INTO proveedores (nombre_proveedor, telefono_contacto, rfc, telefono_empresa, nombre_empresa) VALUES (?, ?, ?, ?, ?)`;
+        // Verificar si ya existe un proveedor con el mismo nombre de empresa
+        const checkQuery = `SELECT id FROM proveedores WHERE nombre_empresa = ?`;
+        const [existingProveedor] = await db.query(checkQuery, [nombre_empresa]);
 
+        if (existingProveedor.length > 0) {
+            return res.status(400).json({ message: 'Ya existe un proveedor con este nombre de empresa' });
+        }
+
+        // Si no existe, insertar el nuevo proveedor
+        const insertQuery = `INSERT INTO proveedores (nombre_proveedor, telefono_contacto, rfc, telefono_empresa, nombre_empresa) VALUES (?, ?, ?, ?, ?)`;
         const values = [nombre_empresa, nombre_proveedor, rfc, telefono_contacto, telefono_empresa];
 
-        await db.query(query, values);
+        await db.query(insertQuery, values);
 
         return res.status(200).json({ message: 'Proveedor agregado correctamente' });
     } catch (error) {
@@ -25,6 +33,7 @@ router.post('/agregar_proveedor', async (req, res) => {
         return res.status(500).json({ message: 'Error al agregar el proveedor' });
     }
 });
+
 
 // * Obtener proveedores
 router.get('/obtener_proveedores', async (req, res) => {
