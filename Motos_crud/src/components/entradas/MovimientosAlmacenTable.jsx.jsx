@@ -132,7 +132,7 @@ export const MovimientosAlmacenTable = () => {
           onClick={() => navigate("/almacen/ProductoAlmacenTable")}
         >
           <WarehouseIcon sx={{ fontSize: 24 }} />
-          Almacén
+          INVENTARIO
         </Button>
 
         <Button
@@ -178,7 +178,7 @@ export const MovimientosAlmacenTable = () => {
                     "Realizo Mov.",
                     "Autorizo",
                     "Detalles",
-                    "Acciones",
+                    // "Acciones",
                   ].map((header) => (
                     <TableCell
                       key={header}
@@ -223,7 +223,7 @@ export const MovimientosAlmacenTable = () => {
                         <FeedIcon sx={{fontSize: 29 }}/>
                       </IconButton>
                     </TableCell>
-                    <TableCell align="center">
+                    {/* <TableCell align="center">
                       <IconButton
                         sx={{ color: "black" }}
                         onClick={() => {
@@ -242,7 +242,7 @@ export const MovimientosAlmacenTable = () => {
                       >
                         <InventoryIcon sx={{ fontSize: 20 }} />
                       </IconButton>
-                    </TableCell>
+                    </TableCell> */}
                   </TableRow>
                 ))}
               </TableBody>

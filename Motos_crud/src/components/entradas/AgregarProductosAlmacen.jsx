@@ -429,6 +429,7 @@ export const AgregarProductosAlmacen = () => {
       currency: "MXN",
     }).format(valor);
   };
+  
   return (
     <>
       <NavBar />
@@ -458,7 +459,7 @@ export const AgregarProductosAlmacen = () => {
           onClick={() => navigate("/almacen/ProductoAlmacenTable")}
         >
           <WarehouseIcon sx={{ fontSize: 24 }} />
-          Almacén
+          Inventario
         </Button>
 
         <Button

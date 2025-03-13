@@ -156,7 +156,7 @@ export const ProductoAlmacenTable = () => {
           }}
         >
           <Typography variant="h5" fontWeight="bold" color="white">
-            Almacén
+          Inventario
           </Typography>
         </Box>
 
