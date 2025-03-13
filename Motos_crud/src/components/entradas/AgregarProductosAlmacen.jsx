@@ -54,12 +54,15 @@ export const AgregarProductosAlmacen = () => {
   const [openModal, setOpenModal] = useState(false);
   const [productoSeleccionado, setProductoSeleccionado] = useState(null);
   const [selectedMovimiento, setSelectedMovimiento] = useState(null);
+  // * envio del total al backend
+  const [total, setTotal] = useState(0);
+
 
   const [formData, setFormData] = useState({
     proveedor: null,
     fecha: "",
     cantidad: "",
-    producto: null,
+    producto: [],
     costo_unitario: "",
     tipo: null,
     autorizo: null,
@@ -213,38 +216,64 @@ export const AgregarProductosAlmacen = () => {
     return Object.keys(newErrors).length === 0;
   };
 
+  // * <<<<<<<<<---------------- Arreglar aqui -------------------->>>>>>>>>>>>>>>>>
   // * guardar los datos en el estado
   const handleSubmit = (e) => {
     e.preventDefault();
 
     if (!validateForm()) return;
 
+    // const nuevoProducto = {
+    //   proveedor_id: formData.proveedor
+    //     ? proveedorFijo
+    //     : { value: formData.proveedor.value, label: formData.proveedor.label },
+    //   fecha: fechaFijo ?? formData.fecha,
+    //   cantidad: formData.cantidad,
+    //   producto_id: formData.producto
+    //     ? { value: formData.producto.value, label: formData.producto.label }
+    //     : null,
+    //   costo_unitario: formData.costo_unitario,
+    //   tipo_entrada_id: formData.tipo
+    //     ? tipoEntradaFijo
+    //     : {
+    //         value: formData.tipo.value,
+    //         label: formData.tipo.label,
+    //       },
+    //   autorizo_id: formData.autorizo
+    //     ? autorizoFijo
+    //     : { value: formData.autorizo.value, label: formData.autorizo.label },
+    //   tipo_movimiento_id: formData.tipoMovimiento
+    //     ? tipoMovimientoFijo
+    //     : {
+    //         value: formData.tipoMovimiento.value,
+    //         label: formData.tipoMovimiento.label,
+    //       },
+    // };
+
+    // console.log("nuevoProducto",nuevoProducto)
+
     const nuevoProducto = {
-      proveedor_id: formData.proveedor
-        ? proveedorFijo
-        : { value: formData.proveedor.value, label: formData.proveedor.label },
-      fecha: fechaFijo ?? formData.fecha,
-      cantidad: formData.cantidad,
-      producto_id: formData.producto
-        ? { value: formData.producto.value, label: formData.producto.label }
-        : null,
-      costo_unitario: formData.costo_unitario,
-      tipo_entrada_id: formData.tipo
-        ? tipoEntradaFijo
-        : {
-            value: formData.tipo.value,
-            label: formData.tipo.label,
-          },
-      autorizo_id: formData.autorizo
-        ? autorizoFijo
-        : { value: formData.autorizo.value, label: formData.autorizo.label },
-      tipo_movimiento_id: formData.tipoMovimiento
-        ? tipoMovimientoFijo
-        : {
-            value: formData.tipoMovimiento.value,
-            label: formData.tipoMovimiento.label,
-          },
+      fecha: fechaFijo,
+      tipo_movimiento_id: tipoMovimientoFijo.value,
+      tipo_entrada_id: tipoEntradaFijo.value,
+      autorizo_id: autorizoFijo.value,
+      productos: [
+        {
+          producto_id: formData.producto
+            ? { value: formData.producto.value, label: formData.producto.label }
+            : null,
+          proveedor_id: formData.proveedor
+            ? proveedorFijo
+            : {
+                value: formData.proveedor.value,
+                label: formData.proveedor.label,
+              },
+          costo_unitario: formData.costo_unitario,
+          cantidad: formData.cantidad,
+        },
+      ],
     };
+    console.log("Nuevo Producto", nuevoProducto);
 
     setProductosAgregados((prevProductos) => {
       const nuevosProductos = [...prevProductos, nuevoProducto];
@@ -262,7 +291,7 @@ export const AgregarProductosAlmacen = () => {
       proveedor: proveedorFijo,
       fecha: fechaFijo,
       cantidad: "",
-      producto: null,
+      producto: [],
       costo_unitario: "",
       tipo: tipoEntradaFijo,
       autorizo: autorizoFijo,
@@ -275,15 +304,24 @@ export const AgregarProductosAlmacen = () => {
   // * mandar datos a insertar
   const handleGuardarTodo = async () => {
     if (productosAgregados.length === 0) {
+      console.log("Productos Agregados:", productosAgregados); // Asegúrate de que no esté vacío
       return;
     }
     const usuario_id = localStorage.getItem("idUsuario");
-    for (let producto of productosAgregados) {
-      await agregarInventario({
-        ...producto,
-        usuario_id,
-      });
-    }
+
+    // * esto es lo que se envia al backend
+    const datosParaEnviar = {
+      fecha: productosAgregados[0].fecha, // Usa la fecha de uno de los productos
+      tipo_movimiento_id: productosAgregados[0].tipo_movimiento_id,
+      tipo_entrada_id: productosAgregados[0].tipo_entrada_id,
+      autorizo_id: productosAgregados[0].autorizo_id,
+      productos: productosAgregados.flatMap((item) => item.productos), // Flatten para enviar todos los productos en un solo array
+      total: total,
+      usuario_id,
+    };
+    // * Llamada a la API para agregar el inventario
+    await agregarInventario(datosParaEnviar);
+
     // * reset formualrio
     setProductosAgregados([]);
     // * tipo de movimientos
@@ -307,28 +345,13 @@ export const AgregarProductosAlmacen = () => {
       proveedor: null,
       fecha: "",
       cantidad: "",
-      producto: null,
+      producto: [],
       costo_unitario: "",
       tipo: null,
       autorizo: null,
       tipoMovimiento: null,
     });
   };
-
-  // * efecto para el filtro de productos por proveedores
-  // useEffect(() => {
-  //   console.log("Proveedor seleccionado:", proveedorSeleccionado);
-  //   console.log("productosFiltrados", listaProductos);
-  //   if (proveedorSeleccionado) {
-  //     const productosFiltrados = listaProductos.filter(
-  //       (producto) => producto.proveedorId === proveedorSeleccionado.value
-  //     );
-  //     console.log("productosFiltrados", productosFiltrados);
-  //     setProductosFiltrados(productosFiltrados);
-  //   } else {
-  //     setProductosFiltrados([]);
-  //   }
-  // }, [proveedorSeleccionado, listaProductos]);
 
   // * efecto para el filtro de tipo de entrada por el tipo de movimiento
   useEffect(() => {
@@ -387,6 +410,16 @@ export const AgregarProductosAlmacen = () => {
     }
   };
 
+  // * efecto para calcular el total y guardarlo en el estado
+  useEffect(() => {
+    const nuevoTotal = productosAgregados.reduce(
+      (total, item) =>
+        total + (item.productos[0]?.cantidad * item.productos[0]?.costo_unitario || 0),
+      0
+    );
+    setTotal(nuevoTotal);
+  }, [productosAgregados]);
+  
   const miniDrawerWidth = 50;
 
   // * funcion para formato de dinero
@@ -402,7 +435,7 @@ export const AgregarProductosAlmacen = () => {
       <div
         style={{
           display: "flex",
-          flexDirection: "row",
+          flexdirection: "row",
           justifyContent: "flex-end",
           gap: "16px", // Espacio entre los botones
           position: "fixed",
@@ -515,7 +548,7 @@ export const AgregarProductosAlmacen = () => {
               <IconButton
                 color="primary"
                 onClick={handleOpenModal}
-                flexDirection={"flex-end"}
+                flexdirection={"flex-end"}
                 disabled={!proveedorSeleccionado}
               >
                 <ContentPasteSearchIcon sx={{ fontSize: 29 }} />
@@ -600,45 +633,29 @@ export const AgregarProductosAlmacen = () => {
           <table className="table mt-3">
             <thead>
               <tr>
-                {/* <th>Proveedor</th> */}
                 <th>Producto</th>
                 <th>Cantidad</th>
-                {/* <th>Fecha</th> */}
                 <th>Costo unitario</th>
-                <th>Subtotal</th> {/* Nueva columna para el subtotal */}
-                {/* <th>Tipo Entrada</th>
-        <th>Autoriza</th>
-        <th>Movimiento</th> */}
+                <th>Subtotal</th>
                 <th>Acciones</th>
               </tr>
             </thead>
             <tbody>
-              {productosAgregados.map((producto, index) => (
-                <tr key={`${producto}-${index}`}>
-                  {/* <td>
-            {producto.proveedor_id ? producto.proveedor_id.label : ""}
-          </td> */}
-                  <td>
-                    {producto.producto_id ? producto.producto_id.label : ""}
-                  </td>
-                  <td>{producto.cantidad}</td>
-                  {/* <td>
-                    {producto.fecha
-                      ? new Date(producto.fecha).toLocaleDateString("es-MX")
-                      : "Fecha no disponible"}
-                  </td> */}
-                  <td>{formatearDinero(producto.costo_unitario)}</td>
+              {productosAgregados.map((item, index) => (
+                <tr key={index}>
+                  <td>{item.productos[0]?.producto_id?.label || "N/A"}</td>
+                  <td>{item.productos[0]?.cantidad}</td>
+                  <td>{item.productos[0]?.costo_unitario}</td>
                   <td>
                     {formatearDinero(
-                      (producto.cantidad * producto.costo_unitario).toFixed(2)
+                      item.productos[0]?.cantidad *
+                        item.productos[0]?.costo_unitario
                     )}
-                  </td>{" "}
-                  {/* Cálculo del subtotal */}
+                  </td>
                   <td>
-                    {/* Botón para eliminar el producto agregado en el estado */}
                     <IconButton
                       sx={{ color: "red" }}
-                      onClick={() => eliminarProductoInventario(index)} // Pasar el índice del producto a eliminar
+                      onClick={() => eliminarProductoInventario(index)}
                     >
                       <DeleteOutlineIcon sx={{ fontSize: 29 }} />
                     </IconButton>
@@ -646,6 +663,25 @@ export const AgregarProductosAlmacen = () => {
                 </tr>
               ))}
             </tbody>
+            <tfoot>
+              <tr>
+                <td colSpan="4" className="text-end fw-bold ">
+                  Total:
+                </td>
+                <td>
+                  {formatearDinero(
+                    productosAgregados.reduce(
+                      (total, item) =>
+                        total +
+                        (item.productos[0]?.cantidad *
+                          item.productos[0]?.costo_unitario || 0),
+                      0
+                    )
+                  )}
+                </td>
+                <td></td>
+              </tr>
+            </tfoot>
           </table>
 
           <div

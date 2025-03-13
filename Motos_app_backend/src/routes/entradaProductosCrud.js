@@ -4,37 +4,23 @@ const router = express.Router();
 const db = dbConexion();
 
 
-
-router.post('/agregar_inventario', async (req, res) => { 
-    const { 
-        fecha, 
-        producto_id, 
-        tipo_movimiento_id, 
-        tipo_entrada_id, 
-        autorizo_id, 
-        proveedor_id,
-        cantidad, 
-        costo_unitario,
-        usuario_id 
+router.post('/agregar_inventario', async (req, res) => {
+    const {
+        fecha,
+        tipo_movimiento_id,
+        tipo_entrada_id,
+        autorizo_id,
+        productos, 
+        usuario_id,
+        total
     } = req.body;
 
-    console.log('datos recibidos',{
-        fecha, 
-        producto_id, 
-        tipo_movimiento_id, 
-        tipo_entrada_id, 
-        autorizo_id, 
-        proveedor_id,
-        cantidad, 
-        costo_unitario,
-        usuario_id 
-    });
+    console.log('Datos recibidos:', { fecha, tipo_movimiento_id, tipo_entrada_id, autorizo_id, productos, usuario_id, total });
 
     // Validación de datos
-    if (!fecha || !producto_id ||
-        !tipo_movimiento_id || !tipo_entrada_id || !autorizo_id || 
-        !proveedor_id || !usuario_id) {
-        return res.status(400).json({ message: 'Todos los campos son obligatorios' });
+    if (!fecha || !productos || productos.length === 0 || 
+        !tipo_movimiento_id || !tipo_entrada_id || !autorizo_id || !usuario_id) {
+        return res.status(400).json({ message: 'Todos los campos son obligatorios y debe haber al menos un producto' });
     }
 
     let connection;
@@ -42,40 +28,62 @@ router.post('/agregar_inventario', async (req, res) => {
         connection = await db.getConnection();
         await connection.beginTransaction(); // Iniciar transacción
 
-        // Insertar en movimientos_almacen
+        // Insertar en movimientos_almacen (solo una vez)
         const queryMaestro = `
-            INSERT INTO movimientos_almacen 
-            (fecha, tipo_movimiento_id, tipo_entrada_id, autorizo_id, usuario_id) 
-            VALUES (?, ?, ?, ?, ?)`;
+            INSERT INTO movimientos_almacen
+            (fecha, tipo_movimiento_id, tipo_entrada_id, autorizo_id, usuario_id, total)
+            VALUES (?, ?, ?, ?, ?, ?)`;
+        const [result] = await connection.query(queryMaestro, [
+            fecha,
+            tipo_movimiento_id,
+            tipo_entrada_id,
+            autorizo_id,
+            usuario_id,
+            total
+        ]);
 
-        const [result] = await connection.query(queryMaestro, 
-            [fecha, tipo_movimiento_id.value, tipo_entrada_id.value, autorizo_id.value, usuario_id]);
+        const id_movimiento = result.insertId; // Usar el mismo id_movimiento para todos los productos
+        console.log('Movimiento insertado con ID:', result.insertId); // Verifica si el movimiento se inserta solo una vez
 
-        const id_movimiento = result.insertId;
-
-        const subtotal = cantidad * costo_unitario;
-
+        
         // Insertar cada producto en movimientos_almacen_detalle
         const queryDetalle = `
-            INSERT INTO movimientos_almacen_detalle 
-            (id_movimiento, producto_id, proveedor_id, cantidad, costo_unitario, subtotal) 
-            VALUES (?,?,?,?,?,?)`;
+    INSERT INTO movimientos_almacen_detalle
+    (id_movimiento, producto_id, proveedor_id, cantidad, costo_unitario, subtotal)
+    VALUES (?, ?, ?, ?, ?, ?)`;
 
-        connection.query(queryDetalle, [id_movimiento, producto_id.value, proveedor_id.value, cantidad, costo_unitario, subtotal])
+// Para cada producto, asignamos el mismo id_movimiento
+for (let producto of productos) {
+    const producto_id = producto.producto_id?.value || producto.producto_id;
+    const proveedor_id = producto.proveedor_id?.value || null;
+    const cantidad = Number(producto.cantidad);
+    const costo_unitario = Number(producto.costo_unitario);
+    const subtotal = cantidad * costo_unitario;
 
+    // Insertamos el producto en la tabla
+    await connection.query(queryDetalle, [
+        id_movimiento,  // El id_movimiento es el mismo para todos los productos
+        producto_id,
+        proveedor_id,
+        cantidad,
+        costo_unitario,
+        subtotal
+    ]);
+}
+       
         await connection.commit(); // Confirmar transacción
-        res.status(201).json({ message: "Producto agregado correctamente", id_movimiento });
+        res.status(201).json({ message: "Productos agregados correctamente", id_movimiento });
 
     } catch (error) {
         if (connection) await connection.rollback(); // Revertir cambios en caso de error
         console.error("Error al insertar el movimiento:", error);
         res.status(500).json({ message: "Error al registrar el movimiento", error });
-
     } finally {
         if (connection) connection.release(); // Liberar la conexión
     }
 });
 
+  
 
 // Actualizar un registro del inventario por ID
 router.put('/actualizar_inventario/:id', async (req, res) => {
@@ -144,15 +152,14 @@ router.get('/obtener_listas', async (req, res) => {
 // * consulta buena falta la autorizacion
 router.get('/obtener_inventario', async (req, res) => {
     try {
-        const [result] = await db.query(`                
-                    
-SELECT 
-	sa.producto_id as idProducto,
-	sa.cantidad as cantidad,
-	p.nombre as nombreProducto,
-	p.codigo as codigo
-FROM inventario_almacen sa
-left join productos p on p.id = sa.producto_id;
+        const [result] = await db.query(`                              
+                SELECT 
+                    sa.producto_id as idProducto,
+                    sa.cantidad as cantidad,
+                    p.nombre as nombreProducto,
+                    p.codigo as codigo
+                FROM inventario_almacen sa
+                left join productos p on p.id = sa.producto_id;
         `);
         
         res.status(200).json(result);
@@ -168,14 +175,19 @@ router.get('/obtener_movimientos', async (req, res) => {
     try {
         const [result] = await db.query(`                
                 select 
-                mad.id_movimiento as idMovimiento,
+                ma.id as idMovimiento,
                 ma.fecha as fecha_movimiento,
                 u.nombre as nombreUsuario,
-                a.nombre as nombreAutorizo
+                a.nombre as nombreAutorizo,
+                GROUP_CONCAT(
+                    CONCAT(mad.producto_id, ' - ', mad.cantidad, ' - ', mad.costo_unitario, ' - ', mad.subtotal) 
+                    SEPARATOR ', '
+                ) as detalles
             from movimientos_almacen ma
             left join movimientos_almacen_detalle mad on ma.id = mad.id_movimiento
             left join autorizaciones a on ma.autorizo_id = a.idAutorizo
-            left join usuarios u on u.idUsuario = ma.usuario_id;
+            left join usuarios u on u.idUsuario = ma.usuario_id
+            group by ma.id;  -- Agrupa por movimiento
         `);
         
         res.status(200).json(result);
@@ -183,18 +195,20 @@ router.get('/obtener_movimientos', async (req, res) => {
         console.error("Error al obtener datos:", error);
         res.status(500).json({ message: "Error en el servidor" });
     }
-    
 });
 
+
+// * consulta para la tabla movimientos almacen detalles
 // * consulta para la tabla movimientos almacen detalles
 router.get('/obtener_movimientos_detalles/:idMovimiento', async (req, res) => {
-    const { idMovimiento } = req.params; // Obtener el parámetro de la URL
+    const { idMovimiento } = req.params;
     
     try {
         const [result] = await db.query(`
             SELECT 
                 ma.id AS movimiento_id,
                 ma.fecha,
+                ma.total,
                 tm.movimiento AS tipo_movimiento,
                 te.tipo_entrada,
                 a.nombre AS autorizado_por,
@@ -216,12 +230,18 @@ router.get('/obtener_movimientos_detalles/:idMovimiento', async (req, res) => {
             ORDER BY ma.fecha DESC;
         `, [idMovimiento]);
         
-        res.status(200).json(result);
+        // Si hay resultados, enviarlos como respuesta
+        if (result.length > 0) {
+            res.status(200).json(result);
+        } else {
+            res.status(404).json({ message: "Detalles no encontrados" });
+        }
     } catch (error) {
         console.error("Error al obtener datos:", error);
         res.status(500).json({ message: "Error en el servidor" });
     }
 });
+
 
 
 // * buscar productos por codigo de producto

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import WarehouseIcon from "@mui/icons-material/Warehouse";
-import PlaylistAddCircleIcon from '@mui/icons-material/PlaylistAddCircle';
+import PlaylistAddCircleIcon from "@mui/icons-material/PlaylistAddCircle";
 import MoveToInboxIcon from "@mui/icons-material/MoveToInbox";
 import Paper from "@mui/material/Paper";
 import Table from "@mui/material/Table";
@@ -101,7 +101,7 @@ export const ProductoAlmacenTable = () => {
           display: "flex",
           flexDirection: "row",
           justifyContent: "flex-end",
-          gap: "16px", // Espacio entre los botones
+          gap: "30px", // Espacio entre los botones
           position: "fixed",
           right: 50,
           top: 80,
@@ -109,7 +109,19 @@ export const ProductoAlmacenTable = () => {
       >
         <Button
           variant="contained"
-          sx={{ backgroundColor: "#1f618d", color: "white", ":hover": { opacity: 0.7 }, position: "absolute", right: 20, borderRadius: "8px", padding: "10px 20px", display: "flex", alignItems: "center", gap: "8px", marginRight: 8 }}
+          sx={{
+            backgroundColor: "#1f618d",
+            color: "white",
+            ":hover": { opacity: 0.7 },
+            position: "absolute",
+            right: 20,
+            borderRadius: "8px",
+            padding: "10px 20px",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+            marginRight: 28,
+          }}
           onClick={() => navigate("/almacen/MovimientosAlmacenTable")}
         >
           <WarehouseIcon sx={{ fontSize: 24 }} />
@@ -143,7 +155,7 @@ export const ProductoAlmacenTable = () => {
             borderRadius: "8px 8px 0 0",
           }}
         >
-          <Typography variant="h5" fontWeight="bold" color="white" >
+          <Typography variant="h5" fontWeight="bold" color="white">
             Almacén
           </Typography>
         </Box>
@@ -180,8 +192,12 @@ export const ProductoAlmacenTable = () => {
                   <TableRow key={producto.id}>
                     <TableCell align="center">{producto.idProducto}</TableCell>
                     <TableCell align="center">{producto.codigo}</TableCell>
-                    <TableCell align="center">{producto.nombreProducto}</TableCell>
-                    <TableCell align="center">{Math.round(producto.cantidad)}</TableCell>
+                    <TableCell align="center">
+                      {producto.nombreProducto}
+                    </TableCell>
+                    <TableCell align="center">
+                      {Math.round(producto.cantidad)}
+                    </TableCell>
                     {/* <TableCell align="center">
                       <IconButton
                         sx={{ color: "black" }}

@@ -224,7 +224,7 @@ export const MovimientosAlmacenTable = () => {
                       </IconButton>
                     </TableCell>
                     <TableCell align="center">
-                      {/* <IconButton
+                      <IconButton
                         sx={{ color: "black" }}
                         onClick={() => {
                           setProductoSeleccionado(producto);
@@ -232,7 +232,7 @@ export const MovimientosAlmacenTable = () => {
                         }}
                       >
                         <EditIcon sx={{ fontSize: 20 }} />
-                      </IconButton> */}
+                      </IconButton>
 
                       <IconButton
                         variant="contained"
@@ -246,6 +246,7 @@ export const MovimientosAlmacenTable = () => {
                   </TableRow>
                 ))}
               </TableBody>
+              
             </Table>
           </TableContainer>
         </Paper>
