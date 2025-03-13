@@ -89,16 +89,16 @@ export const ActualizarServicio = async (id, servicioData) => {
 };
 
 
-export const EliminarServicio = async (id, actualizarLista) => {
+export const ActualizarStatus = async (id, actualizarLista) => {
     try {
         const result = await Swal.fire({
-            title: "¿Estás seguro de eliminar esta moto?",
-            text: "Esta acción no se puede deshacer.",
+            title: "¿Estás seguro que desea eliminar el producto?",
+            text: "Esta acción cambiará el status de la nota a inactiva",
             icon: "question",
             showCancelButton: true,
             confirmButtonColor: "#f1c40f",
             cancelButtonColor: "#7f8c8d",
-            confirmButtonText: "Sí, eliminar",
+            confirmButtonText: "Sí, cambiar",
             cancelButtonText: "Cancelar"
         });
 
@@ -106,28 +106,30 @@ export const EliminarServicio = async (id, actualizarLista) => {
             return;
         }
 
-        const response = await fetch(`http://192.168.0.104:4000/servicios/eliminar_servicio/${id}`, {
-            method: 'DELETE',
+        const response = await fetch(`${API_URL}/servicios/actualizar_status_servicio/${id}`, {
+            method: 'PUT',
         });
 
         if (response.ok) {
             Swal.fire({
                 position: 'center',
                 icon: 'success',
-                title: 'Moto eliminada correctamente',
+                title: 'Status actualizado correctamente',
                 showConfirmButton: true,
             });
 
-            // Actualizar la lista de motos después de eliminar
+            // Llamar al callback para actualizar la lista con el id del servicio
             actualizarLista(id);
         } else {
-            throw new Error('Error al eliminar moto');
+            throw new Error('Error al actualizar el status');
         }
     } catch (error) {
         console.error('Error al realizar la solicitud:', error);
         Swal.fire('Error', 'Hubo un problema al conectar con el servidor.', 'error');
     }
 };
+
+
 
 // *<===================================== SERVICIOS MOTOS ====================================================================>
 
@@ -138,6 +140,7 @@ export const ObtenerMantenimientos = async ({ filtro }) => {
     if (filtro.fecha_inicio) params.append("fecha_inicio", filtro.fecha_inicio);
     if (filtro.fecha_final) params.append("fecha_final", filtro.fecha_final);
     if (filtro.servicio) params.append("servicio", filtro.servicio);
+    if (filtro.moto) params.append("moto", filtro.moto);
 
     try {
         const response = await fetch(`${API_URL}/servicios/obtener_mantenimientos?${params.toString()}`, {

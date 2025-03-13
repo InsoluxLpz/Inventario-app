@@ -2,34 +2,32 @@ import { useEffect, useState } from "react";
 import { ActualizarServicio } from "../../api/ServiciosApi";
 import { Button } from '@mui/material';
 
-export const EditarServiciosModal = ({ onClose, modalOpen, servicio, actualizarLista }) => {
+export const EditarServiciosModal = ({ onClose, modalOpen, servicio, actualizarLista, ListaServicios }) => {
     if (!modalOpen) return null;
+
+    const Servicios = ListaServicios;
 
     const [formData, setFormData] = useState({
         nombre: servicio.nombre,
         descripcion: servicio.descripcion,
-
     });
 
-    const [errors, setErrors] = useState({})
+    const [errors, setErrors] = useState({});
 
     useEffect(() => {
         if (servicio) {
             setFormData({
                 nombre: servicio.nombre || "",
                 descripcion: servicio.descripcion || "",
-
             });
         }
     }, [servicio]);
-
 
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
         setErrors((prev) => ({ ...prev, [name]: "" }));
     };
-
 
     const validateForm = () => {
         const newErrors = {};
@@ -46,15 +44,35 @@ export const EditarServiciosModal = ({ onClose, modalOpen, servicio, actualizarL
     const handleSubmit = async (e) => {
         e.preventDefault();
 
+        // Limpiar espacios al principio y al final del nombre SOLO antes de enviar
+        const cleanedFormData = {
+            ...formData,
+            nombre: formData.nombre.trim(),
+        };
+
+        setFormData(cleanedFormData);
+
+        // Validar si el nombre ya existe en los servicios
+        const nombreServicioExistente = Servicios.find(
+            (serv) => serv.nombre.toLowerCase() === cleanedFormData.nombre.toLowerCase() && serv.id !== servicio.id
+        );
+
+        if (nombreServicioExistente) {
+            setErrors((prev) => ({
+                ...prev,
+                nombre: "Ya existe un servicio con ese nombre",
+            }));
+            return;
+        }
+
         if (!validateForm()) return;
 
         // Hacer la solicitud PUT al backend para actualizar el servicio
-        const response = await ActualizarServicio(servicio.id, formData);
+        const response = await ActualizarServicio(servicio.id, cleanedFormData);
 
         if (response) {
-            // Actualizar la lista en el componente principal con el servicio actualizado
-            actualizarLista(response);  // Pasar el servicio actualizado
-            onClose();  // Cerrar el modal
+            actualizarLista(response);
+            onClose();
         }
     };
 

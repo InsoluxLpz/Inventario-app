@@ -42,9 +42,20 @@ export const AgregarProductoModal = ({ modalOpen, onClose, grupos, unidadMedida,
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
+
+        if (name === "precio") {
+            let numericValue = value.replace(/[^0-9.]/g, "");
+
+            const formattedValue = new Intl.NumberFormat('es-MX').format(numericValue);
+
+            setFormData(prev => ({ ...prev, [name]: formattedValue }));
+        } else {
+            setFormData(prev => ({ ...prev, [name]: value }));
+        }
+
         setErrors(prev => ({ ...prev, [name]: "" }));
     };
+
 
     const handleSelectChange = (selectedOptions) => {
         setFormData(prev => ({
@@ -68,6 +79,14 @@ export const AgregarProductoModal = ({ modalOpen, onClose, grupos, unidadMedida,
     const handleSubmit = async (e) => {
         e.preventDefault();
 
+        const codigoSinEspacios = formData.codigo.trim();
+        const nombreSinEspacios = formData.nombre.trim();
+        const formDataConEspaciosEliminados = {
+            ...formData,
+            codigo: codigoSinEspacios,
+            nombre: nombreSinEspacios,
+        };
+
         const precioNumerico = parseFloat(formData.precio.replace(/[^\d.-]/g, ''));
 
         if (!validateForm()) return;
@@ -79,7 +98,7 @@ export const AgregarProductoModal = ({ modalOpen, onClose, grupos, unidadMedida,
         }
 
         const formDataConUsuario = {
-            ...formData,
+            ...formDataConEspaciosEliminados,
             precio: precioNumerico,
             idUsuario
         };
@@ -123,6 +142,7 @@ export const AgregarProductoModal = ({ modalOpen, onClose, grupos, unidadMedida,
             setErrors((prev) => ({ ...prev, general: "Ocurrió un error al agregar el producto. Inténtelo de nuevo." }));
         }
     };
+
 
 
     return (
@@ -176,14 +196,20 @@ export const AgregarProductoModal = ({ modalOpen, onClose, grupos, unidadMedida,
 
                                     <div className="col-md-6 mb-3">
                                         <label className="form-label">Precio</label>
-                                        <input
-                                            type="number"
-                                            name="precio"
-                                            className={`form-control ${errors.precio ? "is-invalid" : ""}`}
-                                            value={formData.precio}
-                                            onChange={(e) => setFormData({ ...formData, precio: e.target.value })}
-                                        />
-                                        {errors.precio && <div className="invalid-feedback">{errors.precio}</div>}
+                                        <div className="input-group">
+                                            <span className="input-group-text" style={{ height: 47 }}>
+                                                $
+                                            </span>
+                                            <input
+                                                type="text"
+                                                name="precio"
+                                                className={`form-control ${errors.precio ? "is-invalid" : ""}`}
+                                                value={formData.precio}
+                                                onChange={handleChange}
+                                            />
+
+                                            {errors.precio && <div className="invalid-feedback">{errors.precio}</div>}
+                                        </div>
                                     </div>
                                 </div>
 

@@ -81,9 +81,14 @@ export const ProductoTable = () => {
 
   const actualizarLista = (productoActualizado) => {
     setProductos((prevProductos) =>
-      prevProductos.map((m) => (m.idProducto === productoActualizado.idProducto ? productoActualizado : m))
+      prevProductos.map((producto) =>
+        producto.id === productoActualizado.id
+          ? { ...producto, ...productoActualizado }
+          : producto
+      )
     );
   };
+
 
   const agregarProducto = (producto) => {
     setProductos(prevProductos => [...prevProductos, producto]);
@@ -276,6 +281,7 @@ export const ProductoTable = () => {
           modalOpen={openModalEditar}
           onClose={() => setOpenModalEditar(false)}
           producto={productoSeleccionado}
+          ListaProductos={productos}
           actualizarLista={actualizarLista}
           listagrupos={grupos}
           unidadMedida={unidadMedida}

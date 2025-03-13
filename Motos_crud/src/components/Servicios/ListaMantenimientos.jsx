@@ -89,11 +89,13 @@ export const ListaMantenimientos = () => {
   };
 
   const cargarMantenimientos = async () => {
+    console.log("Filtro moto antes de enviar:", filtro.moto);
+
     const data = await ObtenerMantenimientos({
       filtro: {
         ...filtro,
         servicio: filtro.servicio?.value || "",
-        moto: filtro.moto ? filtro.moto.value : ""
+        moto: filtro.moto ? Number(filtro.moto.value) : ""
       }
     });
     console.log("Valor de moto antes de enviar:", filtro.moto);
@@ -199,7 +201,7 @@ export const ListaMantenimientos = () => {
                   name="motos"
                   options={opcionesMotos}
                   isMulti={false}
-                  placeholder="SELECCIONA VEHÍCULO"
+                  placeholder="SELECCIONA MOTO"
                   value={filtro.moto}
                   onChange={(selectedOption) =>
                     setFiltro({ ...filtro, moto: selectedOption })

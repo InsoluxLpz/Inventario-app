@@ -255,6 +255,7 @@ export const ProveedoresTable = () => {
           onClose={handleCloseModalEditar}
           proveedor={proveedorSeleccionado}
           actualizarLista={actualizarLista}
+          ListaProveedor={proveedores}
         />
       </Box>
     </>

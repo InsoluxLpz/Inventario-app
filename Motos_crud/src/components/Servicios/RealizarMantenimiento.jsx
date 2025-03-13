@@ -117,18 +117,17 @@ export const RealizarMantenimiento = ({ modalOpen, onClose }) => {
     const handleChange = (e) => {
         const { name, value } = e.target;
 
-        // Elimina cualquier carácter que no sea un número (excepto el punto y la coma)
-        const numericValue = value.replace(/[^\d]/g, '');
+        if (name === "odometro" || name === "costo_total") {
+            // Restringir solo a números
+            const numericValue = value.replace(/[^\d]/g, '');
+            const formattedValue = new Intl.NumberFormat('es-MX').format(numericValue);
+            setFormData((prev) => ({ ...prev, [name]: numericValue }));
 
-        // Formatea el número con comas
-        const formattedValue = new Intl.NumberFormat('es-MX').format(numericValue);
-
-        // Actualiza el estado con el valor numérico limpio (solo para cálculos)
-        setFormData((prev) => ({ ...prev, [name]: numericValue }));
-
-        // Si es costo_total, también actualiza el valor mostrado con comas
-        if (name === "costo_total") {
-            e.target.value = formattedValue;
+            if (name === "costo_total") {
+                e.target.value = formattedValue;
+            }
+        } else {
+            setFormData((prev) => ({ ...prev, [name]: value }));
         }
 
         setErrors((prev) => ({ ...prev, [name]: "" }));
@@ -418,7 +417,7 @@ export const RealizarMantenimiento = ({ modalOpen, onClose }) => {
 
                                 <div className="col-md-12 mb-2 ">
                                     <label className="form-label">Comentario</label>
-                                    <textarea name="comentario" className={`form-control form-control-sm`} value={formData.comentario} onChange={handleChange} />
+                                    <textarea name="comentario" type="text" className={`form-control form-control-sm`} value={formData.comentario} onChange={handleChange} />
                                 </div>
 
                                 <div className="modal-footer">

@@ -4,12 +4,13 @@ import { Button } from "@mui/material";
 import Select from "react-select";
 import Swal from "sweetalert2";
 
-export const EditarProductoModal = ({ onClose, modalOpen, producto, actualizarLista, listagrupos, unidadMedida, ListaProveedores }) => {
+export const EditarProductoModal = ({ onClose, modalOpen, producto, actualizarLista, listagrupos, unidadMedida, ListaProveedores, ListaProductos }) => {
   if (!modalOpen) return null;
 
   const grupos = listagrupos;
   const unidad = unidadMedida;
   const Proveedor = ListaProveedores;
+  const Productos = ListaProductos;
 
   console.log(Proveedor)
 
@@ -25,7 +26,7 @@ export const EditarProductoModal = ({ onClose, modalOpen, producto, actualizarLi
 
   const [errors, setErrors] = useState({});
   useEffect(() => {
-    if (producto) {
+    if (producto && ListaProveedores.length > 0) {
       console.log("Producto cargado:", producto);
 
       setFormData({
@@ -36,20 +37,29 @@ export const EditarProductoModal = ({ onClose, modalOpen, producto, actualizarLi
         precio: producto.precio || "",
         descripcion: producto.descripcion || "",
         proveedores: producto.proveedores
-          ? producto.proveedores.map(prov => ({ value: prov.id, label: prov.nombre }))
+          ? producto.proveedores.map(prov => {
+            const proveedorEncontrado = ListaProveedores.find(p => p.id === prov.id);
+            return {
+              value: prov.id,
+              label: proveedorEncontrado ? proveedorEncontrado.nombre_proveedor : "Proveedor no disponible"
+            };
+          })
           : [],
-
       });
     }
-  }, [producto]);
-
+  }, [producto, ListaProveedores]);
 
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    let newValue = value;
+    if (name === "codigo" || name === "nombre") {
+      newValue = value.replace(/^\s+/, "");
+    }
+    setFormData((prev) => ({ ...prev, [name]: newValue }));
     setErrors((prev) => ({ ...prev, [name]: "" }));
   };
+
 
 
   const validateForm = () => {
@@ -69,7 +79,45 @@ export const EditarProductoModal = ({ onClose, modalOpen, producto, actualizarLi
 
 
   const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    const cleanedFormData = {
+      ...formData,
+      codigo: formData.codigo.trim(),
+      nombre: formData.nombre.trim()
+    };
+
+    setFormData(cleanedFormData);
+
     if (!validateForm()) return;
+
+    const productoExistenteNombre = Productos.find(
+      (prod) =>
+        prod.nombre.toLowerCase() === cleanedFormData.nombre.toLowerCase() &&
+        prod.id !== producto.id
+    );
+
+    if (productoExistenteNombre) {
+      setErrors((prev) => ({
+        ...prev,
+        nombre: "Ya existe un producto con ese nombre",
+      }));
+      return;
+    }
+
+    const productoExistenteCodigo = Productos.find(
+      (prod) =>
+        prod.codigo.toLowerCase() === cleanedFormData.codigo.toLowerCase() &&
+        prod.id !== producto.id
+    );
+
+    if (productoExistenteCodigo) {
+      setErrors((prev) => ({
+        ...prev,
+        codigo: "Ya existe un producto con este código",
+      }));
+      return;
+    }
 
     const idUsuario = parseInt(localStorage.getItem('idUsuario'), 10);
 
@@ -78,11 +126,10 @@ export const EditarProductoModal = ({ onClose, modalOpen, producto, actualizarLi
       return;
     }
 
-    // Transformar proveedores para solo enviar los IDs
     const formDataProcessed = {
-      ...formData,
+      ...cleanedFormData,
       idUsuario,
-      proveedores: formData.proveedores.map(proveedor => proveedor.value) // Solo los IDs
+      proveedores: formData.proveedores.map((proveedor) => proveedor.value),
     };
 
     try {
@@ -103,6 +150,17 @@ export const EditarProductoModal = ({ onClose, modalOpen, producto, actualizarLi
       setErrors({ general: "Error al conectar con el servidor" });
     }
   };
+
+  const formatCurrency = (value) => {
+    if (value) {
+      return new Intl.NumberFormat('es-MX', {
+        style: 'currency',
+        currency: 'MXN',
+      }).format(value);
+    }
+    return '$0.00';  // Valor por defecto si no hay valor
+  };
+
 
   const opcionesGrupos = [...grupos]
     .sort((a, b) => a.nombre.localeCompare(b.nombre))
@@ -189,12 +247,11 @@ export const EditarProductoModal = ({ onClose, modalOpen, producto, actualizarLi
                           $
                         </span>
                         <input
-                          type="number"
+                          type="text"
                           name="precio"
                           readOnly
                           className={`form-control ${errors.precio ? "is-invalid" : ""}`}
-                          value={formData.precio}
-                          onChange={handleChange}
+                          value={formatCurrency(formData.precio)}
                         />
                       </div>
                       {errors.precio && (

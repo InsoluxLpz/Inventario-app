@@ -79,23 +79,29 @@ router.put('/actualizar_servicio/:id', async (req, res) => {
 });
 
 
-router.delete('/eliminar_servicio/:id', async (req, res) => {
+router.put('/actualizar_status_servicio/:id', async (req, res) => {
     const { id } = req.params
 
-    if (!id || isNaN(id)) {
-        return res.status(400).json({ message: 'No se encontro ningun id' });
+    if (!id) {
+        return res.status(400).json('Faltan parametros para actualizar el campo');
     }
+
+    const query = `UPDATE cat_servicios SET status = 0 WHERE id = ?`
 
     try {
-        await db.query('DELETE FROM cat_servicios WHERE id = ?', [id]);
+        const [results] = await db.query(query, [id]);
 
-        return res.status(200).json({ ok: true, msg: 'Moto eliminada correctamente' });
+        if (results.length === 0) {
+            return res.status(404).json('No hay datos en la tabla');
+        }
+        return res.status(200).json(results);
 
-    } catch (error) {
-        console.error('Error al eliminar la moto:', error);
-        return res.status(500).json({ ok: false, msg: 'Error en el servidor al eliminar la moto' });
+    } catch (err) {
+        console.error('Error al obtener el crédito:', err);
+        return res.status(500).json({ errors: ['Error en el servidor'] });
     }
-});
+
+})
 
 //* <============================== mantenimientos-motos======================================>
 

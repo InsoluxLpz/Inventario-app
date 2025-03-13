@@ -128,9 +128,8 @@ router.put('/actualizar_producto/:id', async (req, res) => {
 
     const connection = await db.getConnection();
     try {
-        await connection.beginTransaction(); // Iniciar transacción
+        await connection.beginTransaction();
 
-        // Actualizar el producto
         const updateProductoQuery = `
             UPDATE productos
             SET codigo = ?, nombre = ?, precio = ?, descripcion = ?, idGrupo = ?, idUnidadMedida = ? 
@@ -138,20 +137,30 @@ router.put('/actualizar_producto/:id', async (req, res) => {
         const valuesProducto = [codigo, nombre, precio, descripcion, grupo, unidad_medida, id];
         await connection.query(updateProductoQuery, valuesProducto);
 
-        // Eliminar los proveedores antiguos
         const deleteProveedoresQuery = `DELETE FROM productos_proveedor WHERE idProducto = ?`;
         await connection.query(deleteProveedoresQuery, [id]);
 
-        // Insertar los nuevos proveedores
         const valuesProveedores = proveedores.map(idProveedor => [id, idProveedor]);
         const insertProveedorQuery = `INSERT INTO productos_proveedor (idProducto, idProveedor) VALUES ?`;
         await connection.query(insertProveedorQuery, [valuesProveedores]);
+        await connection.commit();
 
-        await connection.commit(); // Confirmar transacción
-        return res.status(200).json({ message: 'Producto actualizado correctamente' });
+        const getUpdatedProductoQuery = `
+            SELECT p.id, p.codigo, p.nombre, p.precio, p.descripcion, p.idGrupo AS grupo, 
+                p.idUnidadMedida AS unidad_medida, 
+                JSON_ARRAYAGG(JSON_OBJECT('id', pp.idProveedor)) AS proveedores
+            FROM productos p
+            LEFT JOIN productos_proveedor pp ON p.id = pp.idProducto
+            WHERE p.id = ?
+            GROUP BY p.id;
+        `;
+
+        const [updatedProducto] = await connection.query(getUpdatedProductoQuery, [id]);
+
+        return res.status(200).json(updatedProducto[0]);
 
     } catch (error) {
-        await connection.rollback(); // Revertir cambios si hay error
+        await connection.rollback();
         console.error('Error al actualizar el producto:', error.message);
         return res.status(500).json({ message: error.message || 'Error al actualizar el producto' });
     } finally {

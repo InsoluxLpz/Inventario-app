@@ -4,8 +4,10 @@ import { actualizarProovedor } from "../../api/proovedoresApi";
 import "../../styles/LoginScreen.css";
 import Swal from "sweetalert2";
 
-export const EditarProveedoresModal = ({ onClose, modalOpen, proveedor, actualizarLista }) => {
+export const EditarProveedoresModal = ({ onClose, modalOpen, proveedor, actualizarLista, ListaProveedor }) => {
   if (!modalOpen) return null;
+
+  const Proveedores = ListaProveedor;
 
   const [formData, setFormData] = useState({
     nombre_empresa: proveedor.nombre_empresa,
@@ -55,19 +57,40 @@ export const EditarProveedoresModal = ({ onClose, modalOpen, proveedor, actualiz
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Limpiar espacios al principio y al final del nombre SOLO antes de enviar
+    const cleanedFormData = {
+      ...formData,
+      nombre_empresa: formData.nombre_empresa.trim(),
+    };
+
+    setFormData(cleanedFormData);
+
+    // Validar si el nombre de la empresa ya existe en los proveedores
+    const nombreProveedorExistente = Proveedores.find(
+      (prov) => prov.nombre_empresa.toLowerCase() === cleanedFormData.nombre_empresa.toLowerCase() && prov.id !== proveedor.id
+    );
+
+    if (nombreProveedorExistente) {
+      setErrors((prev) => ({
+        ...prev,
+        nombre_empresa: "Ya existe un proveedor con ese nombre de empresa",
+      }));
+      return;
+    }
+
     if (!validateForm()) return;
 
     try {
-      const updateProveedor = await actualizarProovedor(proveedor.id, formData);
-      console.log("se actualizara el proveedor", updateProveedor)
+      const updateProveedor = await actualizarProovedor(proveedor.id, cleanedFormData);
+      console.log("Proveedor actualizado:", updateProveedor);
       if (updateProveedor?.error) {
-        setErrors({ general: "Error al actualizar el producto" });
+        setErrors({ general: "Error al actualizar el proveedor" });
         return;
       }
       Swal.fire("Éxito", "Proveedor actualizado correctamente.", "success");
 
-
-      // Aquí iría la lógica para actualizar el proveedor en la base de datos
+      // Llamada para actualizar el proveedor en la lista
       actualizarLista(updateProveedor);
       onClose();
       console.log("Proveedor actualizado", updateProveedor);
