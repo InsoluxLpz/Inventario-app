@@ -16,14 +16,12 @@ import { NavBar } from "../NavBar";
 import { cargarListasCampos } from "../../api/almacenProductosApi";
 import AddchartIcon from "@mui/icons-material/Addchart";
 import InventoryIcon from "@mui/icons-material/Inventory";
+import { AgregarProductosAlmacenModal } from "./AgregarProductosAlmacenModal";
 import { EditarProductoAlmacenModal } from "./EditarProductoAlmacenModal";
 import { obtenerProductos } from "../../api/productosApi";
 import { obtenerProveedores } from "../../api/proveedoresApi";
-import { useNavigate } from "react-router";
 
 export const ProductoAlmacenTable = () => {
-  const navigate = useNavigate();
-
   const [openModalEditar, setOpenModalEditar] = useState(false);
   const [openModalAgregar, setOpenModalAgregar] = useState(false);
   const [inventario, setInventario] = useState([]);
@@ -49,6 +47,35 @@ export const ProductoAlmacenTable = () => {
     } catch (error) {
       console.error("Error en la petición al obtener Inventario");
     }
+  };
+
+  // * necesito traer productos, tupo, autorizo y proveedores para reflejarlos en los campos
+  const fetchProductos = async () => {
+    const data = await obtenerProductos();
+    if(data) {
+      setProductos(data);
+    }
+  };
+
+  const fetchAutorizo = async () => {
+    const data = await obtenerAutorizaciones();
+  };
+
+  const fetchProveedores = async () => {
+    const data = await obtenerProveedores();
+    if(data){
+      setProveedores(data)
+    }
+  };
+
+  const handleModalAgregar = () => {
+    setOpenModalAgregar(true);
+    fetchProductos();
+    fetchProveedores();
+  };
+  
+  const handleCloseModalAgregar = () => {
+    setOpenModalAgregar(false);
   };
 
   const actualizarLista = (productoActualizado) => {
@@ -106,6 +133,7 @@ export const ProductoAlmacenTable = () => {
           right: 50,
           top: 80,
         }}
+        onClick={handleModalAgregar}
       >
         <Button
           variant="contained"
@@ -232,6 +260,13 @@ export const ProductoAlmacenTable = () => {
         onClose={() => setOpenModalEditar(false)}
         producto={productoSeleccionado}
         actualizarLista={actualizarLista}
+      />
+
+      <AgregarProductosAlmacenModal
+        modalOpen={openModalAgregar}
+        onClose={handleCloseModalAgregar}
+        productos={productos}
+        proveedores={proveedores}
       />
     </>
   );
