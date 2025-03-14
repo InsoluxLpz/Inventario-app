@@ -15,8 +15,10 @@ import ListItem from "@mui/material/ListItem";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Collapse, InputBase, Typography } from "@mui/material";
+import { Collapse, Typography } from "@mui/material";
+import ArticleIcon from '@mui/icons-material/Article';
 import HandymanIcon from '@mui/icons-material/Handyman';
+import NewspaperIcon from '@mui/icons-material/Newspaper';
 import HomeIcon from "@mui/icons-material/Home";
 import TwoWheelerIcon from "@mui/icons-material/TwoWheeler";
 import MiscellaneousServicesIcon from '@mui/icons-material/MiscellaneousServices';
@@ -25,9 +27,9 @@ import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import CategoryIcon from "@mui/icons-material/Category";
 import WarehouseIcon from "@mui/icons-material/Warehouse";
 import LogoutIcon from "@mui/icons-material/Logout";
-import InboxIcon from '@mui/icons-material/Inbox';
+import { ExpandMore } from "@material-ui/icons";
 
-const drawerWidth = 290;
+const drawerWidth = 250;
 
 const openedMixin = (theme) => ({
   width: drawerWidth,
@@ -125,10 +127,6 @@ export const NavBar = ({ onSearch }) => {
     setOpen(false);
   };
 
-  const handleSearchChange = (event) => {
-    onSearch(event.target.value);
-  };
-
   const handleProductsClick = () => {
     setOpenProducts(!openProducts);
   };
@@ -148,14 +146,14 @@ export const NavBar = ({ onSearch }) => {
 
   const routeTitles = {
     "/inicio": "Inicio",
-    "/motos": "Administración de Motos",
-    "/productos": "Productos",
+    "/motos": "Flotilla",
+    "/productos": "Catalogo de Productos",
     "/servicios/RealizarServicio": "Servicios",
     "/servicios/ListaServicios": "Servicios",
     "/almacen/ProductoAlmacenTable": "Almacén de productos",
     "/almacen/MovimientosAlmacenTable": "Movimientos de productos",
     "/Proveedores": "Catalogo de Proveedores",
-    "/servicios/ListaMantenimientos": "Mantenimientos",
+    "/servicios/ListaMantenimientos": "Reporte Mantenimientos",
     "/servicios/CatalogoServicios": "Catalogo de servicios",
     "/almacen/Entradas": "Entradas"
   };
@@ -187,7 +185,12 @@ export const NavBar = ({ onSearch }) => {
       </AppBar>
 
       {/* Drawer */}
-      <Drawer variant="permanent" open={open}>
+      <Drawer
+        variant="permanent"
+        open={open}
+        onMouseEnter={() => setOpen(true)}  // Abre el Drawer al pasar el mouse
+        onMouseLeave={() => setOpen(false)} // Cierra el Drawer al salir el mouse
+      >
         <DrawerHeader>
           <Typography variant="h6" style={{ color: 'black' }}>
             MODULOS
@@ -198,73 +201,128 @@ export const NavBar = ({ onSearch }) => {
         </DrawerHeader>
         <Divider />
 
-        {/* List of items */}
         <List>
           <ListItem button selected={selectedItem === "/inicio"} onClick={() => handleNavigate("/inicio")}>
-            <ListItemIcon>
+            <ListItemIcon sx={{ minWidth: 32 }}>
               <HomeIcon />
             </ListItemIcon>
-            <ListItemText primary="Inicio" />
-          </ListItem>
-          <ListItem button selected={selectedItem === "/Proveedores"} onClick={() => handleNavigate("/Proveedores")}>
-            <ListItemIcon>
-              <LocalShippingIcon />
-            </ListItemIcon>
-            <ListItemText primary="Proveedores" />
-          </ListItem>
-          <ListItem button selected={selectedItem === "/motos"} onClick={() => handleNavigate("/motos")}>
-            <ListItemIcon>
-              <TwoWheelerIcon />
-            </ListItemIcon>
-            <ListItemText primary="Flotilla" />
-          </ListItem>
-
-          <ListItem button onClick={() => handleNavigate("/productos")}>
-            <ListItemIcon>
-              <InventoryTwoToneIcon sx={{ fontSize: 18 }} />
-            </ListItemIcon>
-            <ListItemText primary="Lista de Productos" />
-          </ListItem>
-
-          <ListItem button onClick={() => handleNavigate("/servicios/ListaMantenimientos")}>
-            <ListItemIcon>
-              <HandymanIcon sx={{ fontSize: 18 }} />
-            </ListItemIcon>
-            <ListItemText primary="Lista de Mantenimientos" />
-          </ListItem>
-          <ListItem button onClick={() => handleNavigate("/servicios/CatalogoServicios")}>
-            <ListItemIcon>
-              <MiscellaneousServicesIcon sx={{ fontSize: 18 }} />
-            </ListItemIcon>
-            <ListItemText primary="Catalogo Servicios" />
+            <ListItemText primary="Inicio" sx={{ display: open ? "block" : "none" }} />
           </ListItem>
 
           <ListItem button onClick={() => handleNavigate("/almacen/Entradas")}>
-            <ListItemIcon>
-              <WarehouseIcon sx={{ fontSize: 18 }} />
+            <ListItemIcon sx={{ minWidth: 32 }}>
+              <WarehouseIcon />
             </ListItemIcon>
-            <ListItemText primary="Entradas" />
-          </ListItem>
-          <ListItem button onClick={() => handleNavigate("/almacen/MovimientosAlmacenTable")}>
-            <ListItemIcon>
-              <MoveToInboxIcon sx={{ fontSize: 18 }} />
-            </ListItemIcon>
-            <ListItemText primary="Movimientos almacen" />
-          </ListItem>
-          <ListItem button onClick={() => handleNavigate("/almacen/ProductoAlmacenTable")}>
-            <ListItemIcon>
-              <CategoryIcon sx={{ fontSize: 18 }} />
-            </ListItemIcon>
-            <ListItemText primary="Almacén" />
+            <ListItemText primary="Entradas" sx={{ display: open ? "block" : "none" }} />
           </ListItem>
 
-          <Divider />
+
+
+          <ListItem button onClick={() => handleNavigate("/almacen/ProductoAlmacenTable")}>
+            <ListItemIcon sx={{ minWidth: 32 }}>
+              <CategoryIcon sx={{ fontSize: 18 }} />
+            </ListItemIcon>
+            <ListItemText primary="Inventario" sx={{ display: open ? "block" : "none" }} />
+          </ListItem>
+          <Divider sx={{ borderColor: "rgba(0, 0, 0, 0.7)", borderWidth: 1 }} />
+
+          <ListItem button onClick={handleProductsClick} sx={{ backgroundColor: '#f1c40f' }}>
+            <ListItemIcon sx={{ minWidth: 32 }}>
+              <NewspaperIcon />
+            </ListItemIcon>
+            <ListItemText primary="Catálogos" sx={{ display: open ? "block" : "none" }} />
+
+            {open && (
+              <ExpandMore
+                sx={{
+                  transition: "transform 0.3s",
+                  transform: openProducts ? "rotate(180deg)" : "rotate(0deg)",
+                  marginLeft: "auto", // Lo empuja hacia la derecha
+                }}
+              />
+            )}
+          </ListItem>
+
+          <Collapse in={openProducts} timeout="auto" unmountOnExit>
+            <List component="div" disablePadding > {/* Agrega padding a la izquierda */}
+              <ListItem button selected={selectedItem === "/Proveedores"} onClick={() => handleNavigate("/Proveedores")} sx={{ pl: 3 }}>
+                <ListItemIcon sx={{ minWidth: 32 }}>
+                  <LocalShippingIcon sx={{ fontSize: 18 }} />
+                </ListItemIcon>
+                <ListItemText primary="Proveedores" sx={{ fontSize: "0.875rem", display: open ? "block" : "none" }} />
+              </ListItem>
+
+              <ListItem button selected={selectedItem === "/motos"} onClick={() => handleNavigate("/motos")} sx={{ pl: 3 }}>
+                <ListItemIcon sx={{ minWidth: 32 }}>
+                  <TwoWheelerIcon sx={{ fontSize: 18 }} />
+                </ListItemIcon>
+                <ListItemText primary="Flotilla" sx={{ fontSize: "0.875rem", display: open ? "block" : "none" }} />
+              </ListItem>
+
+              <ListItem button onClick={() => handleNavigate("/productos")} sx={{ pl: 3 }}>
+                <ListItemIcon sx={{ minWidth: 32 }}>
+                  <InventoryTwoToneIcon sx={{ fontSize: 18 }} />
+                </ListItemIcon>
+                <ListItemText primary="Productos" sx={{ fontSize: "0.875rem", display: open ? "block" : "none" }} />
+              </ListItem>
+
+              <ListItem button onClick={() => handleNavigate("/servicios/CatalogoServicios")} sx={{ pl: 3 }}>
+                <ListItemIcon sx={{ minWidth: 32 }}>
+                  <MiscellaneousServicesIcon sx={{ fontSize: 18 }} />
+                </ListItemIcon>
+                <ListItemText primary="Servicios" sx={{ fontSize: "0.875rem", display: open ? "block" : "none" }} />
+              </ListItem>
+            </List>
+          </Collapse>
+
+          <Divider sx={{ borderColor: "rgba(0, 0, 0, 0.7)", borderWidth: 1 }} />
+
+          <ListItem button onClick={handleServicesClick} sx={{ backgroundColor: '#f1c40f' }}>
+            <ListItemIcon sx={{ minWidth: 32 }}>
+              <ArticleIcon />
+            </ListItemIcon>
+            <ListItemText primary="Reportes" sx={{ display: open ? "block" : "none" }} />
+
+            {open && (
+              <ExpandMore
+                sx={{
+                  transition: "transform 0.3s",
+                  transform: openServices ? "rotate(180deg)" : "rotate(0deg)",
+                  marginLeft: "auto", // Lo empuja hacia la derecha
+                }}
+              />
+            )}
+          </ListItem>
+
+          {/* Subcategorías de "Productos" */}
+          <Collapse in={openServices} timeout="auto" unmountOnExit>
+            <List component="div" disablePadding >
+
+              <ListItem button onClick={() => handleNavigate("/servicios/ListaMantenimientos")} sx={{ pl: 3 }}>
+                <ListItemIcon sx={{ minWidth: 32 }}>
+                  <HandymanIcon fontSize="small" />
+                </ListItemIcon>
+                <ListItemText primary="Mantenimientos" sx={{ fontSize: "0.875rem", display: open ? "block" : "none" }} />
+              </ListItem>
+
+              <ListItem button onClick={() => handleNavigate("/almacen/MovimientosAlmacenTable")} sx={{ pl: 3 }}>
+                <ListItemIcon sx={{ minWidth: 32 }}>
+                  <MoveToInboxIcon fontSize="small" />
+                </ListItemIcon>
+                <ListItemText primary="Movimientos almacen" sx={{ fontSize: "0.875rem", display: open ? "block" : "none" }} />
+              </ListItem>
+            </List>
+          </Collapse>
+
+          <Divider sx={{ borderColor: "rgba(0, 0, 0, 0.7)", borderWidth: 1 }} />
+
           <ListItem button onClick={handleLogout}>
             <ListItemIcon>
               <LogoutIcon sx={{ fontSize: 18, color: 'red' }} />
             </ListItemIcon>
             <ListItemText primary="Cerrar sesión" sx={{ color: 'red' }} />
           </ListItem>
+
         </List>
       </Drawer>
       <Box

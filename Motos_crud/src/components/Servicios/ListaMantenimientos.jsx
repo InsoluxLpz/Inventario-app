@@ -8,7 +8,7 @@ import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
-import { Box, Button, Grid2, IconButton, TableFooter, TextField, Typography } from "@mui/material";
+import { Box, Button, Grid2, IconButton, TextField, Typography } from "@mui/material";
 import { NavBar } from "../NavBar";
 import { EliminarMantenimiento, ObtenerMantenimientos, ObtenerServicios, } from "../../api/ServiciosApi";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -93,11 +93,10 @@ export const ListaMantenimientos = () => {
     const data = await ObtenerMantenimientos({
       filtro: {
         ...filtro,
-        servicio: filtro.servicio?.value || "",
-        moto: filtro.moto ? Number(filtro.moto.value) : ""
+        servicio: filtro.servicio?.value || "", // Si está vacío, no filtra
+        moto: filtro.moto?.value ? Number(filtro.moto.value) : "" // Si está vacío, no filtra
       }
     });
-    console.log("Valor de moto antes de enviar:", filtro.moto);
 
     if (data) {
       const mantenimientosAdaptados = data.map((servicio) => ({
@@ -116,8 +115,6 @@ export const ListaMantenimientos = () => {
         nombre: servicio.nombre,
       }));
       const mantenimientosOrdenados = mantenimientosAdaptados.sort((a, b) => new Date(b.fecha_inicio).toISOString() - new Date(a.fecha_inicio).toISOString());
-
-
       setMantenimientos(mantenimientosOrdenados);
     }
   };
@@ -177,12 +174,15 @@ export const ListaMantenimientos = () => {
 
   const { totalActivos, totalCancelados } = calcularTotales();
 
-  const opcionesServicios = [...servicios]
-    .sort((a, b) => a.nombre.localeCompare(b.nombre))
-    .map((serv) => ({ value: serv.id, label: serv.nombre }));
+  const opcionesServicios = [
+    { value: "", label: "Todos" }, // Opción Todos
+    ...servicios.sort((a, b) => a.nombre.localeCompare(b.nombre)).map((serv) => ({ value: serv.id, label: serv.nombre }))
+  ];
 
-  const opcionesMotos = [...motos]
-    .map((mot) => ({ value: mot.id, label: mot.inciso }));
+  const opcionesMotos = [
+    { value: "", label: "Todos" }, // Opción Todos
+    ...motos.map((mot) => ({ value: mot.id, label: mot.inciso }))
+  ];
 
   const miniDrawerWidth = 50;
 

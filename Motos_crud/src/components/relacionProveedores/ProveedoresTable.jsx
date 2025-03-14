@@ -75,23 +75,22 @@ export const ProveedoresTable = () => {
     });
   };
 
-  // * buscador
   const filteredProveedores = proveedores
     .filter((proveedor) => {
       const empresaMatch =
         !searchEmpresa ||
         (proveedor.nombre_empresa &&
-          proveedor.nombre_empresa.toLowerCase() === searchEmpresa.toLowerCase());
+          proveedor.nombre_empresa.toLowerCase().includes(searchEmpresa.toLowerCase())); // Búsqueda flexible con includes
 
       const nombreMatch =
         !searchNombre ||
         (proveedor.nombre_proveedor &&
-          proveedor.nombre_proveedor.toLowerCase() === searchNombre.toLowerCase());
+          proveedor.nombre_proveedor.toLowerCase().includes(searchNombre.toLowerCase())); // Búsqueda flexible con includes
 
       const telefonoMatch =
         !searchTelefono ||
         (proveedor.telefono_empresa &&
-          proveedor.telefono_empresa === searchTelefono);
+          proveedor.telefono_empresa.includes(searchTelefono)); // Búsqueda flexible con includes
 
       const matchesStatus = showInactive || proveedor.status !== 0;
 
@@ -102,6 +101,7 @@ export const ProveedoresTable = () => {
       if (a.nombre_empresa.toLowerCase() > b.nombre_empresa.toLowerCase()) return 1;
       return 0;
     });
+
 
 
   const getStatusColor = (status) => {
@@ -136,7 +136,7 @@ export const ProveedoresTable = () => {
 
               <Grid2 item sm={6} md={3}>
                 <TextField
-                  label="Buscar por proveedor"
+                  label="Buscar por Contacto"
                   variant="outlined"
                   sx={{ backgroundColor: "white", width: 400 }}
                   value={searchNombre}
@@ -196,7 +196,7 @@ export const ProveedoresTable = () => {
               <Table stickyHeader aria-label="sticky table">
                 <TableHead>
                   <TableRow>
-                    {["Empresa", "Nombre", "Teléfono Contacto", "RFC", "Teléfono Empresa", "Acciones"].map((col) => (
+                    {["Empresa", "Contacto", "Teléfono Contacto", "Teléfono Empresa", "RFC", "Acciones"].map((col) => (
                       <TableCell
                         key={col}
                         sx={{
@@ -227,8 +227,8 @@ export const ProveedoresTable = () => {
                       <TableCell sx={{ textAlign: "left", width: "16.66%" }}>{proveedor.nombre_empresa}</TableCell>
                       <TableCell sx={{ textAlign: "left", width: "16.66%" }}>{proveedor.nombre_proveedor}</TableCell>
                       <TableCell sx={{ textAlign: "left", width: "16.66%" }}>{proveedor.telefono_contacto}</TableCell>
-                      <TableCell sx={{ textAlign: "left", width: "16.66%" }}>{proveedor.rfc}</TableCell>
                       <TableCell sx={{ textAlign: "left", width: "16.66%" }}>{proveedor.telefono_empresa}</TableCell>
+                      <TableCell sx={{ textAlign: "left", width: "16.66%" }}>{proveedor.rfc}</TableCell>
                       <TableCell sx={{ textAlign: "left", width: "16.66%" }}>
                         <IconButton sx={{ color: "black" }} onClick={() => handleOpenModalEditar(proveedor)}>
                           <EditIcon sx={{ fontSize: 20 }} />
