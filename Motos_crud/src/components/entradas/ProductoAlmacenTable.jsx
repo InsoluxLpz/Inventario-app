@@ -170,7 +170,7 @@ export const ProductoAlmacenTable = () => {
                     "Codigo",
                     "Producto",
                     "Cantidad",
-                    // "Acciones",
+                    "Unidad de medida",
                   ].map((header) => (
                     <TableCell
                       key={header}
@@ -198,6 +198,7 @@ export const ProductoAlmacenTable = () => {
                     <TableCell align="center">
                       {Math.round(producto.cantidad)}
                     </TableCell>
+                    <TableCell align="center">{producto.unidadMedida}</TableCell>
                     {/* <TableCell align="center">
                       <IconButton
                         sx={{ color: "black" }}

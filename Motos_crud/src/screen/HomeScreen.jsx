@@ -73,7 +73,7 @@ export const HomeScreen = () => {
                             className="card shadow text-center d-flex flex-column align-items-center justify-content-center btn-card"
                             onClick={() => handleNavigate('/almacen/ProductoAlmacenTable')}>
                             <WarehouseIcon className="icon-large" />
-                            <h6 className="mt-2">Almacen</h6>
+                            <h6 className="mt-2">Inventario</h6>
                         </div>
                     </div>
 

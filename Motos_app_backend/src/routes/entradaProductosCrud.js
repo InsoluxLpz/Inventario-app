@@ -7,19 +7,19 @@ const db = dbConexion();
 router.post('/agregar_inventario', async (req, res) => {
     const {
         fecha,
-        tipo_movimiento_id,
-        tipo_entrada_id,
-        autorizo_id,
+        idTipoMovimiento,
+        idTipoSubmovimiento,
+        idAutorizo,
         productos, 
-        usuario_id,
+        idUsuario,
         total
     } = req.body;
 
-    console.log('Datos recibidos:', { fecha, tipo_movimiento_id, tipo_entrada_id, autorizo_id, productos, usuario_id, total });
+    console.log('Datos recibidos:', { fecha, idTipoMovimiento, idTipoSubmovimiento, idAutorizo, productos, idUsuario, total });
 
     // Validación de datos
     if (!fecha || !productos || productos.length === 0 || 
-        !tipo_movimiento_id || !tipo_entrada_id || !autorizo_id || !usuario_id) {
+        !idTipoMovimiento || !idTipoSubmovimiento || !idAutorizo || !idUsuario) {
         return res.status(400).json({ message: 'Todos los campos son obligatorios y debe haber al menos un producto' });
     }
 
@@ -31,40 +31,40 @@ router.post('/agregar_inventario', async (req, res) => {
         // Insertar en movimientos_almacen (solo una vez)
         const queryMaestro = `
             INSERT INTO movimientos_almacen
-            (fecha, tipo_movimiento_id, tipo_entrada_id, autorizo_id, usuario_id, total)
+            (fecha, idTipoMovimiento, idTipoSubmovimiento, idAutorizo, idUsuario, total)
             VALUES (?, ?, ?, ?, ?, ?)`;
         const [result] = await connection.query(queryMaestro, [
             fecha,
-            tipo_movimiento_id,
-            tipo_entrada_id,
-            autorizo_id,
-            usuario_id,
+            idTipoMovimiento,
+            idTipoSubmovimiento,
+            idAutorizo,
+            idUsuario,
             total
         ]);
 
-        const id_movimiento = result.insertId; // Usar el mismo id_movimiento para todos los productos
+        const idMovimiento = result.insertId; // Usar el mismo idMovimiento para todos los productos
         console.log('Movimiento insertado con ID:', result.insertId); // Verifica si el movimiento se inserta solo una vez
 
         
         // Insertar cada producto en movimientos_almacen_detalle
         const queryDetalle = `
     INSERT INTO movimientos_almacen_detalle
-    (id_movimiento, producto_id, proveedor_id, cantidad, costo_unitario, subtotal)
+    (idMovimiento, idProducto, idProveedor, cantidad, costo_unitario, subtotal)
     VALUES (?, ?, ?, ?, ?, ?)`;
 
-// Para cada producto, asignamos el mismo id_movimiento
+// Para cada producto, asignamos el mismo idMovimiento
 for (let producto of productos) {
-    const producto_id = producto.producto_id?.value || producto.producto_id;
-    const proveedor_id = producto.proveedor_id?.value || null;
+    const idProducto = producto.idProducto?.value || producto.idProducto;
+    const idProveedor = producto.idProveedor?.value || null;
     const cantidad = Number(producto.cantidad);
     const costo_unitario = Number(producto.costo_unitario);
     const subtotal = cantidad * costo_unitario;
 
     // Insertamos el producto en la tabla
     await connection.query(queryDetalle, [
-        id_movimiento,  // El id_movimiento es el mismo para todos los productos
-        producto_id,
-        proveedor_id,
+        idMovimiento,  // El idMovimiento es el mismo para todos los productos
+        idProducto,
+        idProveedor,
         cantidad,
         costo_unitario,
         subtotal
@@ -72,7 +72,7 @@ for (let producto of productos) {
 }
        
         await connection.commit(); // Confirmar transacción
-        res.status(201).json({ message: "Productos agregados correctamente", id_movimiento });
+        res.status(201).json({ message: "Productos agregados correctamente", idMovimiento });
 
     } catch (error) {
         if (connection) await connection.rollback(); // Revertir cambios en caso de error
@@ -132,7 +132,7 @@ router.get('/obtener_listas', async (req, res) => {
             const [proveedores] = await db.query("SELECT id, nombre_proveedor FROM proveedores");
             const [productos] = await db.query(`SELECT * from productos`);
             const [autorizaciones] = await db.query("SELECT idAutorizo, nombre FROM autorizaciones");
-            const [tiposEntrada] = await db.query("SELECT id, tipo_entrada FROM tipo_entrada");
+            const [tiposEntrada] = await db.query("SELECT id, tipoSubMovimiento FROM sub_movimientos");
             const [tipoMovimiento] = await db.query("SELECT idMovimiento, movimiento FROM tipo_movimiento");
         
             res.status(200).json({
@@ -154,12 +154,14 @@ router.get('/obtener_inventario', async (req, res) => {
     try {
         const [result] = await db.query(`                              
                 SELECT 
-                    sa.producto_id as idProducto,
-                    sa.cantidad as cantidad,
+                    ia.idProducto as idProducto,
+                    ia.cantidad as cantidad,
                     p.nombre as nombreProducto,
-                    p.codigo as codigo
-                FROM inventario_almacen sa
-                left join productos p on p.id = sa.producto_id;
+                    p.codigo as codigo,
+                    cum.nombre as unidadMedida
+                FROM inventario_almacen ia
+                left join productos p on p.id = ia.idProducto
+                left join cat_unidad_medida cum on ia.idUnidadMedida = cum.id;
         `);
         
         res.status(200).json(result);
@@ -180,13 +182,13 @@ router.get('/obtener_movimientos', async (req, res) => {
                 u.nombre as nombreUsuario,
                 a.nombre as nombreAutorizo,
                 GROUP_CONCAT(
-                    CONCAT(mad.producto_id, ' - ', mad.cantidad, ' - ', mad.costo_unitario, ' - ', mad.subtotal) 
+                    CONCAT(mad.idProducto, ' - ', mad.cantidad, ' - ', mad.costo_unitario, ' - ', mad.subtotal) 
                     SEPARATOR ', '
                 ) as detalles
             from movimientos_almacen ma
-            left join movimientos_almacen_detalle mad on ma.id = mad.id_movimiento
-            left join autorizaciones a on ma.autorizo_id = a.idAutorizo
-            left join usuarios u on u.idUsuario = ma.usuario_id
+            left join movimientos_almacen_detalle mad on ma.id = mad.idMovimiento
+            left join autorizaciones a on ma.idAutorizo = a.idAutorizo
+            left join usuarios u on u.idUsuario = ma.idUsuario
             group by ma.id;  -- Agrupa por movimiento
         `);
         
@@ -199,18 +201,17 @@ router.get('/obtener_movimientos', async (req, res) => {
 
 
 // * consulta para la tabla movimientos almacen detalles
-// * consulta para la tabla movimientos almacen detalles
 router.get('/obtener_movimientos_detalles/:idMovimiento', async (req, res) => {
     const { idMovimiento } = req.params;
     
     try {
         const [result] = await db.query(`
             SELECT 
-                ma.id AS movimiento_id,
+                ma.id AS idMovimiento,
                 ma.fecha,
                 ma.total,
                 tm.movimiento AS tipo_movimiento,
-                te.tipo_entrada,
+                sm.tipoSubMovimiento,
                 a.nombre AS autorizado_por,
                 u.nombre AS usuario,
                 p.nombre AS producto,
@@ -219,14 +220,14 @@ router.get('/obtener_movimientos_detalles/:idMovimiento', async (req, res) => {
                 mad.costo_unitario,
                 mad.subtotal
             FROM movimientos_almacen ma
-            JOIN tipo_movimiento tm ON ma.tipo_movimiento_id = tm.idMovimiento
-            JOIN tipo_entrada te ON ma.tipo_entrada_id = te.id
-            JOIN autorizaciones a ON ma.autorizo_id = a.idAutorizo
-            JOIN usuarios u ON ma.usuario_id = u.idUsuario  
-            JOIN movimientos_almacen_detalle mad ON ma.id = mad.id_movimiento
-            JOIN productos p ON mad.producto_id = p.id
-            JOIN proveedores pr ON mad.proveedor_id = pr.id
-            WHERE ma.id = ?  -- Filtrar por el ID del movimiento
+            JOIN tipo_movimiento tm ON ma.idTipoMovimiento = tm.idMovimiento
+            JOIN sub_movimientos sm ON ma.idTipoSubmovimiento = sm.id
+            JOIN autorizaciones a ON ma.idAutorizo = a.idAutorizo
+            JOIN usuarios u ON ma.idUsuario = u.idUsuario
+            JOIN movimientos_almacen_detalle mad ON ma.id = mad.idMovimiento
+            JOIN productos p ON mad.idProducto = p.id
+            JOIN proveedores pr ON mad.idProveedor = pr.id
+            WHERE ma.id = ?  
             ORDER BY ma.fecha DESC;
         `, [idMovimiento]);
         

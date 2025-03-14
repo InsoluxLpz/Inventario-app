@@ -1,127 +1,3 @@
-// import React, { useEffect, useState } from "react";
-// import {
-//   Dialog,
-//   DialogTitle,
-//   DialogContent,
-//   DialogActions,
-//   Button,
-//   Table,
-//   TableBody,
-//   TableCell,
-//   TableContainer,
-//   TableHead,
-//   TableRow,
-//   Paper,
-// } from "@mui/material";
-// import { cargarListasMovimientosDetalles } from "../../api/almacenProductosApi"; // Importar API correctamente
-
-// export const ModalMovimientosDetalles = ({ open, onClose, idMovimiento }) => {
-//   const [detalleMovimiento, setDetalleMovimiento] = useState([]);
-
-//   useEffect(() => {
-//     if (open && idMovimiento) {
-//       fetchDetallesMovimiento();
-//     }
-//   }, [open, idMovimiento]);
-
-//   const fetchDetallesMovimiento = async () => {
-//     try {
-//       const data = await cargarListasMovimientosDetalles(idMovimiento); // Llamada a la API con el ID correcto
-//       console.log("idMovimiento", idMovimiento);
-//       setDetalleMovimiento(data);
-//     } catch (error) {
-//       console.error("Error al obtener detalles del movimiento:", error);
-//     }
-//   };
-
-//   // Función para el formato de dinero
-//   const formatearDinero = (valor) => {
-//     return new Intl.NumberFormat("es-MX", {
-//       style: "currency",
-//       currency: "MXN",
-//     }).format(valor);
-//   };
-
-//   return (
-//     <Dialog
-//       open={open}
-//       onClose={onClose}
-//       maxWidth="md"
-//       fullWidth
-//       sx={{ border: "2px solid black" }}
-//     >
-//       <DialogTitle>Detalles del Movimiento #{idMovimiento}</DialogTitle>
-//       <DialogContent dividers>
-//         <TableContainer component={Paper}>
-//           <Table>
-//             <TableBody>
-//               {detalleMovimiento.length > 0 ? (
-//                 detalleMovimiento.map((detalle, index) => (
-//                   <React.Fragment key={index}>
-//                     <TableRow>
-//                       <TableCell><strong>Fecha</strong></TableCell>
-//                       <TableCell>{detalle.fecha ? new Date(detalle.fecha).toLocaleDateString("es-MX") : "Fecha no disponible"}</TableCell>
-//                     </TableRow>
-//                     <TableRow>
-//                       <TableCell><strong>Realizó movimiento</strong></TableCell>
-//                       <TableCell>{detalle.usuario}</TableCell>
-//                     </TableRow>
-//                     <TableRow>
-//                       <TableCell><strong>Numero de movimiento</strong></TableCell>
-//                       <TableCell>{detalle.movimiento_id}</TableCell>
-//                     </TableRow>
-//                     <TableRow>
-//                       <TableCell><strong>Tipo de movimiento</strong></TableCell>
-//                       <TableCell>{detalle.tipo_movimiento}</TableCell>
-//                     </TableRow>
-//                     <TableRow>
-//                       <TableCell><strong>Metodo</strong></TableCell>
-//                       <TableCell>{detalle.tipo_entrada}</TableCell>
-//                     </TableRow>
-//                     <TableRow>
-//                       <TableCell><strong>Autorizó</strong></TableCell>
-//                       <TableCell>{detalle.autorizado_por}</TableCell>
-//                     </TableRow>
-//                     <TableRow>
-//                       <TableCell><strong>Producto</strong></TableCell>
-//                       <TableCell>{detalle.producto}</TableCell>
-//                     </TableRow>
-//                     <TableRow>
-//                       <TableCell><strong>Proveedor</strong></TableCell>
-//                       <TableCell>{detalle.proveedor}</TableCell>
-//                     </TableRow>
-//                     <TableRow>
-//                       <TableCell><strong>Cantidad</strong></TableCell>
-//                       <TableCell>{detalle.cantidad}</TableCell>
-//                     </TableRow>
-//                     <TableRow>
-//                       <TableCell><strong>Costo unitario</strong></TableCell>
-//                       <TableCell>{formatearDinero(detalle.costo_unitario)}</TableCell>
-//                     </TableRow>
-//                     <TableRow>
-//                       <TableCell><strong>Subtotal</strong></TableCell>
-//                       <TableCell>{formatearDinero(detalle.subtotal)}</TableCell>
-//                     </TableRow>
-//                   </React.Fragment>
-//                 ))
-//               ) : (
-//                 <TableRow>
-//                   <TableCell colSpan={2} align="center">No hay detalles disponibles.</TableCell>
-//                 </TableRow>
-//               )}
-//             </TableBody>
-//           </Table>
-//         </TableContainer>
-//       </DialogContent>
-//       <DialogActions>
-//         <Button onClick={onClose} color="primary" variant="contained">Cerrar</Button>
-//       </DialogActions>
-//     </Dialog>
-//   );
-// };
-
-
-
 
 import React, { useEffect, useState } from "react";
 import {
@@ -198,7 +74,7 @@ export const ModalMovimientosDetalles = ({ open, onClose, idMovimiento }) => {
                   </TableRow>
                   <TableRow>
                     <TableCell><strong>Numero de movimiento</strong></TableCell>
-                    <TableCell>{movimientoInfo.movimiento_id}</TableCell>
+                    <TableCell>{movimientoInfo.idMovimiento}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell><strong>Tipo de movimiento</strong></TableCell>
@@ -206,7 +82,7 @@ export const ModalMovimientosDetalles = ({ open, onClose, idMovimiento }) => {
                   </TableRow>
                   <TableRow>
                     <TableCell><strong>Metodo</strong></TableCell>
-                    <TableCell>{movimientoInfo.tipo_entrada}</TableCell>
+                    <TableCell>{movimientoInfo.tipoSubMovimiento}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell><strong>Autorizó</strong></TableCell>

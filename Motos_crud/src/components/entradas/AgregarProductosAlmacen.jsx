@@ -1,4 +1,4 @@
-import { Button, IconButton, Box } from "@mui/material";
+import { Button, IconButton, Box, Typography } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { NavBar } from "../NavBar";
 import Select from "react-select";
@@ -56,7 +56,6 @@ export const AgregarProductosAlmacen = () => {
   const [selectedMovimiento, setSelectedMovimiento] = useState(null);
   // * envio del total al backend
   const [total, setTotal] = useState(0);
-
 
   const [formData, setFormData] = useState({
     proveedor: null,
@@ -127,7 +126,7 @@ export const AgregarProductosAlmacen = () => {
           setListaTipoEntrada(
             data.tiposEntrada.map((t) => ({
               value: t.id,
-              label: t.tipo_entrada,
+              label: t.tipoSubMovimiento,
             }))
           );
         }
@@ -224,16 +223,16 @@ export const AgregarProductosAlmacen = () => {
     if (!validateForm()) return;
 
     // const nuevoProducto = {
-    //   proveedor_id: formData.proveedor
+    //   idProveedor: formData.proveedor
     //     ? proveedorFijo
     //     : { value: formData.proveedor.value, label: formData.proveedor.label },
     //   fecha: fechaFijo ?? formData.fecha,
     //   cantidad: formData.cantidad,
-    //   producto_id: formData.producto
+    //   idProducto: formData.producto
     //     ? { value: formData.producto.value, label: formData.producto.label }
     //     : null,
     //   costo_unitario: formData.costo_unitario,
-    //   tipo_entrada_id: formData.tipo
+    //   idTipoSubmovimiento: formData.tipo
     //     ? tipoEntradaFijo
     //     : {
     //         value: formData.tipo.value,
@@ -242,7 +241,7 @@ export const AgregarProductosAlmacen = () => {
     //   autorizo_id: formData.autorizo
     //     ? autorizoFijo
     //     : { value: formData.autorizo.value, label: formData.autorizo.label },
-    //   tipo_movimiento_id: formData.tipoMovimiento
+    //   idTipoMovimiento: formData.tipoMovimiento
     //     ? tipoMovimientoFijo
     //     : {
     //         value: formData.tipoMovimiento.value,
@@ -254,15 +253,15 @@ export const AgregarProductosAlmacen = () => {
 
     const nuevoProducto = {
       fecha: fechaFijo,
-      tipo_movimiento_id: tipoMovimientoFijo.value,
-      tipo_entrada_id: tipoEntradaFijo.value,
-      autorizo_id: autorizoFijo.value,
+      idTipoMovimiento: tipoMovimientoFijo.value,
+      idTipoSubmovimiento: tipoEntradaFijo.value,
+      idAutorizo: autorizoFijo.value,
       productos: [
         {
-          producto_id: formData.producto
+          idProducto: formData.producto
             ? { value: formData.producto.value, label: formData.producto.label }
             : null,
-          proveedor_id: formData.proveedor
+          idProveedor: formData.proveedor
             ? proveedorFijo
             : {
                 value: formData.proveedor.value,
@@ -307,17 +306,17 @@ export const AgregarProductosAlmacen = () => {
       console.log("Productos Agregados:", productosAgregados); // Asegúrate de que no esté vacío
       return;
     }
-    const usuario_id = localStorage.getItem("idUsuario");
+    const idUsuario = localStorage.getItem("idUsuario");
 
     // * esto es lo que se envia al backend
     const datosParaEnviar = {
       fecha: productosAgregados[0].fecha, // Usa la fecha de uno de los productos
-      tipo_movimiento_id: productosAgregados[0].tipo_movimiento_id,
-      tipo_entrada_id: productosAgregados[0].tipo_entrada_id,
-      autorizo_id: productosAgregados[0].autorizo_id,
+      idTipoMovimiento: productosAgregados[0].idTipoMovimiento,
+      idTipoSubmovimiento: productosAgregados[0].idTipoSubmovimiento,
+      idAutorizo: productosAgregados[0].idAutorizo,
       productos: productosAgregados.flatMap((item) => item.productos), // Flatten para enviar todos los productos en un solo array
       total: total,
-      usuario_id,
+      idUsuario,
     };
     // * Llamada a la API para agregar el inventario
     await agregarInventario(datosParaEnviar);
@@ -414,12 +413,13 @@ export const AgregarProductosAlmacen = () => {
   useEffect(() => {
     const nuevoTotal = productosAgregados.reduce(
       (total, item) =>
-        total + (item.productos[0]?.cantidad * item.productos[0]?.costo_unitario || 0),
+        total +
+        (item.productos[0]?.cantidad * item.productos[0]?.costo_unitario || 0),
       0
     );
     setTotal(nuevoTotal);
   }, [productosAgregados]);
-  
+
   const miniDrawerWidth = 50;
 
   // * funcion para formato de dinero
@@ -429,7 +429,7 @@ export const AgregarProductosAlmacen = () => {
       currency: "MXN",
     }).format(valor);
   };
-  
+
   return (
     <>
       <NavBar />
@@ -482,7 +482,23 @@ export const AgregarProductosAlmacen = () => {
       </div>
 
       <div className="container mt-4">
-        <h2>Agregar Entrada</h2>
+        <Box
+          sx={{
+            backgroundColor: "#1f618d",
+            padding: "10px 20px",
+            borderRadius: "8px 8px 0 0",
+            marginTop: "70px", // Ajusta el valor de marginTop según lo que necesites
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "flex-end", // Esto mantiene el contenido alineado al fondo
+            height: "100%", // Asegúrate de que el contenedor tenga suficiente altura
+          }}
+        >
+          <Typography variant="h5" fontWeight="bold" color="white">
+            REALIZAR MOVIMIENTO
+          </Typography>
+        </Box>
+
         <form onSubmit={handleSubmit}>
           <div className="row">
             {/* TIPO DE MOVIMIENTO */}
@@ -618,72 +634,114 @@ export const AgregarProductosAlmacen = () => {
         </form>
       </div>
 
+      {/*   LINEA DIVISORA ENTRE AGREGAR Y LOS PRODUCTOS YA AGREGADOS */}
       <hr />
+
+      {/* ESTADO DE PRODUCTOS AGREGADOS */}
+
       <Box
         sx={{
           backgroundColor: "#f2f3f4",
           minHeight: "100vh",
-          paddingBottom: 4,
+          paddingBottom: 5,
           transition: "margin 0.3s ease-in-out",
           marginLeft: `${miniDrawerWidth}px`,
         }}
       >
-        {/* <Box width="90%" maxWidth={2000} margin="0 auto" mt={4}></Box> */}
         <div className="container mt-4">
-          <h3 className="text-center">PRODUCTOS AGREGADOS</h3>
-          <table className="table mt-3">
-            <thead>
-              <tr>
-                <th>Producto</th>
-                <th>Cantidad</th>
-                <th>Costo unitario</th>
-                <th>Subtotal</th>
-                <th>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {productosAgregados.map((item, index) => (
-                <tr key={index}>
-                  <td>{item.productos[0]?.producto_id?.label || "N/A"}</td>
-                  <td>{item.productos[0]?.cantidad}</td>
-                  <td>{item.productos[0]?.costo_unitario}</td>
+          <Box
+            sx={{
+              backgroundColor: "#1f618d",
+              padding: "10px 20px",
+              borderRadius: "8px 8px 0 0",
+              marginTop: "30px",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              height: "100%",
+            }}
+          >
+            <Typography variant="h5" fontWeight="bold" color="white">
+              MOVIMIENTO DE LOS PRODUCTOS
+            </Typography>
+          </Box>
+
+          <div
+            style={{
+              maxHeight: "200px", // Ajusta la altura según necesites
+              overflowY: "auto", // Activa el scroll vertical
+              marginTop: "20px",
+            }}
+          >
+            <table
+              className="table"
+              style={{
+                borderRadius: "8px",
+                overflow: "hidden",
+              }}
+            >
+              <thead style={{ backgroundColor: "#1f618d", color: "white" }}>
+                <tr>
+                  <th>Producto</th>
+                  <th>Cantidad</th>
+                  <th>Costo unitario</th>
+                  <th>Subtotal</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {productosAgregados.map((item, index) => (
+                  <tr
+                    key={index}
+                    style={{
+                      backgroundColor: index % 2 === 0 ? "#f9f9f9" : "#e9e9e9",
+                      borderRadius: "8px",
+                      boxShadow: "0px 1px 3px rgba(0, 0, 0, 0.1)",
+                    }}
+                  >
+                    <td>{item.productos[0]?.idProducto?.label || "N/A"}</td>
+                    <td>{item.productos[0]?.cantidad}</td>
+                    <td>{item.productos[0]?.costo_unitario}</td>
+                    <td>
+                      {formatearDinero(
+                        item.productos[0]?.cantidad *
+                          item.productos[0]?.costo_unitario
+                      )}
+                    </td>
+                    <td>
+                      <IconButton
+                        sx={{
+                          color: "red",
+                          ":hover": { backgroundColor: "#ffdddd" },
+                        }}
+                        onClick={() => eliminarProductoInventario(index)}
+                      >
+                        <DeleteOutlineIcon sx={{ fontSize: 29 }} />
+                      </IconButton>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td colSpan="4" className="text-end fw-bold ">
+                    Total:
+                  </td>
                   <td>
                     {formatearDinero(
-                      item.productos[0]?.cantidad *
-                        item.productos[0]?.costo_unitario
+                      productosAgregados.reduce(
+                        (total, item) =>
+                          total +
+                          (item.productos[0]?.cantidad *
+                            item.productos[0]?.costo_unitario || 0),
+                        0
+                      )
                     )}
                   </td>
-                  <td>
-                    <IconButton
-                      sx={{ color: "red" }}
-                      onClick={() => eliminarProductoInventario(index)}
-                    >
-                      <DeleteOutlineIcon sx={{ fontSize: 29 }} />
-                    </IconButton>
-                  </td>
                 </tr>
-              ))}
-            </tbody>
-            <tfoot>
-              <tr>
-                <td colSpan="4" className="text-end fw-bold ">
-                  Total:
-                </td>
-                <td>
-                  {formatearDinero(
-                    productosAgregados.reduce(
-                      (total, item) =>
-                        total +
-                        (item.productos[0]?.cantidad *
-                          item.productos[0]?.costo_unitario || 0),
-                      0
-                    )
-                  )}
-                </td>
-                <td></td>
-              </tr>
-            </tfoot>
-          </table>
+              </tfoot>
+            </table>
+          </div>
 
           <div
             className="mt-5"
@@ -694,6 +752,11 @@ export const AgregarProductosAlmacen = () => {
               variant="contained"
               color="primary"
               disabled={productosAgregados.length === 0}
+              sx={{
+                backgroundColor: "#1f618d",
+                color: "white",
+                ":hover": { backgroundColor: "#145a8d" },
+              }}
             >
               Guardar
             </Button>
@@ -702,6 +765,11 @@ export const AgregarProductosAlmacen = () => {
               color="primary"
               onClick={() => window.location.reload()}
               disabled={productosAgregados.length === 0}
+              sx={{
+                borderColor: "#1f618d",
+                color: "#1f618d",
+                ":hover": { borderColor: "#145a8d", color: "#145a8d" },
+              }}
             >
               Cancelar
             </Button>
