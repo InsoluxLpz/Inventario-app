@@ -202,14 +202,26 @@ export const NavBar = ({ onSearch }) => {
         <Divider />
 
         <List>
-          <ListItem button selected={selectedItem === "/inicio"} onClick={() => handleNavigate("/inicio")}>
+          <ListItem
+            button
+            selected={selectedItem === "/inicio"}
+            onClick={() => handleNavigate("/inicio")}
+            sx={{
+              backgroundColor: selectedItem === "/inicio" ? "#d4ac0d" : "transparent"
+            }}>
             <ListItemIcon sx={{ minWidth: 32 }}>
               <HomeIcon />
             </ListItemIcon>
             <ListItemText primary="Inicio" sx={{ display: open ? "block" : "none" }} />
           </ListItem>
 
-          <ListItem button onClick={() => handleNavigate("/almacen/Entradas")}>
+          <ListItem
+            button
+            selected={selectedItem === "/almacen/Entradas"}
+            onClick={() => handleNavigate("/almacen/Entradas")}
+            sx={{
+              backgroundColor: selectedItem === "/almacen/Entradas" ? "#d4ac0d" : "transparent"
+            }}>
             <ListItemIcon sx={{ minWidth: 32 }}>
               <WarehouseIcon />
             </ListItemIcon>
@@ -217,8 +229,13 @@ export const NavBar = ({ onSearch }) => {
           </ListItem>
 
 
-
-          <ListItem button onClick={() => handleNavigate("/almacen/ProductoAlmacenTable")}>
+          <ListItem
+            button
+            selected={selectedItem === "/almacen/ProductoAlmacenTable"}
+            onClick={() => handleNavigate("/almacen/ProductoAlmacenTable")}
+            sx={{
+              backgroundColor: selectedItem === "/almacen/ProductoAlmacenTable" ? "#d4ac0d" : "transparent"
+            }}>
             <ListItemIcon sx={{ minWidth: 32 }}>
               <CategoryIcon sx={{ fontSize: 18 }} />
             </ListItemIcon>
@@ -226,7 +243,7 @@ export const NavBar = ({ onSearch }) => {
           </ListItem>
           <Divider sx={{ borderColor: "rgba(0, 0, 0, 0.7)", borderWidth: 1 }} />
 
-          <ListItem button onClick={handleProductsClick} sx={{ backgroundColor: '#f1c40f' }}>
+          <ListItem button onClick={handleProductsClick} >
             <ListItemIcon sx={{ minWidth: 32 }}>
               <NewspaperIcon />
             </ListItemIcon>
@@ -277,7 +294,7 @@ export const NavBar = ({ onSearch }) => {
 
           <Divider sx={{ borderColor: "rgba(0, 0, 0, 0.7)", borderWidth: 1 }} />
 
-          <ListItem button onClick={handleServicesClick} sx={{ backgroundColor: '#f1c40f' }}>
+          <ListItem button onClick={handleServicesClick}>
             <ListItemIcon sx={{ minWidth: 32 }}>
               <ArticleIcon />
             </ListItemIcon>
