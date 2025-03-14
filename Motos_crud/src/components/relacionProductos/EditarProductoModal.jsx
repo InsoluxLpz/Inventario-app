@@ -22,6 +22,7 @@ export const EditarProductoModal = ({ onClose, modalOpen, producto, actualizarLi
     precio: "",
     descripcion: "",
     proveedores: [],
+    status: 1,
   });
 
   const [errors, setErrors] = useState({});
@@ -36,6 +37,7 @@ export const EditarProductoModal = ({ onClose, modalOpen, producto, actualizarLi
         unidad_medida: producto.idUnidadMedida || "",
         precio: producto.precio || "",
         descripcion: producto.descripcion || "",
+        status: producto.status || "",
         proveedores: producto.proveedores
           ? producto.proveedores.map(prov => {
             const proveedorEncontrado = ListaProveedores.find(p => p.id === prov.id);
@@ -310,6 +312,23 @@ export const EditarProductoModal = ({ onClose, modalOpen, producto, actualizarLi
                     </div>
                   </div>
 
+                  <div className="col-md-6 mb-3">
+                    <label className="form-label">Activar/Desactivar producto</label>
+                    <select
+                      name="status"
+                      className={`form-control ${errors.status ? "is-invalid" : ""}`}
+                      value={formData.status}  // Asegúrate de que `formData.status` proviene de la BD
+                      onChange={handleChange}
+                    >
+                      <option value="">Seleccionar</option>
+                      <option value="1">Activo</option>
+                      <option value="0">Inactivo</option>
+                    </select>
+                    {errors.status && (
+                      <div className="invalid-feedback">{errors.status}</div>
+                    )}
+                  </div>
+
                   <div className="col-md-12 mb-3">
                     <label className="form-label">Descripción</label>
                     <textarea
@@ -335,8 +354,8 @@ export const EditarProductoModal = ({ onClose, modalOpen, producto, actualizarLi
               </form>
             </div>
           </div>
-        </div>
-      </div>
+        </div >
+      </div >
     </>
   );
 };

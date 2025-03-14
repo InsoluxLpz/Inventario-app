@@ -18,9 +18,10 @@ export const AgregarProveedoresModal = ({ onClose, modalOpen, agregarProveedorHa
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value.trim() }));
+    setFormData((prev) => ({ ...prev, [name]: value }));  // Eliminamos .trimEnd()
     setErrors((prev) => ({ ...prev, [name]: "" }));
   };
+
 
   const validateForm = () => {
     const newErrors = {};
@@ -36,9 +37,16 @@ export const AgregarProveedoresModal = ({ onClose, modalOpen, agregarProveedorHa
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Eliminar espacios al final antes de enviar los datos
+    const cleanedFormData = {
+      ...formData,
+      nombre_empresa: formData.nombre_empresa.trim(),
+      nombre_proveedor: formData.nombre_proveedor.trim(),
+    };
+
     if (!validateForm()) return;
 
-    const result = await agregarProveedor(formData);
+    const result = await agregarProveedor(cleanedFormData);
 
     if (result?.error) {
       if (result.error.includes("Ya existe un proveedor con este nombre de empresa")) {
@@ -49,9 +57,10 @@ export const AgregarProveedoresModal = ({ onClose, modalOpen, agregarProveedorHa
       return;
     }
 
-    agregarProveedorHandler(formData);
+    agregarProveedorHandler(cleanedFormData);
     onClose();
   };
+
 
 
   return (

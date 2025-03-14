@@ -13,7 +13,7 @@ export const RealizarMantenimiento = ({ modalOpen, onClose }) => {
     const idUsuario = localStorage.getItem('idUsuario');
 
     const [formData, setFormData] = useState({
-        fecha_inicio: new Date().toISOString().split('T')[0],
+        fecha_inicio: new Date(),
         vehiculo: "",
         idAutorizo: "",
         odometro: "",
@@ -168,7 +168,7 @@ export const RealizarMantenimiento = ({ modalOpen, onClose }) => {
     };
 
     const handleSubmit = async (e) => {
-        e.preventDefault()
+        e.preventDefault();
         if (!validateForm()) return;
 
         const nuevoMantenimiento = {
@@ -189,11 +189,13 @@ export const RealizarMantenimiento = ({ modalOpen, onClose }) => {
                 subtotal: parseFloat(prod.subtotal) || 0
             }))
         };
+
         const respuesta = await AgregarMantenimiento(nuevoMantenimiento);
 
         if (respuesta && !respuesta.error) {
             console.log("Mantenimiento agregado correctamente:", respuesta);
 
+            // Limpiar formulario y estado
             setFormData({
                 fecha_inicio: "",
                 vehiculo: "",
@@ -203,15 +205,19 @@ export const RealizarMantenimiento = ({ modalOpen, onClose }) => {
                 comentario: "",
             });
             setProductosSeleccionados([]);
-            ObtenerMantenimientos()
+            ObtenerMantenimientos();
             setErrors({});
             onClose();
 
+            // Recargar la página después de 3 segundos
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
         } else {
             console.error("Error al agregar mantenimiento:", respuesta.error);
         }
-
     };
+
 
     const formatNumber = (value) => {
         return parseFloat(value).toLocaleString('es-MX');
@@ -221,6 +227,13 @@ export const RealizarMantenimiento = ({ modalOpen, onClose }) => {
         const total = productosSeleccionados.reduce((acc, prod) => acc + prod.subtotal, 0);
         setFormData((prev) => ({ ...prev, costo_total: total }));
     }, [productosSeleccionados]);
+
+    const getLocalDateTime = () => {
+        const date = new Date();
+        const offset = date.getTimezoneOffset(); // Obtiene el desfase horario en minutos
+        const localDate = new Date(date.getTime() - offset * 60000); // Ajusta la fecha por el desfase horario
+        return localDate.toISOString().slice(0, 16); // Convierte a ISO y corta al formato adecuado
+    };
 
 
     return (
@@ -239,8 +252,15 @@ export const RealizarMantenimiento = ({ modalOpen, onClose }) => {
                                 <div className="row">
                                     <div className="col-md-3 mb-2">
                                         <label className="form-label">Fecha de inicio</label>
-                                        <input name="fecha_inicio" type='date' className={`form-control form-control-sm ${errors.fecha_inicio ? "is-invalid" : ""}`} value={formData.fecha_inicio} onChange={handleChange} readOnly />
-                                        {errors.fecha_inicio && <div className="invalid-feedback">{errors.fecha_inicio}</div>}
+                                        <input
+                                            name="fecha_inicio"
+                                            type="datetime-local"
+                                            className={`form-control form-control-sm ${errors.fecha_inicio ? "is-invalid" : ""}`}
+                                            value={formData.fecha_inicio ? getLocalDateTime() : ''}
+                                            onChange={handleChange}
+                                        />
+
+
                                     </div>
 
                                     <div className="col-md-4 mb-2">

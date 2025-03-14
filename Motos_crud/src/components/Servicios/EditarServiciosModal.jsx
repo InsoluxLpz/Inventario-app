@@ -10,6 +10,7 @@ export const EditarServiciosModal = ({ onClose, modalOpen, servicio, actualizarL
     const [formData, setFormData] = useState({
         nombre: servicio.nombre,
         descripcion: servicio.descripcion,
+        status: servicio.status,
     });
 
     const [errors, setErrors] = useState({});
@@ -19,6 +20,7 @@ export const EditarServiciosModal = ({ onClose, modalOpen, servicio, actualizarL
             setFormData({
                 nombre: servicio.nombre || "",
                 descripcion: servicio.descripcion || "",
+                status: servicio.status || "",
             });
         }
     }, [servicio]);
@@ -99,6 +101,23 @@ export const EditarServiciosModal = ({ onClose, modalOpen, servicio, actualizarL
                                         <label className="form-label">Descripcion</label>
                                         <textarea type="text" name="descripcion" className={`form-control ${errors.descripcion ? "is-invalid" : ""}`} value={formData.descripcion} onChange={handleChange} />
                                         {errors.descripcion && <div className="invalid-feedback">{errors.descripcion}</div>}
+                                    </div>
+
+                                    <div className="col-md-6 mb-3">
+                                        <label className="form-label">Activar/DesActivar servicio</label>
+                                        <select
+                                            name="status"
+                                            className={`form-control ${errors.status ? "is-invalid" : ""}`}
+                                            value={formData.status}  // Asegúrate de que `formData.status` proviene de la BD
+                                            onChange={handleChange}
+                                        >
+                                            <option value="">Seleccionar</option>
+                                            <option value="1">Activo</option>
+                                            <option value="0">Inactivo</option>
+                                        </select>
+                                        {errors.status && (
+                                            <div className="invalid-feedback">{errors.status}</div>
+                                        )}
                                     </div>
                                 </div>
                             </div>

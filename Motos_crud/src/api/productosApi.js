@@ -94,8 +94,8 @@ export const actualizarProductos = async (id, productoData) => {
 export const ActualizarStatus = async (id, actualizarLista) => {
     try {
         const result = await Swal.fire({
-            title: "¿Estás seguro que desea eliminar el producto?",
-            text: "Esta acción cambiara el status de la nota a inactiva",
+            title: "¿Estás seguro?",
+            text: "Esta acción cambiara el status del prodcuto a inactivo",
             icon: "question",
             showCancelButton: true,
             confirmButtonColor: "#f1c40f",

@@ -4,7 +4,6 @@ import { Button } from '@mui/material';
 import { ActualizarMantenimiento } from '../../api/ServiciosApi';
 import { cargarListasEntradas } from '../../api/almacenProductosApi';
 
-
 export const EditarMantenimiento = ({ modalOpen, onClose, mantenimiento, listaMotos, listaServicios }) => {
     if (!modalOpen || !mantenimiento) return null;
 
@@ -75,7 +74,6 @@ export const EditarMantenimiento = ({ modalOpen, onClose, mantenimiento, listaMo
         return Object.keys(newErrors).length === 0;
     };
 
-
     const handleChange = (e) => {
         setFormData({
             ...formData,
@@ -94,7 +92,9 @@ export const EditarMantenimiento = ({ modalOpen, onClose, mantenimiento, listaMo
 
         if (resultado && !resultado.error) {
             onClose(); // Cierra el modal tras éxito
-            window.location.reload();
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
         }
     };
 

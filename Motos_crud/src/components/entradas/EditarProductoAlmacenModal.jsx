@@ -4,8 +4,8 @@ import { Button } from "@mui/material";
 import Swal from "sweetalert2";
 import Select from "react-select";
 
-export const EditarProductoAlmacenModal = ({ onClose, modalOpen, producto, actualizarLista}) => {
-    if (!modalOpen) return null;
+export const EditarProductoAlmacenModal = ({ onClose, modalOpen, producto, actualizarLista }) => {
+  if (!modalOpen) return null;
 
   const [formData, setFormData] = useState({
     codigo: "",
@@ -71,7 +71,7 @@ export const EditarProductoAlmacenModal = ({ onClose, modalOpen, producto, actua
     .sort((a, b) => a.nombre.localeCompare(b.nombre))
     .map((grupo) => ({ value: grupo.id, label: grupo.nombre }));
 
-    
+
   return (
     <>
       <div className="modal-backdrop">

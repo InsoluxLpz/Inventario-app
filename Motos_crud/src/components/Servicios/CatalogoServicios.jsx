@@ -145,7 +145,7 @@ export const CatalogoServicios = () => {
 
                     <Box sx={{ backgroundColor: "#1f618d", padding: "10px 20px", borderRadius: "8px 8px 0 0" }}>
                         <Typography variant="h5" color="white">
-                            Lista de Productos
+                            Lista de Servicios
                         </Typography>
                     </Box>
                     <Box sx={{ display: "flex", justifyContent: "flex-end", backgroundColor: 'white' }}>

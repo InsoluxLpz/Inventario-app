@@ -92,10 +92,10 @@ LEFT JOIN (
 ) pr ON pp.idProveedor = pr.id
 LEFT JOIN (
     -- Subconsulta para calcular el stock por producto
-    SELECT producto_id, SUM(cantidad) AS stock_disponible 
+    SELECT idProducto, SUM(cantidad) AS stock_disponible 
     FROM inventario_almacen 
-    GROUP BY producto_id
-) st ON p.id = st.producto_id
+    GROUP BY idProducto
+) st ON p.id = st.idProducto
 GROUP BY 
     p.id;
     `;
@@ -118,11 +118,11 @@ GROUP BY
 router.put('/actualizar_producto/:id', async (req, res) => {
     console.log("Datos recibidos en el backend para actualizar producto:", req.body);
 
-    const { codigo, nombre, precio, descripcion, grupo, unidad_medida, idUsuario, proveedores } = req.body;
+    const { codigo, nombre, precio, descripcion, grupo, unidad_medida, idUsuario, proveedores, status } = req.body;
     const { id } = req.params;
 
     // Validar los parámetros
-    if (!codigo || !nombre || !grupo || !unidad_medida || !precio || !idUsuario || !proveedores) {
+    if (!codigo || !nombre || !grupo || !unidad_medida || !precio || !idUsuario || !proveedores || !status) {
         return res.status(400).json({ message: 'Faltan parámetros para actualizar el producto' });
     }
 
@@ -132,9 +132,9 @@ router.put('/actualizar_producto/:id', async (req, res) => {
 
         const updateProductoQuery = `
             UPDATE productos
-            SET codigo = ?, nombre = ?, precio = ?, descripcion = ?, idGrupo = ?, idUnidadMedida = ? 
+            SET codigo = ?, nombre = ?, precio = ?, descripcion = ?, idGrupo = ?, idUnidadMedida = ?, status = ? 
             WHERE id = ?`;
-        const valuesProducto = [codigo, nombre, precio, descripcion, grupo, unidad_medida, id];
+        const valuesProducto = [codigo, nombre, precio, descripcion, grupo, unidad_medida, status, id];
         await connection.query(updateProductoQuery, valuesProducto);
 
         const deleteProveedoresQuery = `DELETE FROM productos_proveedor WHERE idProducto = ?`;
@@ -146,8 +146,8 @@ router.put('/actualizar_producto/:id', async (req, res) => {
         await connection.commit();
 
         const getUpdatedProductoQuery = `
-            SELECT p.id, p.codigo, p.nombre, p.precio, p.descripcion, p.idGrupo AS grupo, 
-                p.idUnidadMedida AS unidad_medida, 
+            SELECT p.id, p.codigo, p.nombre, p.precio, p.descripcion AS grupo, 
+                p.idUnidadMedida AS unidad_medida, p.idGrupo,p.status,
                 JSON_ARRAYAGG(JSON_OBJECT('id', pp.idProveedor)) AS proveedores
             FROM productos p
             LEFT JOIN productos_proveedor pp ON p.id = pp.idProducto

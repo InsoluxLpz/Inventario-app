@@ -92,8 +92,8 @@ export const ActualizarServicio = async (id, servicioData) => {
 export const ActualizarStatus = async (id, actualizarLista) => {
     try {
         const result = await Swal.fire({
-            title: "¿Estás seguro que desea eliminar el producto?",
-            text: "Esta acción cambiará el status de la nota a inactiva",
+            title: "¿Estás seguro?",
+            text: "Esta acción cambiará el status del servicio a inactivo",
             icon: "question",
             showCancelButton: true,
             confirmButtonColor: "#f1c40f",
@@ -166,7 +166,6 @@ export const ObtenerMantenimientos = async ({ filtro }) => {
 
 export const AgregarMantenimiento = async (mantenimientoData, actualizarLista) => {
     try {
-
         const response = await fetch(`${API_URL}/servicios/agregar_mantenimiento`, {
             method: "POST",
             headers: {
@@ -186,8 +185,9 @@ export const AgregarMantenimiento = async (mantenimientoData, actualizarLista) =
             });
             return data;
         } else {
-            Swal.fire('Error', data.message || 'Hubo un problema al agregar el servicio.', 'error');
-            return { error: data.message || 'Hubo un problema al agregar el servicio.' };
+            // 🔽 Ahora muestra correctamente el mensaje de error del backend
+            Swal.fire('Error', data.error || 'Hubo un problema al agregar el servicio.', 'error');
+            return { error: data.error || 'Hubo un problema al agregar el servicio.' };
         }
     } catch (error) {
         console.error('Error al realizar la solicitud:', error);
@@ -195,6 +195,7 @@ export const AgregarMantenimiento = async (mantenimientoData, actualizarLista) =
         return null;
     }
 };
+
 
 export const ActualizarMantenimiento = async (id, MantenimientoData) => {
     try {

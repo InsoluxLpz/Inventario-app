@@ -55,15 +55,15 @@ router.get('/obtener_servicio', async (req, res) => {
 
 router.put('/actualizar_servicio/:id', async (req, res) => {
     const { id } = req.params;
-    const { nombre, descripcion } = req.body;
+    const { nombre, descripcion, status } = req.body;
 
     if (!id) {
         return res.status(400).json({ message: 'No se encuentra id en la petición' })
     }
     try {
         // Actualizamos el servicio
-        const query = `UPDATE cat_servicios SET nombre = ?, descripcion = ? WHERE id = ?`;
-        const values = [nombre, descripcion, id];
+        const query = `UPDATE cat_servicios SET nombre = ?, descripcion = ?, status = ? WHERE id = ?`;
+        const values = [nombre, descripcion, status, id];
         await db.query(query, values);
 
         // Obtener el servicio actualizado
@@ -105,6 +105,8 @@ router.put('/actualizar_status_servicio/:id', async (req, res) => {
 
 //* <============================== mantenimientos-motos======================================>
 
+const moment = require('moment-timezone');
+
 router.post('/agregar_mantenimiento', async (req, res) => {
     console.log("Datos recibidos en el backend:", req.body);
 
@@ -114,14 +116,17 @@ router.post('/agregar_mantenimiento', async (req, res) => {
         return res.status(400).json({ error: "Faltan datos obligatorios" });
     }
 
+    // Convierte la fecha_inicio a la hora local
+    const fechaInicioLocal = moment(fecha_inicio).local().format('YYYY-MM-DD HH:mm:ss'); // Se usa el formato adecuado para MySQL
+
     const connection = await db.getConnection();
     try {
         await connection.beginTransaction();
 
-        // 🔽 Insertar nuevo servicio si no existe
+        // Insertar en la base de datos con la fecha ya convertida a hora local
         const [servicioResult] = await connection.query(
             "INSERT INTO mantenimientos (fecha_inicio, odometro, costo_total, comentario, idMoto, idAutorizo, idUsuario, idCancelo, fecha_cancelacion) VALUES (?, ?, ?, ?, ?, ?, ?, ?,?)",
-            [fecha_inicio, odometro, costo, comentario, moto, idAutorizo, idUsuario, idCancelo, fecha_cancelacion]
+            [fechaInicioLocal, odometro, costo, comentario, moto, idAutorizo, idUsuario, idCancelo, fecha_cancelacion]
         );
         const idServicio = servicioResult.insertId;
 
@@ -129,7 +134,7 @@ router.post('/agregar_mantenimiento', async (req, res) => {
         if (servicios && servicios.length > 0) {
             const servicioValues = servicios.map(servicio => [idServicio, servicio]);
             await connection.query(
-                "INSERT INTO servicio_mantenimientos (idMantenimiento, idServicio) VALUES ?",
+                "INSERT INTO mantenimientos_servicios (idMantenimiento, idServicio) VALUES ?",
                 [servicioValues]
             );
         }
@@ -156,7 +161,13 @@ router.post('/agregar_mantenimiento', async (req, res) => {
     } catch (error) {
         await connection.rollback();
         console.error("Error al agregar servicio:", error);
-        res.status(500).json({ error: "Error al agregar servicio" });
+
+        // 🔽 Si el error viene del trigger, capturamos el mensaje de MySQL
+        if (error.code === 'ER_SIGNAL_EXCEPTION') {
+            return res.status(400).json({ error: error.sqlMessage });
+        }
+
+        res.status(500).json({ error: "Error interno del servidor" });
     } finally {
         connection.release();
     }
@@ -210,7 +221,7 @@ router.get('/obtener_mantenimientos', async (req, res) => {
                 md.subtotal
             FROM mantenimientos m
             LEFT JOIN cat_motocicletas_prueba mt ON m.idMoto = mt.id
-            LEFT JOIN servicio_mantenimientos sm ON m.id = sm.idMantenimiento
+            LEFT JOIN mantenimientos_servicios sm ON m.id = sm.idMantenimiento
             LEFT JOIN cat_servicios cs ON sm.idServicio = cs.id
             LEFT JOIN usuarios u ON m.idCancelo = u.idUsuario
             LEFT JOIN mantenimientos_detalles md ON m.id = md.idMantenimiento
@@ -238,7 +249,7 @@ router.get('/obtener_mantenimientos', async (req, res) => {
         if (servicio) {
             query += ` AND m.id IN (
                     SELECT idMantenimiento 
-                    FROM servicio_mantenimientos 
+                    FROM mantenimientos_servicios 
                     WHERE idServicio = ?
                 )`;
             queryParams.push(servicio);
@@ -326,7 +337,7 @@ router.put('/actualizar_mantenimiento/:id', async (req, res) => {
 
         // Eliminar servicios anteriores del mantenimiento
         await connection.query(
-            "DELETE FROM servicio_mantenimientos WHERE idMantenimiento = ?",
+            "DELETE FROM mantenimientos_servicios WHERE idMantenimiento = ?",
             [id]
         );
 
@@ -334,7 +345,7 @@ router.put('/actualizar_mantenimiento/:id', async (req, res) => {
         if (servicios.length > 0) {
             const servicioValues = servicios.map(servicio => [id, servicio]);
             await connection.query(
-                "INSERT INTO servicio_mantenimientos (idMantenimiento, idServicio) VALUES ?",
+                "INSERT INTO mantenimientos_servicios (idMantenimiento, idServicio) VALUES ?",
                 [servicioValues]
             );
         }

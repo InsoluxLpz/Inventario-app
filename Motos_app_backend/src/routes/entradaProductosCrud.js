@@ -10,7 +10,7 @@ router.post('/agregar_inventario', async (req, res) => {
         idTipoMovimiento,
         idTipoSubmovimiento,
         idAutorizo,
-        productos, 
+        productos,
         idUsuario,
         total
     } = req.body;
@@ -18,7 +18,7 @@ router.post('/agregar_inventario', async (req, res) => {
     console.log('Datos recibidos:', { fecha, idTipoMovimiento, idTipoSubmovimiento, idAutorizo, productos, idUsuario, total });
 
     // Validación de datos
-    if (!fecha || !productos || productos.length === 0 || 
+    if (!fecha || !productos || productos.length === 0 ||
         !idTipoMovimiento || !idTipoSubmovimiento || !idAutorizo || !idUsuario) {
         return res.status(400).json({ message: 'Todos los campos son obligatorios y debe haber al menos un producto' });
     }
@@ -45,32 +45,32 @@ router.post('/agregar_inventario', async (req, res) => {
         const idMovimiento = result.insertId; // Usar el mismo idMovimiento para todos los productos
         console.log('Movimiento insertado con ID:', result.insertId); // Verifica si el movimiento se inserta solo una vez
 
-        
+
         // Insertar cada producto en movimientos_almacen_detalle
         const queryDetalle = `
     INSERT INTO movimientos_almacen_detalle
     (idMovimiento, idProducto, idProveedor, cantidad, costo_unitario, subtotal)
     VALUES (?, ?, ?, ?, ?, ?)`;
 
-// Para cada producto, asignamos el mismo idMovimiento
-for (let producto of productos) {
-    const idProducto = producto.idProducto?.value || producto.idProducto;
-    const idProveedor = producto.idProveedor?.value || null;
-    const cantidad = Number(producto.cantidad);
-    const costo_unitario = Number(producto.costo_unitario);
-    const subtotal = cantidad * costo_unitario;
+        // Para cada producto, asignamos el mismo idMovimiento
+        for (let producto of productos) {
+            const idProducto = producto.idProducto?.value || producto.idProducto;
+            const idProveedor = producto.idProveedor?.value || null;
+            const cantidad = Number(producto.cantidad);
+            const costo_unitario = Number(producto.costo_unitario);
+            const subtotal = cantidad * costo_unitario;
 
-    // Insertamos el producto en la tabla
-    await connection.query(queryDetalle, [
-        idMovimiento,  // El idMovimiento es el mismo para todos los productos
-        idProducto,
-        idProveedor,
-        cantidad,
-        costo_unitario,
-        subtotal
-    ]);
-}
-       
+            // Insertamos el producto en la tabla
+            await connection.query(queryDetalle, [
+                idMovimiento,  // El idMovimiento es el mismo para todos los productos
+                idProducto,
+                idProveedor,
+                cantidad,
+                costo_unitario,
+                subtotal
+            ]);
+        }
+
         await connection.commit(); // Confirmar transacción
         res.status(201).json({ message: "Productos agregados correctamente", idMovimiento });
 
@@ -83,7 +83,7 @@ for (let producto of productos) {
     }
 });
 
-  
+
 
 // Actualizar un registro del inventario por ID
 router.put('/actualizar_inventario/:id', async (req, res) => {
@@ -129,23 +129,23 @@ router.delete('/eliminar_inventario/:id', async (req, res) => {
 // * peticion unificada para cargar listas
 router.get('/obtener_listas', async (req, res) => {
     try {
-            const [proveedores] = await db.query("SELECT id, nombre_proveedor FROM proveedores");
-            const [productos] = await db.query(`SELECT * from productos`);
-            const [autorizaciones] = await db.query("SELECT idAutorizo, nombre FROM autorizaciones");
-            const [tiposEntrada] = await db.query("SELECT id, tipoSubMovimiento FROM sub_movimientos");
-            const [tipoMovimiento] = await db.query("SELECT idMovimiento, movimiento FROM tipo_movimiento");
-        
-            res.status(200).json({
-                proveedores,
-                productos,
-                autorizaciones,
-                tiposEntrada,
-                tipoMovimiento
-            });
-        } catch (error) {
-            console.error("Error al obtener listas:", error);
-            res.status(500).json({ message: "Error en el servidor" });
-        }
+        const [proveedores] = await db.query("SELECT id, nombre_proveedor FROM proveedores");
+        const [productos] = await db.query(`SELECT * from productos`);
+        const [autorizaciones] = await db.query("SELECT idAutorizo, nombre FROM autorizaciones");
+        const [tiposEntrada] = await db.query("SELECT id, tipoSubMovimiento FROM sub_movimientos");
+        const [tipoMovimiento] = await db.query("SELECT idMovimiento, movimiento FROM tipo_movimiento");
+
+        res.status(200).json({
+            proveedores,
+            productos,
+            autorizaciones,
+            tiposEntrada,
+            tipoMovimiento
+        });
+    } catch (error) {
+        console.error("Error al obtener listas:", error);
+        res.status(500).json({ message: "Error en el servidor" });
+    }
 
 });
 
@@ -163,13 +163,13 @@ router.get('/obtener_inventario', async (req, res) => {
                 left join productos p on p.id = ia.idProducto
                 left join cat_unidad_medida cum on ia.idUnidadMedida = cum.id;
         `);
-        
+
         res.status(200).json(result);
     } catch (error) {
         console.error("Error al obtener datos:", error);
         res.status(500).json({ message: "Error en el servidor" });
     }
-    
+
 });
 
 // * consulta que se puede pedir mas adelante para la tabla movimientos almacen
@@ -191,7 +191,7 @@ router.get('/obtener_movimientos', async (req, res) => {
             left join usuarios u on u.idUsuario = ma.idUsuario
             group by ma.id;  -- Agrupa por movimiento
         `);
-        
+
         res.status(200).json(result);
     } catch (error) {
         console.error("Error al obtener datos:", error);
@@ -203,7 +203,7 @@ router.get('/obtener_movimientos', async (req, res) => {
 // * consulta para la tabla movimientos almacen detalles
 router.get('/obtener_movimientos_detalles/:idMovimiento', async (req, res) => {
     const { idMovimiento } = req.params;
-    
+
     try {
         const [result] = await db.query(`
             SELECT 
@@ -230,7 +230,7 @@ router.get('/obtener_movimientos_detalles/:idMovimiento', async (req, res) => {
             WHERE ma.id = ?  
             ORDER BY ma.fecha DESC;
         `, [idMovimiento]);
-        
+
         // Si hay resultados, enviarlos como respuesta
         if (result.length > 0) {
             res.status(200).json(result);
@@ -248,7 +248,7 @@ router.get('/obtener_movimientos_detalles/:idMovimiento', async (req, res) => {
 // * buscar productos por codigo de producto
 router.get('/buscar_producto/:codigo', async (req, res) => {
     const { codigo } = req.params;
-    
+
     const query = `SELECT * FROM productos WHERE codigo = ? AND status = 1`;
 
     try {

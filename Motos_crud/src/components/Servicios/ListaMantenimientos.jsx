@@ -89,7 +89,6 @@ export const ListaMantenimientos = () => {
   };
 
   const cargarMantenimientos = async () => {
-    console.log("Filtro moto antes de enviar:", filtro.moto);
 
     const data = await ObtenerMantenimientos({
       filtro: {
@@ -116,8 +115,10 @@ export const ListaMantenimientos = () => {
         status: servicio.status,
         nombre: servicio.nombre,
       }));
-      setMantenimientos(mantenimientosAdaptados);
-      console.log(filtro)
+      const mantenimientosOrdenados = mantenimientosAdaptados.sort((a, b) => new Date(b.fecha_inicio).toISOString() - new Date(a.fecha_inicio).toISOString());
+
+
+      setMantenimientos(mantenimientosOrdenados);
     }
   };
 
@@ -191,7 +192,6 @@ export const ListaMantenimientos = () => {
         sx={{ backgroundColor: "#f2f3f4", minHeight: "100vh", paddingBottom: 4, transition: "margin 0.3s ease-in-out", marginLeft: `${miniDrawerWidth}px`, }}
       >
         <NavBar />
-
         <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", marginTop: 3, marginLeft: 12 }}>
           <Box sx={{ flexGrow: 1 }}>
             <Grid2 container spacing={2} justifyContent="center" alignItems="center">
@@ -221,7 +221,6 @@ export const ListaMantenimientos = () => {
                   }}
                 />
               </Grid2>
-
 
               <Grid2 item sm={6} md={3}>
                 <Select
@@ -317,7 +316,7 @@ export const ListaMantenimientos = () => {
                 <TableHead>
                   <TableRow>
                     {["Vehiculo", "Servicio(s)", "Refacciones Almacen", "Fecha de Inicio", "Comentario", "Costo Total", "status", "Acciones"].map((header) => (
-                      <TableCell key={header} align="center" sx={{ fontWeight: "bold", backgroundColor: "#f4f6f7", color: "black", textAlign: "center", width: "16.66%" }}>
+                      <TableCell key={header} align="center" sx={{ fontWeight: "bold", backgroundColor: "#f4f6f7", color: "black", textAlign: "left", width: "16.66%" }}>
                         {header}
                       </TableCell>
                     ))}
@@ -335,29 +334,30 @@ export const ListaMantenimientos = () => {
                           },
                         }}
                       >
-                        <TableCell align="center" sx={{ textAlign: "right", width: "16.66%" }}>
+                        <TableCell align="center" sx={{ textAlign: "left", width: "16.66%" }}>
                           {mantenimiento.moto_inciso}
                         </TableCell>
-                        <TableCell align="center" sx={{ textAlign: "right", width: "16.66%" }}>
+                        <TableCell align="center" sx={{ textAlign: "left", width: "16.66%" }}>
                           {mantenimiento.servicios.length > 0
                             ? mantenimiento.servicios.map((s) => s.nombre).join(", ")
                             : "N/A"}
                         </TableCell>
-                        <TableCell align="center" sx={{ textAlign: "right", width: "16.66%" }}>
+                        <TableCell align="center" sx={{ textAlign: "left", width: "16.66%" }}>
                           {mantenimiento.productos.length > 0
                             ? mantenimiento.productos.map((p) => p.nombre).join(", ")
                             : "N/A"}
                         </TableCell>
-                        <TableCell align="center" sx={{ textAlign: "right", width: "16.66%" }}>
-                          {new Date(mantenimiento.fecha_inicio).toLocaleDateString("es-MX")}
+                        <TableCell align="center" sx={{ textAlign: "left", width: "16.66%" }}>
+                          {new Date(mantenimiento.fecha_inicio).toLocaleString("es-MX")}
                         </TableCell>
-                        <TableCell align="center" sx={{ textAlign: "right", width: "16.66%" }}>
+
+                        <TableCell align="center" sx={{ textAlign: "left", width: "16.66%" }}>
                           {mantenimiento.comentario}
                         </TableCell>
-                        <TableCell align="center" sx={{ textAlign: "right", width: "16.66%" }}>
+                        <TableCell align="center" sx={{ textAlign: "left", width: "16.66%" }}>
                           {formatearDinero(mantenimiento.costo_total)}
                         </TableCell>
-                        <TableCell align="center" sx={{ textAlign: "right", width: "16.66%", fontWeight: "bold", color: mantenimiento.status === 0 ? "red" : "green" }}>
+                        <TableCell align="center" sx={{ textAlign: "left", width: "16.66%", fontWeight: "bold", color: mantenimiento.status === 0 ? "red" : "green" }}>
                           {mantenimiento.status === 0 ? "Cancelado" : "Activo"}
                         </TableCell>
 
@@ -390,8 +390,6 @@ export const ListaMantenimientos = () => {
                             </IconButton>
                           )}
                         </TableCell>
-
-
                       </TableRow>
                     ))
                   ) : (
@@ -402,25 +400,21 @@ export const ListaMantenimientos = () => {
                     </TableRow>
                   )}
                 </TableBody>
-
-                {/* Footer con totales */}
-                <TableFooter>
-                  <TableRow>
-                    <TableCell colSpan={6} align="right" sx={{ fontWeight: "bold", color: "green" }}>Total Activos:</TableCell>
-                    <TableCell align="center" sx={{ fontWeight: "bold" }}>
-                      {formatearDinero(totalActivos)}
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell colSpan={6} align="right" sx={{ fontWeight: "bold", color: "red" }}>Total Cancelados:</TableCell>
-                    <TableCell align="center" sx={{ fontWeight: "bold" }}>
-                      {formatearDinero(totalCancelados)}
-                    </TableCell>
-                  </TableRow>
-                </TableFooter>
-
               </Table>
             </TableContainer>
+
+            <Box sx={{ display: "flex", justifyContent: "flex-end", marginTop: 2, paddingRight: 2, }}>
+              <Box sx={{ display: "flex", justifyContent: "flex-end", padding: "10px 20px", borderRadius: "8px", width: "auto", gap: 2, }}>
+                <Typography variant="h6" sx={{ fontWeight: "bold", color: "green" }}>
+                  Total Activos: {formatearDinero(totalActivos)}
+                </Typography>
+                <Typography variant="h6" sx={{ fontWeight: "bold", color: "red" }}>
+                  Total Cancelados: {formatearDinero(totalCancelados)}
+                </Typography>
+              </Box>
+            </Box>
+
+
             <RealizarMantenimiento
               modalOpen={openModalAgregar}
               onClose={handleCloseModalAgregar}

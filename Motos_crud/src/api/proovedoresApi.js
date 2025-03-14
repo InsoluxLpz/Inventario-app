@@ -93,8 +93,8 @@ export const actualizarProovedor = async (id, proveedoresData) => {
 export const ActualizarStatus = async (id, actualizarLista) => {
     try {
         const result = await Swal.fire({
-            title: "¿Estás seguro que desea eliminar el proveedores?",
-            text: "Esta acción cambiara el status de la nota a inactiva",
+            title: "¿Estás seguro?",
+            text: "Esta acción cambiara el status del proveedor a inactivo",
             icon: "question",
             showCancelButton: true,
             confirmButtonColor: "#f1c40f",

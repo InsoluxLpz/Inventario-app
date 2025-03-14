@@ -16,11 +16,12 @@ import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Collapse, InputBase, Typography } from "@mui/material";
+import HandymanIcon from '@mui/icons-material/Handyman';
 import HomeIcon from "@mui/icons-material/Home";
 import TwoWheelerIcon from "@mui/icons-material/TwoWheeler";
-import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
-import ArrowRightIcon from "@mui/icons-material/ArrowRight";
+import MiscellaneousServicesIcon from '@mui/icons-material/MiscellaneousServices';
 import InventoryTwoToneIcon from "@mui/icons-material/InventoryTwoTone";
+import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import CategoryIcon from "@mui/icons-material/Category";
 import WarehouseIcon from "@mui/icons-material/Warehouse";
 import LogoutIcon from "@mui/icons-material/Logout";
@@ -207,7 +208,7 @@ export const NavBar = ({ onSearch }) => {
           </ListItem>
           <ListItem button selected={selectedItem === "/Proveedores"} onClick={() => handleNavigate("/Proveedores")}>
             <ListItemIcon>
-              <InboxIcon />
+              <LocalShippingIcon />
             </ListItemIcon>
             <ListItemText primary="Proveedores" />
           </ListItem>
@@ -227,13 +228,13 @@ export const NavBar = ({ onSearch }) => {
 
           <ListItem button onClick={() => handleNavigate("/servicios/ListaMantenimientos")}>
             <ListItemIcon>
-              <CategoryIcon sx={{ fontSize: 18 }} />
+              <HandymanIcon sx={{ fontSize: 18 }} />
             </ListItemIcon>
             <ListItemText primary="Lista de Mantenimientos" />
           </ListItem>
           <ListItem button onClick={() => handleNavigate("/servicios/CatalogoServicios")}>
             <ListItemIcon>
-              <InventoryTwoToneIcon sx={{ fontSize: 18 }} />
+              <MiscellaneousServicesIcon sx={{ fontSize: 18 }} />
             </ListItemIcon>
             <ListItemText primary="Catalogo Servicios" />
           </ListItem>
