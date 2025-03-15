@@ -5,7 +5,6 @@ import Select from "react-select";
 import WarehouseIcon from "@mui/icons-material/Warehouse";
 import MoveToInboxIcon from "@mui/icons-material/MoveToInbox";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-import FindInPageIcon from "@mui/icons-material/FindInPage";
 import ContentPasteSearchIcon from "@mui/icons-material/ContentPasteSearch";
 import {
   cargarListasEntradas,
@@ -13,9 +12,12 @@ import {
 } from "../../api/almacenProductosApi";
 import { useNavigate } from "react-router";
 import { ModalBuscarProductos } from "./ModalBuscarProductos";
+import { useRef } from "react";
 
 export const AgregarProductosAlmacen = () => {
   const navigate = useNavigate();
+
+  const cantidadRef = useRef(null); // Referencia al input de cantidad
 
   const [listaProveedores, setListaProveedores] = useState([]);
   const [listaProductos, setListaProductos] = useState([]);
@@ -100,7 +102,7 @@ export const AgregarProductosAlmacen = () => {
           setListaProveedores(
             data.proveedores.map((p) => ({
               value: p.id,
-              label: p.nombre_proveedor,
+              label: p.nombre_empresa,
             }))
           );
         }
@@ -202,6 +204,12 @@ export const AgregarProductosAlmacen = () => {
         costo_unitario: option.costoUnitario || "", // Llenar costo unitario
       }));
     }
+
+    // * mover el cursor a cantidad cuando se seleccione producto
+    // Cuando se selecciona un producto, hacer foco en el input de cantidad
+    if (name === "producto" && cantidadRef.current) {
+      cantidadRef.current.focus();
+    }
   };
 
   const validateForm = () => {
@@ -221,35 +229,6 @@ export const AgregarProductosAlmacen = () => {
     e.preventDefault();
 
     if (!validateForm()) return;
-
-    // const nuevoProducto = {
-    //   idProveedor: formData.proveedor
-    //     ? proveedorFijo
-    //     : { value: formData.proveedor.value, label: formData.proveedor.label },
-    //   fecha: fechaFijo ?? formData.fecha,
-    //   cantidad: formData.cantidad,
-    //   idProducto: formData.producto
-    //     ? { value: formData.producto.value, label: formData.producto.label }
-    //     : null,
-    //   costo_unitario: formData.costo_unitario,
-    //   idTipoSubmovimiento: formData.tipo
-    //     ? tipoEntradaFijo
-    //     : {
-    //         value: formData.tipo.value,
-    //         label: formData.tipo.label,
-    //       },
-    //   autorizo_id: formData.autorizo
-    //     ? autorizoFijo
-    //     : { value: formData.autorizo.value, label: formData.autorizo.label },
-    //   idTipoMovimiento: formData.tipoMovimiento
-    //     ? tipoMovimientoFijo
-    //     : {
-    //         value: formData.tipoMovimiento.value,
-    //         label: formData.tipoMovimiento.label,
-    //       },
-    // };
-
-    // console.log("nuevoProducto",nuevoProducto)
 
     const nuevoProducto = {
       fecha: fechaFijo,
@@ -589,6 +568,7 @@ export const AgregarProductosAlmacen = () => {
                 className="form-control"
                 value={formData.cantidad}
                 onChange={handleChange}
+                ref={cantidadRef}
               />
               {errors.cantidad && (
                 <div className="text-danger">{errors.cantidad}</div>
@@ -624,8 +604,8 @@ export const AgregarProductosAlmacen = () => {
           </div>
 
           <div
-            className="mt-5"
-            style={{ display: "flex", justifyContent: "flex-end" }}
+            className="mt-1"
+            style={{ display: "flex", justifyContent: "flex-start" }}
           >
             <Button type="submit" variant="contained" color="primary">
               Agregar
@@ -668,7 +648,7 @@ export const AgregarProductosAlmacen = () => {
 
           <div
             style={{
-              maxHeight: "200px", // Ajusta la altura según necesites
+              maxHeight: "300px", // Ajusta la altura según necesites
               overflowY: "auto", // Activa el scroll vertical
               marginTop: "20px",
             }}
@@ -744,7 +724,7 @@ export const AgregarProductosAlmacen = () => {
           </div>
 
           <div
-            className="mt-5"
+            className="mt-2"
             style={{ display: "flex", justifyContent: "flex-end" }}
           >
             <Button

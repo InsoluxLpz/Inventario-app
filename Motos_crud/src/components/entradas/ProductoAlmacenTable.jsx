@@ -11,17 +11,19 @@ import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
-import { Box, Button, Typography, IconButton } from "@mui/material";
+import { Box, Button, Typography, IconButton, TextField } from "@mui/material";
 import { NavBar } from "../NavBar";
 import { cargarListasCampos } from "../../api/almacenProductosApi";
 import AddchartIcon from "@mui/icons-material/Addchart";
 import InventoryIcon from "@mui/icons-material/Inventory";
-import { AgregarProductosAlmacenModal } from "./AgregarProductosAlmacenModal";
 import { EditarProductoAlmacenModal } from "./EditarProductoAlmacenModal";
 import { obtenerProductos } from "../../api/productosApi";
 import { obtenerProveedores } from "../../api/proveedoresApi";
+import { useNavigate } from "react-router";
 
 export const ProductoAlmacenTable = () => {
+  const navigate = useNavigate();
+
   const [openModalEditar, setOpenModalEditar] = useState(false);
   const [openModalAgregar, setOpenModalAgregar] = useState(false);
   const [inventario, setInventario] = useState([]);
@@ -29,9 +31,12 @@ export const ProductoAlmacenTable = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [showInactive, setShowInactive] = useState(false);
 
-  // * estados para el modal dinamico
-  // const [productos, setProductos] = useState([]);
-  // const [proveedores, setProveedores] = useState([]);
+  //  * filtro para el inventario
+  const [filtro, setFiltro] = useState({
+    codigo: "",
+    fecha: "",
+    unidadMedida: "",
+  });
 
   useEffect(() => {
     fetchInventario();
@@ -47,35 +52,6 @@ export const ProductoAlmacenTable = () => {
     } catch (error) {
       console.error("Error en la petición al obtener Inventario");
     }
-  };
-
-  // * necesito traer productos, tupo, autorizo y proveedores para reflejarlos en los campos
-  const fetchProductos = async () => {
-    const data = await obtenerProductos();
-    if(data) {
-      setProductos(data);
-    }
-  };
-
-  const fetchAutorizo = async () => {
-    const data = await obtenerAutorizaciones();
-  };
-
-  const fetchProveedores = async () => {
-    const data = await obtenerProveedores();
-    if(data){
-      setProveedores(data)
-    }
-  };
-
-  const handleModalAgregar = () => {
-    setOpenModalAgregar(true);
-    fetchProductos();
-    fetchProveedores();
-  };
-  
-  const handleCloseModalAgregar = () => {
-    setOpenModalAgregar(false);
   };
 
   const actualizarLista = (productoActualizado) => {
@@ -96,28 +72,55 @@ export const ProductoAlmacenTable = () => {
     });
   };
 
-  const filteredInventario = inventario.filter((producto) => {
-    const matchesSearch =
-      (producto.nombre?.toLowerCase() || "").includes(
-        searchTerm.toLowerCase()
-      ) ||
-      (producto.codigo?.toLowerCase() || "").includes(
-        searchTerm.toLowerCase()
-      ) ||
-      (producto.grupo?.toLowerCase() || "").includes(searchTerm.toLowerCase());
-
-    return showInactive
-      ? matchesSearch
-      : matchesSearch && producto.status !== 0;
-  });
-
   //   * formato de dinero
-  const formatearDinero = (valor) => {
-    return new Intl.NumberFormat("es-MX", {
-      style: "currency",
-      currency: "MXN",
-    }).format(valor);
+  // const formatearDinero = (valor) => {
+  //   return new Intl.NumberFormat("es-MX", {
+  //     style: "currency",
+  //     currency: "MXN",
+  //   }).format(valor);
+  // };
+
+  // const filteredInventario = inventario.filter((producto) => {
+  //   const matchesSearch =
+  //     (producto.nombre?.toLowerCase() || "").includes(
+  //       searchTerm.toLowerCase()
+  //     ) ||
+  //     (producto.codigo?.toLowerCase() || "").includes(
+  //       searchTerm.toLowerCase()
+  //     ) ||
+  //     (producto.grupo?.toLowerCase() || "").includes(searchTerm.toLowerCase());
+
+  //   return showInactive
+  //     ? matchesSearch
+  //     : matchesSearch && producto.status !== 0;
+  // });
+
+  const handleFiltroChange = (e) => {
+    setFiltro({ ...filtro, [e.target.name]: e.target.value });
   };
+
+  const filteredInventario = inventario.filter((m) => {
+    // Comparación de código, asegurándote de que m.codigo no sea null o undefined
+    const codigoMatch =
+      filtro.codigo === "" ||
+      (m.codigo &&
+        m.codigo.toLowerCase().includes(filtro.codigo.toLowerCase().trim()));
+
+    // Comparación de unidad de medida sin importar mauscula o minuscula
+    const unidadMedidaMatch =
+      filtro.unidadMedida === "" ||
+      (m.unidadMedida &&
+        m.unidadMedida
+          .toLowerCase()
+          .includes(filtro.unidadMedida.toLowerCase()));
+
+    // Comparación de fecha
+    const fechaMatch =
+      filtro.fecha === "" ||
+      (m.fecha_movimiento && m.fecha_movimiento.includes(filtro.fecha)); // Asegúrate que m.fecha_movimiento esté en formato adecuado
+
+    return codigoMatch && unidadMedidaMatch && fechaMatch;
+  });
 
   return (
     <>
@@ -133,7 +136,6 @@ export const ProductoAlmacenTable = () => {
           right: 50,
           top: 80,
         }}
-        onClick={handleModalAgregar}
       >
         <Button
           variant="contained"
@@ -175,7 +177,32 @@ export const ProductoAlmacenTable = () => {
         </Button>
       </div>
 
-      <Box width="90%" maxWidth={2000} margin="0 auto" mt={10}>
+      <Box display="flex" justifyContent="center" gap={1} my={2} mt={10}>
+        <TextField
+          label="Codigo"
+          name="codigo"
+          value={filtro.codigo}
+          onChange={handleFiltroChange}
+        />
+        <TextField
+          label="Filtrar por"
+          name="fecha"
+          type="date"
+          value={filtro.fecha}
+          onChange={handleFiltroChange}
+          onFocus={(e) => (e.target.showPicker ? e.target.showPicker() : null)} // Agregar verificación para `showPicker`
+          InputLabelProps={{ shrink: true }}
+        />
+
+        <TextField
+          label="Unidad de medida"
+          name="unidadMedida"
+          value={filtro.unidadMedida}
+          onChange={handleFiltroChange}
+        />
+      </Box>
+
+      <Box width="90%" maxWidth={2000} margin="0 auto" mt={2}>
         <Box
           sx={{
             backgroundColor: "#1f618d",
@@ -184,17 +211,17 @@ export const ProductoAlmacenTable = () => {
           }}
         >
           <Typography variant="h5" fontWeight="bold" color="white">
-          Inventario
+            Inventario
           </Typography>
         </Box>
 
         <Paper sx={{ width: "100%" }}>
-          <TableContainer sx={{ maxHeight: 700, backgroundColor: "#eaeded" }}>
+          <TableContainer sx={{ maxHeight: 600, backgroundColor: "#eaeded" }}>
             <Table stickyHeader>
               <TableHead>
                 <TableRow>
                   {[
-                    "id",
+                    // "id",
                     "Codigo",
                     "Producto",
                     "Cantidad",
@@ -218,7 +245,7 @@ export const ProductoAlmacenTable = () => {
               <TableBody>
                 {filteredInventario.map((producto) => (
                   <TableRow key={producto.id}>
-                    <TableCell align="center">{producto.idProducto}</TableCell>
+                    {/* <TableCell align="center">{producto.idProducto}</TableCell> */}
                     <TableCell align="center">{producto.codigo}</TableCell>
                     <TableCell align="center">
                       {producto.nombreProducto}
@@ -226,7 +253,9 @@ export const ProductoAlmacenTable = () => {
                     <TableCell align="center">
                       {Math.round(producto.cantidad)}
                     </TableCell>
-                    <TableCell align="center">{producto.unidadMedida}</TableCell>
+                    <TableCell align="center">
+                      {producto.unidadMedida}
+                    </TableCell>
                     {/* <TableCell align="center">
                       <IconButton
                         sx={{ color: "black" }}
@@ -260,13 +289,6 @@ export const ProductoAlmacenTable = () => {
         onClose={() => setOpenModalEditar(false)}
         producto={productoSeleccionado}
         actualizarLista={actualizarLista}
-      />
-
-      <AgregarProductosAlmacenModal
-        modalOpen={openModalAgregar}
-        onClose={handleCloseModalAgregar}
-        productos={productos}
-        proveedores={proveedores}
       />
     </>
   );

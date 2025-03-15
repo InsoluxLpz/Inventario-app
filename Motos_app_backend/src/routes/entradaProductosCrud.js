@@ -129,7 +129,7 @@ router.delete('/eliminar_inventario/:id', async (req, res) => {
 // * peticion unificada para cargar listas
 router.get('/obtener_listas', async (req, res) => {
     try {
-        const [proveedores] = await db.query("SELECT id, nombre_proveedor FROM proveedores");
+        const [proveedores] = await db.query("SELECT id, nombre_empresa FROM proveedores");
         const [productos] = await db.query(`SELECT * from productos`);
         const [autorizaciones] = await db.query("SELECT idAutorizo, nombre FROM autorizaciones");
         const [tiposEntrada] = await db.query("SELECT id, tipoSubMovimiento FROM sub_movimientos");

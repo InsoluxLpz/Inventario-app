@@ -1,5 +1,3 @@
-// Este componente se hizo por error pero puede ser que se pida mas adelante
-
 import React, { useState, useEffect } from "react";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
@@ -11,7 +9,7 @@ import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
-import { Box, Button, Typography, IconButton } from "@mui/material";
+import { Box, Button, Typography, IconButton, TextField } from "@mui/material";
 import { NavBar } from "../NavBar";
 import { cargarListasMovimientos } from "../../api/almacenProductosApi";
 import { ModalMovimientosDetalles } from "./ModalMovimientosDetalles";
@@ -34,6 +32,13 @@ export const MovimientosAlmacenTable = () => {
   // * modal movimientos detalles
   const [openModal, setOpenModal] = useState(false);
   const [selectedMovimiento, setSelectedMovimiento] = useState(null);
+
+  // * filtro por idMovimiento, Fecha y quien realizo el movimiento
+  const [filtro, setFiltro] = useState({
+    idMovimiento: "",
+    fecha: "",
+    nombreUsuario: "",
+  });
 
   const handleOpenModal = (id) => {
     setSelectedMovimiento(id);
@@ -69,38 +74,30 @@ export const MovimientosAlmacenTable = () => {
     );
   };
 
-  const handleActualizarStatus = (id) => {
-    ActualizarStatusInventario(id, (idActualizado) => {
-      setInventario((productosActuales) =>
-        productosActuales.map((producto) =>
-          producto.id === idActualizado ? { ...producto, status: 0 } : producto
-        )
-      );
-    });
+
+  // * funcion para los filtros
+  const handleFiltroChange = (e) => {
+    setFiltro({ ...filtro, [e.target.name]: e.target.value });
   };
 
-  const filteredInventario = inventario.filter((producto) => {
-    const matchesSearch =
-      (producto.nombre?.toLowerCase() || "").includes(
-        searchTerm.toLowerCase()
-      ) ||
-      (producto.codigo?.toLowerCase() || "").includes(
-        searchTerm.toLowerCase()
-      ) ||
-      (producto.grupo?.toLowerCase() || "").includes(searchTerm.toLowerCase());
+  const movimientosFiltrados = inventario.filter((m) => {
+    const nombreUsuarioMatch =
+      filtro.nombreUsuario === "" ||
+      (m.nombreUsuario &&
+        m.nombreUsuario
+          .toLowerCase()
+          .includes(filtro.nombreUsuario.toLowerCase().trim()));
+    console.log("filtro", filtro);
 
-    return showInactive
-      ? matchesSearch
-      : matchesSearch && producto.status !== 0;
+    const idMovimientoMatch =
+      filtro.idMovimiento === "" ||
+      m.idMovimiento?.toString().includes(filtro.idMovimiento.toString());
+
+    const fechaMatch =
+      filtro.fecha === "" || m.fecha_movimiento?.includes(filtro.fecha);
+
+    return nombreUsuarioMatch && idMovimientoMatch && fechaMatch;
   });
-
-  //   * formato de dinero
-  const formatearDinero = (valor) => {
-    return new Intl.NumberFormat("es-MX", {
-      style: "currency",
-      currency: "MXN",
-    }).format(valor);
-  };
 
   return (
     <>
@@ -154,7 +151,31 @@ export const MovimientosAlmacenTable = () => {
         </Button>
       </div>
 
-      <Box width="90%" maxWidth={2000} margin="0 auto" mt={10}>
+      <Box display="flex" justifyContent="center" gap={1} my={2} mt={10}>
+        <TextField
+          label="No.Movimiento"
+          name="idMovimiento"
+          value={filtro.idMovimiento}
+          onChange={handleFiltroChange}
+        />
+        <TextField
+          label="Filtrar por"
+          name="fecha"
+          type="date"
+          value={filtro.fecha}
+          onChange={handleFiltroChange}
+          onFocus={(e) => (e.target.showPicker ? e.target.showPicker() : null)} 
+          InputLabelProps={{ shrink: true }}
+        />
+        <TextField
+          label="Usuario"
+          name="nombreUsuario"
+          value={filtro.nombreUsuario}
+          onChange={handleFiltroChange}
+        />
+      </Box>
+
+      <Box width="90%" maxWidth={2000} margin="0 auto" mt={2}>
         <Box
           sx={{
             backgroundColor: "#1f618d",
@@ -168,7 +189,7 @@ export const MovimientosAlmacenTable = () => {
         </Box>
 
         <Paper sx={{ width: "100%" }}>
-          <TableContainer sx={{ maxHeight: 700, backgroundColor: "#eaeded" }}>
+          <TableContainer sx={{ maxHeight: 600, backgroundColor: "#eaeded" }}>
             <Table stickyHeader>
               <TableHead>
                 <TableRow>
@@ -196,8 +217,8 @@ export const MovimientosAlmacenTable = () => {
               </TableHead>
 
               <TableBody>
-                {filteredInventario.map((producto) => (
-                  <TableRow key={producto.id}>
+                {movimientosFiltrados.map((producto) => (
+                  <TableRow key={producto.idMovimiento}>
                     <TableCell align="center">
                       {producto.idMovimiento}
                     </TableCell>
@@ -214,39 +235,17 @@ export const MovimientosAlmacenTable = () => {
                     <TableCell align="center">
                       {producto.nombreAutorizo}
                     </TableCell>
-                    {/* boton para ver los detalles del movimiento ( informacion completa) */}
                     <TableCell align="center">
                       <IconButton
                         sx={{ color: "black" }}
                         onClick={() => handleOpenModal(producto.idMovimiento)}
                       >
-                        <FeedIcon sx={{fontSize: 29 }}/>
+                        <FeedIcon sx={{ fontSize: 29 }} />
                       </IconButton>
                     </TableCell>
-                    {/* <TableCell align="center">
-                      <IconButton
-                        sx={{ color: "black" }}
-                        onClick={() => {
-                          setProductoSeleccionado(producto);
-                          setOpenModalEditar(true);
-                        }}
-                      >
-                        <EditIcon sx={{ fontSize: 20 }} />
-                      </IconButton>
-
-                      <IconButton
-                        variant="contained"
-                        color="error"
-                        style={{ marginLeft: "10px" }}
-                        onClick={() => handleActualizarStatus(producto.id)}
-                      >
-                        <InventoryIcon sx={{ fontSize: 20 }} />
-                      </IconButton>
-                    </TableCell> */}
                   </TableRow>
                 ))}
               </TableBody>
-              
             </Table>
           </TableContainer>
         </Paper>
