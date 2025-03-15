@@ -5,7 +5,7 @@ import { agregarMarcas } from '../../api/marcasApi';
 export const MarcasModal = ({ onClose, modalOpen }) => {
     if (!modalOpen) return null;
 
-    const [formData, setFormData] = useState({ nombre: "", status: "" });
+    const [formData, setFormData] = useState({ nombre: "" });
 
     const [errors, setErrors] = useState({});
 
@@ -40,7 +40,7 @@ export const MarcasModal = ({ onClose, modalOpen }) => {
     return (
         <div className="modal-backdrop">
             <div className="modal fade show" style={{ display: "block" }} aria-labelledby="exampleModalLabel" tabIndex="-1" role="dialog">
-                <div className="modal-dialog" role="document" style={{ maxWidth: "60vw", marginTop: 90 }}>
+                <div className="modal-dialog" role="document" style={{ maxWidth: "20vw", marginTop: 90 }}>
                     <div className="modal-content w-100" style={{ maxWidth: "60vw" }}>
                         <div className="modal-header" style={{ backgroundColor: '#1f618d' }}>
                             <h5 className="modal-title" style={{ color: 'white' }}>Agregar Marca</h5>
@@ -52,12 +52,6 @@ export const MarcasModal = ({ onClose, modalOpen }) => {
                                         <label className="form-label">Nombre</label>
                                         <input type="text" name="nombre" className={`form-control ${errors.nombre ? "is-invalid" : ""}`} value={formData.nombre} onChange={handleChange} />
                                         {errors.nombre && <div className="invalid-feedback">{errors.nombre}</div>}
-                                    </div>
-
-                                    <div className="col-md-6 mb-3">
-                                        <label className="form-label">Status</label>
-                                        <input type="number" name="status" className={`form-control ${errors.status ? "is-invalid" : ""}`} value={formData.status} onChange={handleChange} />
-                                        {errors.status && <div className="invalid-feedback">{errors.status}</div>}
                                     </div>
                                 </div>
                             </div>

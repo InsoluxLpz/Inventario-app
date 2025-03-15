@@ -230,16 +230,16 @@ router.get('/marcas', async (req, res) => {
 })
 
 router.post('/agregar_marcas', async (req, res) => {
-    const { nombre, status } = req.body;
+    const { nombre } = req.body;
 
-    if (!nombre || !status) {
+    if (!nombre) {
         return res.status(400).json('Faltan parametros en la peticion')
     }
 
-    const query = `INSERT INTO cat_marcas_vehiculos (nombre, status) values(?,?)`
+    const query = `INSERT INTO cat_marcas_vehiculos (nombre) values(?)`
 
     try {
-        await db.query(query, [nombre, status])
+        await db.query(query, [nombre])
 
         return res.status(200).json('Se inserto correctamente la marca')
     } catch (error) {
