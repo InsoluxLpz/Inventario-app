@@ -13,6 +13,7 @@ import { Box, Button, Typography, IconButton, TextField } from "@mui/material";
 import { NavBar } from "../NavBar";
 import { cargarListasMovimientos } from "../../api/almacenProductosApi";
 import { ModalMovimientosDetalles } from "./ModalMovimientosDetalles";
+import CleaningServicesIcon from "@mui/icons-material/CleaningServices";
 import InventoryIcon from "@mui/icons-material/Inventory";
 import WarehouseIcon from "@mui/icons-material/Warehouse";
 import FeedIcon from "@mui/icons-material/Feed";
@@ -40,6 +41,15 @@ export const MovimientosAlmacenTable = () => {
     nombreUsuario: "",
   });
 
+  // * funcion para limpiar el estado con el boton para los filtros
+  const limpiarFiltros = () => {
+    setFiltro({
+      idMovimiento: "",
+      fecha: "",
+      nombreUsuario: "",
+    });
+  };
+  
   const handleOpenModal = (id) => {
     setSelectedMovimiento(id);
     setOpenModal(true);
@@ -73,7 +83,6 @@ export const MovimientosAlmacenTable = () => {
       )
     );
   };
-
 
   // * funcion para los filtros
   const handleFiltroChange = (e) => {
@@ -152,6 +161,22 @@ export const MovimientosAlmacenTable = () => {
       </div>
 
       <Box display="flex" justifyContent="center" gap={1} my={2} mt={10}>
+        <Button
+          variant="contained"
+          sx={{
+            backgroundColor: "#566573",
+            color: "white",
+            ":hover": { opacity: 0.7 },
+            borderRadius: "8px",
+            padding: "0px 0px",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+          }}
+          onClick={limpiarFiltros}
+        >
+          <CleaningServicesIcon sx={{ fontSize: 24 }} />
+        </Button>
         <TextField
           label="No.Movimiento"
           name="idMovimiento"
@@ -164,7 +189,7 @@ export const MovimientosAlmacenTable = () => {
           type="date"
           value={filtro.fecha}
           onChange={handleFiltroChange}
-          onFocus={(e) => (e.target.showPicker ? e.target.showPicker() : null)} 
+          onFocus={(e) => (e.target.showPicker ? e.target.showPicker() : null)}
           InputLabelProps={{ shrink: true }}
         />
         <TextField

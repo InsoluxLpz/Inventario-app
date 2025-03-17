@@ -1,9 +1,6 @@
 import React, { useState, useEffect } from "react";
-import AddIcon from "@mui/icons-material/Add";
-import EditIcon from "@mui/icons-material/Edit";
 import WarehouseIcon from "@mui/icons-material/Warehouse";
 import PlaylistAddCircleIcon from "@mui/icons-material/PlaylistAddCircle";
-import MoveToInboxIcon from "@mui/icons-material/MoveToInbox";
 import Paper from "@mui/material/Paper";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -14,11 +11,8 @@ import TableRow from "@mui/material/TableRow";
 import { Box, Button, Typography, IconButton, TextField } from "@mui/material";
 import { NavBar } from "../NavBar";
 import { cargarListasCampos } from "../../api/almacenProductosApi";
-import AddchartIcon from "@mui/icons-material/Addchart";
-import InventoryIcon from "@mui/icons-material/Inventory";
+import CleaningServicesIcon from "@mui/icons-material/CleaningServices";
 import { EditarProductoAlmacenModal } from "./EditarProductoAlmacenModal";
-import { obtenerProductos } from "../../api/productosApi";
-import { obtenerProveedores } from "../../api/proveedoresApi";
 import { useNavigate } from "react-router";
 
 export const ProductoAlmacenTable = () => {
@@ -37,6 +31,14 @@ export const ProductoAlmacenTable = () => {
     fecha: "",
     unidadMedida: "",
   });
+
+  const limpiarFiltros = () => {
+    setFiltro({
+      codigo: "",
+      fecha: "",
+      unidadMedida: "",
+    });
+  };
 
   useEffect(() => {
     fetchInventario();
@@ -178,6 +180,23 @@ export const ProductoAlmacenTable = () => {
       </div>
 
       <Box display="flex" justifyContent="center" gap={1} my={2} mt={10}>
+
+        <Button
+                  variant="contained"
+                  sx={{
+                    backgroundColor: "#566573",
+                    color: "white",
+                    ":hover": { opacity: 0.7 },
+                    borderRadius: "8px",
+                    padding: "0px 0px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                  }}
+                  onClick={limpiarFiltros}
+                >
+                  <CleaningServicesIcon sx={{ fontSize: 24 }} />
+                </Button>
         <TextField
           label="Codigo"
           name="codigo"

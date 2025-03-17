@@ -325,7 +325,7 @@ export const ListaMantenimientos = () => {
           </Box>
 
           <Paper sx={{ width: "100%", maxWidth: "2000px", margin: "0 auto", backgroundColor: "white", padding: 2 }}>
-            <TableContainer sx={{ maxHeight: 800, backgroundColor: "#ffff ", border: "1px solid #d7dbdd", borderRadius: "2px" }}>
+            <TableContainer sx={{ maxHeight: 560, backgroundColor: "#ffff ", border: "1px solid #d7dbdd", borderRadius: "2px" }}>
               <Table >
                 <TableHead>
                   <TableRow>
