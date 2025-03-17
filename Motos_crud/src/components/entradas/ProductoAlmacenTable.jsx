@@ -203,7 +203,7 @@ export const ProductoAlmacenTable = () => {
           value={filtro.codigo}
           onChange={handleFiltroChange}
         />
-        <TextField
+        {/* <TextField
           label="Filtrar por"
           name="fecha"
           type="date"
@@ -211,7 +211,7 @@ export const ProductoAlmacenTable = () => {
           onChange={handleFiltroChange}
           onFocus={(e) => (e.target.showPicker ? e.target.showPicker() : null)} // Agregar verificación para `showPicker`
           InputLabelProps={{ shrink: true }}
-        />
+        /> */}
 
         <TextField
           label="Unidad de medida"

@@ -27,7 +27,9 @@ import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import CategoryIcon from "@mui/icons-material/Category";
 import WarehouseIcon from "@mui/icons-material/Warehouse";
 import LogoutIcon from "@mui/icons-material/Logout";
-import { ExpandMore } from "@material-ui/icons";
+// import { ExpandMoreIcon } from "@material-ui/icons";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+
 
 const drawerWidth = 250;
 
@@ -230,7 +232,7 @@ export const NavBar = () => {
             <ListItemText primary="Catálogos" sx={{ display: open ? "block" : "none" }} />
 
             {open && (
-              <ExpandMore
+              <ExpandMoreIcon
                 sx={{
                   transition: "transform 0.3s",
                   transform: openProducts ? "rotate(180deg)" : "rotate(0deg)",
@@ -290,7 +292,7 @@ export const NavBar = () => {
             <ListItemText primary="Reportes" sx={{ display: open ? "block" : "none" }} />
 
             {open && (
-              <ExpandMore
+              <ExpandMoreIcon
                 sx={{
                   transition: "transform 0.3s",
                   transform: openServices ? "rotate(180deg)" : "rotate(0deg)",
