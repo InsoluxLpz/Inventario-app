@@ -8,7 +8,7 @@ import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
-import { Box, Button, Grid2, IconButton, TextField, Typography } from "@mui/material";
+import { Box, Button, FormControlLabel, Grid2, IconButton, Switch, TextField, Typography } from "@mui/material";
 import { NavBar } from "../NavBar";
 import { EliminarMantenimiento, ObtenerMantenimientos, ObtenerServicios, } from "../../api/ServiciosApi";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -30,6 +30,7 @@ export const ListaMantenimientos = () => {
   const [openModalInfo, setOpenModalInfo] = useState(false);
   const [servicios, setServicios] = useState([]);
   const [productos, setProductos] = useState([]);
+  const [todos, setTodos] = useState(false);
   const [motos, setMotos] = useState([]);
   const [filtro, setFiltro] = useState({
     fecha_inicio: "",
@@ -93,8 +94,9 @@ export const ListaMantenimientos = () => {
     const data = await ObtenerMantenimientos({
       filtro: {
         ...filtro,
-        servicio: filtro.servicio?.value || "", // Si está vacío, no filtra
-        moto: filtro.moto?.value ? Number(filtro.moto.value) : "" // Si está vacío, no filtra
+        servicio: filtro.servicio?.value || "",
+        moto: filtro.moto?.value ? Number(filtro.moto.value) : "",
+        todos: todos
       }
     });
 
@@ -175,12 +177,12 @@ export const ListaMantenimientos = () => {
   const { totalActivos, totalCancelados } = calcularTotales();
 
   const opcionesServicios = [
-    { value: "", label: "Todos" }, // Opción Todos
+    { value: "", label: "Selecciona" },
     ...servicios.sort((a, b) => a.nombre.localeCompare(b.nombre)).map((serv) => ({ value: serv.id, label: serv.nombre }))
   ];
 
   const opcionesMotos = [
-    { value: "", label: "Todos" }, // Opción Todos
+    { value: "", label: "Selecciona" },
     ...motos.map((mot) => ({ value: mot.id, label: mot.inciso }))
   ];
 
@@ -195,6 +197,18 @@ export const ListaMantenimientos = () => {
         <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", marginTop: 3, marginLeft: 12 }}>
           <Box sx={{ flexGrow: 1 }}>
             <Grid2 container spacing={2} justifyContent="center" alignItems="center">
+
+              <Grid2>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={todos}
+                      onChange={(e) => setTodos(e.target.checked)} // Solo actualiza el estado, sin llamar a la API
+                    />
+                  }
+                  label="Mostrar todos"
+                />
+              </Grid2>
 
               <Grid2 item sm={6} md={3}>
                 <Select

@@ -133,8 +133,6 @@ export const RealizarMantenimiento = ({ modalOpen, onClose }) => {
         setErrors((prev) => ({ ...prev, [name]: "" }));
     };
 
-
-
     const handleSelectChange = (selectedOptions) => {
         setFormData((prev) => ({
             ...prev,
@@ -247,7 +245,6 @@ export const RealizarMantenimiento = ({ modalOpen, onClose }) => {
                                 <h5 className="modal-title" style={{ color: 'white' }}>Realizar Servicio</h5>
                             </div>
 
-                            {/* Formulario */}
                             <form onSubmit={handleSubmit} style={{ marginTop: 10 }}>
                                 <div className="row">
                                     <div className="col-md-3 mb-2">
@@ -259,8 +256,6 @@ export const RealizarMantenimiento = ({ modalOpen, onClose }) => {
                                             value={formData.fecha_inicio ? getLocalDateTime() : ''}
                                             onChange={handleChange}
                                         />
-
-
                                     </div>
 
                                     <div className="col-md-4 mb-2">
@@ -272,7 +267,7 @@ export const RealizarMantenimiento = ({ modalOpen, onClose }) => {
                                             value={opcionesVehiculos.find((op) => op.value === formData.vehiculo)}
                                             onChange={(selectedOption) => {
                                                 setFormData({ ...formData, vehiculo: selectedOption.value });
-                                                setErrors((prev) => ({ ...prev, vehiculo: "" })); // Limpiar el error
+                                                setErrors((prev) => ({ ...prev, vehiculo: "" }));
                                             }}
 
                                             styles={{
@@ -305,7 +300,6 @@ export const RealizarMantenimiento = ({ modalOpen, onClose }) => {
                                         />
                                         {errors.odometro && <div className="invalid-feedback">{errors.odometro}</div>}
                                     </div>
-
                                 </div>
 
                                 <div className="row">
@@ -323,7 +317,7 @@ export const RealizarMantenimiento = ({ modalOpen, onClose }) => {
                                             onChange={(selectedOptions) => {
                                                 const serviciosSeleccionados = selectedOptions ? selectedOptions.map(option => option.value) : [];
                                                 setFormData({ ...formData, servicio: serviciosSeleccionados });
-                                                setErrors((prev) => ({ ...prev, servicio: "" })); // Limpiar el error
+                                                setErrors((prev) => ({ ...prev, servicio: "" }));
                                             }}
 
                                             styles={{
@@ -358,26 +352,25 @@ export const RealizarMantenimiento = ({ modalOpen, onClose }) => {
                                     <table className="table">
                                         <thead>
                                             <tr>
-                                                <th style={{ textAlign: "center", width: "16.66%" }}>Producto</th>
-                                                <th style={{ textAlign: "center", width: "16.66%" }}>Costo Unitario</th>
-                                                <th style={{ textAlign: "center", width: "16.66%" }}>Cantidad</th>
-                                                <th style={{ textAlign: "center", width: "16.66%" }}>Subtotal</th>
-                                                <th style={{ textAlign: "center", width: "16.66%" }}>Acciones</th>
+                                                <th style={{ textAlign: "left", width: "16.66%" }}>Producto</th>
+                                                <th style={{ textAlign: "left", width: "16.66%" }}>Costo Unitario</th>
+                                                <th style={{ textAlign: "left", width: "16.66%" }}>Cantidad</th>
+                                                <th style={{ textAlign: "left", width: "16.66%" }}>Subtotal</th>
+                                                <th style={{ textAlign: "left", width: "16.66%" }}>Acciones</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             {productosSeleccionados.map((producto, index) => (
                                                 <tr key={index}>
-                                                    <td style={{ textAlign: "right", width: "16.66%" }}>{producto.producto}</td>
-                                                    <td style={{ textAlign: "right", width: "16.66%" }}>${formatNumber(producto.costo_unitario)}</td>
-                                                    <td style={{ textAlign: "right", width: "16.66%" }}>{producto.cantidad}</td>
-                                                    <td style={{ textAlign: "right", width: "16.66%" }}>${formatNumber(producto.subtotal)}</td>
-                                                    <td style={{ textAlign: "right", width: "16.66%" }}>
+                                                    <td style={{ textAlign: "left", width: "16.66%" }}>{producto.producto}</td>
+                                                    <td style={{ textAlign: "left", width: "16.66%" }}>${formatNumber(producto.costo_unitario)}</td>
+                                                    <td style={{ textAlign: "left", width: "16.66%" }}>{producto.cantidad}</td>
+                                                    <td style={{ textAlign: "left", width: "16.66%" }}>${formatNumber(producto.subtotal)}</td>
+                                                    <td style={{ textAlign: "left", width: "16.66%" }}>
                                                         <button className="btn btn-danger btn-sm" onClick={() => eliminarProductoDeTabla(index)}>
                                                             Eliminar
                                                         </button>
                                                     </td>
-
                                                 </tr>
                                             ))}
                                         </tbody>
@@ -395,7 +388,7 @@ export const RealizarMantenimiento = ({ modalOpen, onClose }) => {
                                             placeholder="SELECCIONA"
                                             onChange={(selectedOption) => {
                                                 setFormData({ ...formData, idAutorizo: selectedOption.value });
-                                                setErrors((prev) => ({ ...prev, idAutorizo: "" })); // Limpiar el error
+                                                setErrors((prev) => ({ ...prev, idAutorizo: "" }));
                                             }}
 
                                             styles={{
@@ -433,7 +426,6 @@ export const RealizarMantenimiento = ({ modalOpen, onClose }) => {
                                         </div>
                                     </div>
                                 </div>
-
 
                                 <div className="col-md-12 mb-2 ">
                                     <label className="form-label">Comentario</label>

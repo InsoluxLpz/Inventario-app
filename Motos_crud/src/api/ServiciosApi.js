@@ -134,13 +134,13 @@ export const ActualizarStatus = async (id, actualizarLista) => {
 // *<===================================== SERVICIOS MOTOS ====================================================================>
 
 export const ObtenerMantenimientos = async ({ filtro }) => {
-
     const params = new URLSearchParams();
 
     if (filtro.fecha_inicio) params.append("fecha_inicio", filtro.fecha_inicio);
     if (filtro.fecha_final) params.append("fecha_final", filtro.fecha_final);
     if (filtro.servicio) params.append("servicio", filtro.servicio);
     if (filtro.moto) params.append("moto", filtro.moto);
+    if (filtro.todos !== undefined) params.append("todos", filtro.todos ? "1" : "0");
 
     try {
         const response = await fetch(`${API_URL}/servicios/obtener_mantenimientos?${params.toString()}`, {
@@ -151,7 +151,7 @@ export const ObtenerMantenimientos = async ({ filtro }) => {
         });
 
         if (response.ok) {
-            const data = await response.json()
+            const data = await response.json();
             console.log("Respuesta del backend:", data);
             return data;
         }
@@ -161,8 +161,9 @@ export const ObtenerMantenimientos = async ({ filtro }) => {
         Swal.fire('Error', 'Hubo un problema al conectar con el servidor.', 'error');
         return null;
     }
-
 };
+
+
 
 export const AgregarMantenimiento = async (mantenimientoData, actualizarLista) => {
     try {

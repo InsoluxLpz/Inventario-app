@@ -175,14 +175,13 @@ router.post('/agregar_mantenimiento', async (req, res) => {
 
 
 router.get('/obtener_mantenimientos', async (req, res) => {
-    console.log("Datos recibidos en el backend:", req.query);
-
-    let { fecha_inicio, fecha_final, servicio, moto } = req.query;
+    let { fecha_inicio, fecha_final, servicio, moto, todos } = req.query;
+    todos = parseInt(todos, 10);
     const connection = await db.getConnection();
-    console.log("moto recibido en backend:", moto);
+    console.log(todos)
 
     try {
-        if (!fecha_inicio && !fecha_final && !servicio && !moto) {
+        if (todos !== 1 && !fecha_inicio && !fecha_final && !servicio && !moto) {
             const hoy = new Date();
             const diaSemana = hoy.getDay();
             const inicioSemana = new Date(hoy);
@@ -204,13 +203,12 @@ router.get('/obtener_mantenimientos', async (req, res) => {
                 m.status,
                 m.idCancelo,
                 m.fecha_cancelacion,
-                mt.id as idMoto,
+                mt.id AS idMoto,
                 mt.inciso AS moto_inciso,
                 m.odometro,
                 m.costo_total,
                 m.comentario,
                 m.idUsuario,
-                m.fecha_cancelacion,
                 u.nombre,
                 sm.idServicio AS servicio_aplicado_id,
                 cs.nombre AS servicio_aplicado_nombre,
@@ -231,16 +229,18 @@ router.get('/obtener_mantenimientos', async (req, res) => {
 
         const queryParams = [];
 
-        // Agregar condiciones de fecha SOLO si no se está filtrando por servicio
-        if (fecha_inicio) {
-            query += ` AND m.fecha_inicio >= ?`;
-            queryParams.push(fecha_inicio);
+        if (!todos) { // Si el parámetro "todos" no está presente, se aplican los filtros de fecha.
+            if (fecha_inicio) {
+                query += ` AND m.fecha_inicio >= ?`;
+                queryParams.push(fecha_inicio);
+            }
+
+            if (fecha_final) {
+                query += ` AND m.fecha_inicio <= ?`;
+                queryParams.push(fecha_final);
+            }
         }
 
-        if (fecha_final) {
-            query += ` AND m.fecha_inicio <= ?`;
-            queryParams.push(fecha_final);
-        }
         if (moto) {
             query += ` AND m.idMoto = ?`;
             queryParams.push(moto);

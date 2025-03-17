@@ -159,19 +159,19 @@ export const VerMantenimientoCancelado = ({ modalOpen, onClose, mantenimiento, l
                                     <table className="table">
                                         <thead>
                                             <tr>
-                                                <th style={{ textAlign: "center", width: "16.66%" }}>Producto</th>
-                                                <th style={{ textAlign: "center", width: "16.66%" }}>Costo Unitario</th>
-                                                <th style={{ textAlign: "center", width: "16.66%" }}>Cantidad</th>
-                                                <th style={{ textAlign: "center", width: "16.66%" }}>Subtotal</th>
+                                                <th style={{ textAlign: "left", width: "16.66%" }}>Producto</th>
+                                                <th style={{ textAlign: "left", width: "16.66%" }}>Costo Unitario</th>
+                                                <th style={{ textAlign: "left", width: "16.66%" }}>Cantidad</th>
+                                                <th style={{ textAlign: "left", width: "16.66%" }}>Subtotal</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             {formData.productos.map((producto, index) => (
                                                 <tr key={index}>
-                                                    <td style={{ textAlign: "right", width: "16.66%" }}>{producto.nombre}</td>
-                                                    <td style={{ textAlign: "right", width: "16.66%" }}>${formatNumber(producto.costo)}</td>
-                                                    <td style={{ textAlign: "right", width: "16.66%" }}>{producto.cantidad}</td>
-                                                    <td style={{ textAlign: "right", width: "16.66%" }}>${formatNumber(producto.costo * producto.cantidad)}</td>
+                                                    <td style={{ textAlign: "left", width: "16.66%" }}>{producto.nombre}</td>
+                                                    <td style={{ textAlign: "left", width: "16.66%" }}>${formatNumber(producto.costo)}</td>
+                                                    <td style={{ textAlign: "left", width: "16.66%" }}>{producto.cantidad}</td>
+                                                    <td style={{ textAlign: "left", width: "16.66%" }}>${formatNumber(producto.costo * producto.cantidad)}</td>
                                                 </tr>
                                             ))}
                                         </tbody>
