@@ -11,8 +11,11 @@ import TableRow from "@mui/material/TableRow";
 import { Box, Button, Typography, IconButton, TextField } from "@mui/material";
 import { NavBar } from "../NavBar";
 import { cargarListasCampos } from "../../api/almacenProductosApi";
-import CleaningServicesIcon from "@mui/icons-material/CleaningServices";
+import AddchartIcon from "@mui/icons-material/Addchart";
+import InventoryIcon from "@mui/icons-material/Inventory";
 import { EditarProductoAlmacenModal } from "./EditarProductoAlmacenModal";
+import { obtenerProductos } from "../../api/productosApi";
+import { obtenerProveedores } from "../../api/proveedoresApi";
 import { useNavigate } from "react-router";
 
 export const ProductoAlmacenTable = () => {
@@ -31,14 +34,6 @@ export const ProductoAlmacenTable = () => {
     fecha: "",
     unidadMedida: "",
   });
-
-  const limpiarFiltros = () => {
-    setFiltro({
-      codigo: "",
-      fecha: "",
-      unidadMedida: "",
-    });
-  };
 
   useEffect(() => {
     fetchInventario();
@@ -180,30 +175,13 @@ export const ProductoAlmacenTable = () => {
       </div>
 
       <Box display="flex" justifyContent="center" gap={1} my={2} mt={10}>
-
-        <Button
-                  variant="contained"
-                  sx={{
-                    backgroundColor: "#566573",
-                    color: "white",
-                    ":hover": { opacity: 0.7 },
-                    borderRadius: "8px",
-                    padding: "0px 0px",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "8px",
-                  }}
-                  onClick={limpiarFiltros}
-                >
-                  <CleaningServicesIcon sx={{ fontSize: 24 }} />
-                </Button>
         <TextField
           label="Codigo"
           name="codigo"
           value={filtro.codigo}
           onChange={handleFiltroChange}
         />
-        {/* <TextField
+        <TextField
           label="Filtrar por"
           name="fecha"
           type="date"
@@ -211,7 +189,7 @@ export const ProductoAlmacenTable = () => {
           onChange={handleFiltroChange}
           onFocus={(e) => (e.target.showPicker ? e.target.showPicker() : null)} // Agregar verificación para `showPicker`
           InputLabelProps={{ shrink: true }}
-        /> */}
+        />
 
         <TextField
           label="Unidad de medida"
