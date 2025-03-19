@@ -57,7 +57,6 @@ export const ListaMantenimientos = () => {
   const fetchMotos = async () => {
     const data = await obtenerMotos();
     if (data) setMotos(data);
-    console.log(data)
   };
 
   const fetchServicios = async () => {

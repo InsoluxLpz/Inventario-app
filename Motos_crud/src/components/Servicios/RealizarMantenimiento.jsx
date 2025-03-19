@@ -7,8 +7,7 @@ import { AgregarMantenimiento, ObtenerMantenimientos, ObtenerServicios } from '.
 import { AgregarRefaccionesModal } from './agregarRefaccionesModal';
 import { cargarListasEntradas } from '../../api/almacenProductosApi';
 
-export const RealizarMantenimiento = ({ modalOpen, onClose }) => {
-    if (!modalOpen) return null;
+export const RealizarMantenimiento = () => {
 
     const idUsuario = localStorage.getItem('idUsuario');
 
@@ -205,17 +204,10 @@ export const RealizarMantenimiento = ({ modalOpen, onClose }) => {
             setProductosSeleccionados([]);
             ObtenerMantenimientos();
             setErrors({});
-            onClose();
-
-            // Recargar la página después de 3 segundos
-            setTimeout(() => {
-                window.location.reload();
-            }, 1000);
         } else {
             console.error("Error al agregar mantenimiento:", respuesta.error);
         }
     };
-
 
     const formatNumber = (value) => {
         return parseFloat(value).toLocaleString('es-MX');
@@ -233,218 +225,212 @@ export const RealizarMantenimiento = ({ modalOpen, onClose }) => {
         return localDate.toISOString().slice(0, 16); // Convierte a ISO y corta al formato adecuado
     };
 
-
     return (
         <>
             <NavBar />
-            <div className="modal-backdrop">
-                <div className="modal fade show" style={{ display: "block" }} aria-labelledby="exampleModalLabel" tabIndex="-1" role="dialog">
-                    <div className="modal-dialog" role="document" style={{ maxWidth: "60vw", marginTop: 90 }}>
-                        <div className="modal-content w-100" style={{ maxWidth: "60vw" }}>
-                            <div className="modal-header" style={{ backgroundColor: '#1f618d' }}>
-                                <h5 className="modal-title" style={{ color: 'white' }}>Realizar Servicio</h5>
+            <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "80vh", backgroundColor: "#f2f3f4", }}>
+                <div style={{ backgroundColor: "#ffffff", padding: "15px", borderRadius: "10px", boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)", maxWidth: "70vw", width: "100%", }}>
+                    <div style={{ backgroundColor: "#1f618d", padding: "10px", borderRadius: "5px" }}>
+                        <h5 style={{ color: "white", textAlign: "center", margin: 0 }}>Realizar Mantenimiento</h5>
+                    </div>
+                    <form onSubmit={handleSubmit} style={{ marginTop: 10 }}>
+                        <div className="row">
+                            <div className="col-md-3 mb-2">
+                                <label className="form-label">Fecha de inicio</label>
+                                <input
+                                    name="fecha_inicio"
+                                    type="datetime-local"
+                                    className={`form-control form-control-sm ${errors.fecha_inicio ? "is-invalid" : ""}`}
+                                    value={formData.fecha_inicio ? getLocalDateTime() : ''}
+                                    onChange={handleChange}
+                                />
                             </div>
 
-                            <form onSubmit={handleSubmit} style={{ marginTop: 10 }}>
-                                <div className="row">
-                                    <div className="col-md-3 mb-2">
-                                        <label className="form-label">Fecha de inicio</label>
-                                        <input
-                                            name="fecha_inicio"
-                                            type="datetime-local"
-                                            className={`form-control form-control-sm ${errors.fecha_inicio ? "is-invalid" : ""}`}
-                                            value={formData.fecha_inicio ? getLocalDateTime() : ''}
-                                            onChange={handleChange}
-                                        />
-                                    </div>
+                            <div className="col-md-4 mb-2">
+                                <label className="form-label">Moto</label>
+                                <Select
+                                    name="vehiculo"
+                                    options={opcionesVehiculos}
+                                    placeholder="SELECCIONA"
+                                    value={opcionesVehiculos.find((op) => op.value === formData.vehiculo)}
+                                    onChange={(selectedOption) => {
+                                        setFormData({ ...formData, vehiculo: selectedOption.value });
+                                        setErrors((prev) => ({ ...prev, vehiculo: "" }));
+                                    }}
 
-                                    <div className="col-md-4 mb-2">
-                                        <label className="form-label">Moto</label>
-                                        <Select
-                                            name="vehiculo"
-                                            options={opcionesVehiculos}
-                                            placeholder="SELECCIONA"
-                                            value={opcionesVehiculos.find((op) => op.value === formData.vehiculo)}
-                                            onChange={(selectedOption) => {
-                                                setFormData({ ...formData, vehiculo: selectedOption.value });
-                                                setErrors((prev) => ({ ...prev, vehiculo: "" }));
-                                            }}
+                                    styles={{
+                                        control: (base) => ({
+                                            ...base,
+                                            minHeight: "45px",
+                                            height: "45px",
+                                        }),
+                                        menuList: (provided) => ({
+                                            ...provided,
+                                            maxHeight: "200px",
+                                            overflowY: "auto",
+                                        }),
+                                    }}
+                                />
 
-                                            styles={{
-                                                control: (base) => ({
-                                                    ...base,
-                                                    minHeight: "45px",
-                                                    height: "45px",
-                                                }),
-                                                menuList: (provided) => ({
-                                                    ...provided,
-                                                    maxHeight: "200px",
-                                                    overflowY: "auto",
-                                                }),
-                                            }}
-                                        />
+                                {errors.vehiculo && (
+                                    <div className="text-danger">{errors.vehiculo}</div>
+                                )}
+                            </div>
 
-                                        {errors.vehiculo && (
-                                            <div className="text-danger">{errors.vehiculo}</div>
-                                        )}
-                                    </div>
-
-                                    <div className="col-md-4 mb-2">
-                                        <label className="form-label">Odómetro/Horómetro</label>
-                                        <input
-                                            type="text"
-                                            name="odometro"
-                                            className={`form-control form-control-sm ${errors.odometro ? "is-invalid" : ""}`}
-                                            value={new Intl.NumberFormat('es-MX').format(formData.odometro)} // Formatea el valor mostrado
-                                            onChange={handleChange}
-                                        />
-                                        {errors.odometro && <div className="invalid-feedback">{errors.odometro}</div>}
-                                    </div>
-                                </div>
-
-                                <div className="row">
-                                    <div className="col-md-10 mb-2">
-                                        <label className="form-label">Servicio(s)</label>
-                                        <Select
-                                            name="servicio"
-                                            options={[...servicio].sort((a, b) => a.label.localeCompare(b.label))}
-                                            isMulti
-                                            placeholder="SELECCIONA"
-                                            value={formData.servicio.map((s) => {
-                                                const serv = servicio.find(serv => serv.value === s);
-                                                return serv ? { value: serv.value, label: serv.label } : null;
-                                            }).filter(Boolean)}
-                                            onChange={(selectedOptions) => {
-                                                const serviciosSeleccionados = selectedOptions ? selectedOptions.map(option => option.value) : [];
-                                                setFormData({ ...formData, servicio: serviciosSeleccionados });
-                                                setErrors((prev) => ({ ...prev, servicio: "" }));
-                                            }}
-
-                                            styles={{
-                                                control: (base) => ({
-                                                    ...base,
-                                                    minHeight: "45px",
-                                                    height: "45px",
-                                                }),
-                                                menuList: (provided) => ({
-                                                    ...provided,
-                                                    maxHeight: "200px",
-                                                    overflowY: "auto",
-                                                }),
-                                            }}
-                                        />
-                                        {errors.servicio && (
-                                            <div className="text-danger">{errors.servicio}</div>
-                                        )}
-                                    </div>
-                                </div>
-
-                                <hr />
-                                {/* Botón para agregar refacciones */}
-                                <div className="d-flex justify-content-end mb-3">
-                                    <Button variant="contained" color="primary" size="small" onClick={handleOpenModal}>
-                                        Agregar Refacción
-                                    </Button>
-                                </div>
-
-                                <h6 className="mb-2">Desglose de Partes/Refacciones de Almacén</h6>
-                                <div className="table-responsive">
-                                    <table className="table">
-                                        <thead>
-                                            <tr>
-                                                <th style={{ textAlign: "left", width: "16.66%" }}>Producto</th>
-                                                <th style={{ textAlign: "left", width: "16.66%" }}>Costo Unitario</th>
-                                                <th style={{ textAlign: "left", width: "16.66%" }}>Cantidad</th>
-                                                <th style={{ textAlign: "left", width: "16.66%" }}>Subtotal</th>
-                                                <th style={{ textAlign: "left", width: "16.66%" }}>Acciones</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {productosSeleccionados.map((producto, index) => (
-                                                <tr key={index}>
-                                                    <td style={{ textAlign: "left", width: "16.66%" }}>{producto.producto}</td>
-                                                    <td style={{ textAlign: "left", width: "16.66%" }}>${formatNumber(producto.costo_unitario)}</td>
-                                                    <td style={{ textAlign: "left", width: "16.66%" }}>{producto.cantidad}</td>
-                                                    <td style={{ textAlign: "left", width: "16.66%" }}>${formatNumber(producto.subtotal)}</td>
-                                                    <td style={{ textAlign: "left", width: "16.66%" }}>
-                                                        <button className="btn btn-danger btn-sm" onClick={() => eliminarProductoDeTabla(index)}>
-                                                            Eliminar
-                                                        </button>
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-
-                                    </table>
-                                </div>
-
-                                <div className="row">
-                                    <div className="col-md-4 mb-2">
-                                        <label className="form-label">Autorizó</label>
-                                        <Select
-                                            name="idAutorizo"
-                                            options={autorizaciones}
-                                            value={autorizaciones.find(option => option.value === formData.idAutorizo)}
-                                            placeholder="SELECCIONA"
-                                            onChange={(selectedOption) => {
-                                                setFormData({ ...formData, idAutorizo: selectedOption.value });
-                                                setErrors((prev) => ({ ...prev, idAutorizo: "" }));
-                                            }}
-
-                                            styles={{
-                                                control: (base) => ({
-                                                    ...base,
-                                                    minHeight: "45px",
-                                                    height: "45px",
-                                                }),
-                                                menuList: (provided) => ({
-                                                    ...provided,
-                                                    maxHeight: "200px",
-                                                    overflowY: "auto",
-                                                }),
-                                            }}
-                                        />
-                                        {errors.idAutorizo && (
-                                            <div className="text-danger">{errors.idAutorizo}</div>
-                                        )}
-                                    </div>
-
-                                    <div className="col-md-2 offset-md-6">
-                                        <label className="form-label">Costo Total</label>
-                                        <div className="input-group">
-                                            <span className="input-group-text" style={{ height: 47 }}>
-                                                $
-                                            </span>
-                                            <input
-                                                type="text"
-                                                name="costo_refacciones"
-                                                className="form-control"
-                                                value={new Intl.NumberFormat('es-MX').format(formData.costo_total)}
-                                                readOnly
-                                            />
-                                            {errors.costo_total && <div className="invalid-feedback">{errors.costo_total}</div>}
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="col-md-12 mb-2 ">
-                                    <label className="form-label">Comentario</label>
-                                    <textarea name="comentario" type="text" className={`form-control form-control-sm`} value={formData.comentario} onChange={handleChange} />
-                                </div>
-
-                                <div className="modal-footer">
-                                    <Button type="submit" style={{ backgroundColor: "#f1c40f", color: "white" }}>
-                                        Guardar
-                                    </Button>
-
-                                    <Button type="button" style={{ backgroundColor: "#7f8c8d", color: "white", marginLeft: 7 }} onClick={onClose}>
-                                        Cancelar
-                                    </Button>
-                                </div>
-                            </form>
-                            <AgregarRefaccionesModal onClose={handleCloseModal} modalOpen={isModalOpen} agregarProductoATabla={agregarProductoATabla} />
+                            <div className="col-md-4 mb-2">
+                                <label className="form-label">Odómetro/Horómetro</label>
+                                <input
+                                    type="text"
+                                    name="odometro"
+                                    className={`form-control form-control-sm ${errors.odometro ? "is-invalid" : ""}`}
+                                    value={new Intl.NumberFormat('es-MX').format(formData.odometro)} // Formatea el valor mostrado
+                                    onChange={handleChange}
+                                />
+                                {errors.odometro && <div className="invalid-feedback">{errors.odometro}</div>}
+                            </div>
                         </div>
-                    </div>
+
+                        <div className="row">
+                            <div className="col-md-10 mb-2">
+                                <label className="form-label">Servicio(s)</label>
+                                <Select
+                                    name="servicio"
+                                    options={[...servicio].sort((a, b) => a.label.localeCompare(b.label))}
+                                    isMulti
+                                    placeholder="SELECCIONA"
+                                    value={formData.servicio.map((s) => {
+                                        const serv = servicio.find(serv => serv.value === s);
+                                        return serv ? { value: serv.value, label: serv.label } : null;
+                                    }).filter(Boolean)}
+                                    onChange={(selectedOptions) => {
+                                        const serviciosSeleccionados = selectedOptions ? selectedOptions.map(option => option.value) : [];
+                                        setFormData({ ...formData, servicio: serviciosSeleccionados });
+                                        setErrors((prev) => ({ ...prev, servicio: "" }));
+                                    }}
+
+                                    styles={{
+                                        control: (base) => ({
+                                            ...base,
+                                            minHeight: "45px",
+                                            height: "45px",
+                                        }),
+                                        menuList: (provided) => ({
+                                            ...provided,
+                                            maxHeight: "200px",
+                                            overflowY: "auto",
+                                        }),
+                                    }}
+                                />
+                                {errors.servicio && (
+                                    <div className="text-danger">{errors.servicio}</div>
+                                )}
+                            </div>
+                        </div>
+
+                        <hr />
+                        {/* Botón para agregar refacciones */}
+                        <div className="d-flex justify-content-end mb-3">
+                            <Button variant="contained" color="primary" size="small" onClick={handleOpenModal}>
+                                Agregar Refacción
+                            </Button>
+                        </div>
+
+                        <h6 className="mb-2">Desglose de Partes/Refacciones de Almacén</h6>
+                        <div className="table-responsive">
+                            <table className="table">
+                                <thead>
+                                    <tr>
+                                        <th style={{ textAlign: "left", width: "16.66%" }}>Producto</th>
+                                        <th style={{ textAlign: "left", width: "16.66%" }}>Costo Unitario</th>
+                                        <th style={{ textAlign: "left", width: "16.66%" }}>Cantidad</th>
+                                        <th style={{ textAlign: "left", width: "16.66%" }}>Subtotal</th>
+                                        <th style={{ textAlign: "left", width: "16.66%" }}>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {productosSeleccionados.map((producto, index) => (
+                                        <tr key={index}>
+                                            <td style={{ textAlign: "left", width: "16.66%" }}>{producto.producto}</td>
+                                            <td style={{ textAlign: "left", width: "16.66%" }}>${formatNumber(producto.costo_unitario)}</td>
+                                            <td style={{ textAlign: "left", width: "16.66%" }}>{producto.cantidad}</td>
+                                            <td style={{ textAlign: "left", width: "16.66%" }}>${formatNumber(producto.subtotal)}</td>
+                                            <td style={{ textAlign: "left", width: "16.66%" }}>
+                                                <button className="btn btn-danger btn-sm" onClick={() => eliminarProductoDeTabla(index)}>
+                                                    Eliminar
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+
+                            </table>
+                        </div>
+
+                        <div className="row">
+                            <div className="col-md-4 mb-2">
+                                <label className="form-label">Autorizó</label>
+                                <Select
+                                    name="idAutorizo"
+                                    options={autorizaciones}
+                                    value={autorizaciones.find(option => option.value === formData.idAutorizo)}
+                                    placeholder="SELECCIONA"
+                                    onChange={(selectedOption) => {
+                                        setFormData({ ...formData, idAutorizo: selectedOption.value });
+                                        setErrors((prev) => ({ ...prev, idAutorizo: "" }));
+                                    }}
+
+                                    styles={{
+                                        control: (base) => ({
+                                            ...base,
+                                            minHeight: "45px",
+                                            height: "45px",
+                                        }),
+                                        menuList: (provided) => ({
+                                            ...provided,
+                                            maxHeight: "200px",
+                                            overflowY: "auto",
+                                        }),
+                                    }}
+                                />
+                                {errors.idAutorizo && (
+                                    <div className="text-danger">{errors.idAutorizo}</div>
+                                )}
+                            </div>
+
+                            <div className="col-md-2 offset-md-6">
+                                <label className="form-label">Costo Total</label>
+                                <div className="input-group">
+                                    <span className="input-group-text" style={{ height: 47 }}>
+                                        $
+                                    </span>
+                                    <input
+                                        type="text"
+                                        name="costo_refacciones"
+                                        className="form-control"
+                                        value={new Intl.NumberFormat('es-MX').format(formData.costo_total)}
+                                        readOnly
+                                    />
+                                    {errors.costo_total && <div className="invalid-feedback">{errors.costo_total}</div>}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="col-md-12 mb-2 ">
+                            <label className="form-label">Comentario</label>
+                            <textarea name="comentario" type="text" className={`form-control form-control-sm`} value={formData.comentario} onChange={handleChange} />
+                        </div>
+
+                        <div className="modal-footer">
+                            <Button type="submit" style={{ backgroundColor: "#f1c40f", color: "white" }}>
+                                Guardar
+                            </Button>
+
+                            <Button type="button" style={{ backgroundColor: "#7f8c8d", color: "white", marginLeft: 7 }} >
+                                Cancelar
+                            </Button>
+                        </div>
+                    </form>
+                    <AgregarRefaccionesModal onClose={handleCloseModal} modalOpen={isModalOpen} agregarProductoATabla={agregarProductoATabla} />
                 </div>
             </div>
         </>

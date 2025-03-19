@@ -129,8 +129,6 @@ export const ActualizarStatus = async (id, actualizarLista) => {
     }
 };
 
-
-
 // *<===================================== SERVICIOS MOTOS ====================================================================>
 
 export const ObtenerMantenimientos = async ({ filtro }) => {
@@ -155,15 +153,12 @@ export const ObtenerMantenimientos = async ({ filtro }) => {
             console.log("Respuesta del backend:", data);
             return data;
         }
-
     } catch (error) {
         console.error('Error al realizar la solicitud:', error);
         Swal.fire('Error', 'Hubo un problema al conectar con el servidor.', 'error');
         return null;
     }
 };
-
-
 
 export const AgregarMantenimiento = async (mantenimientoData, actualizarLista) => {
     try {
@@ -197,7 +192,6 @@ export const AgregarMantenimiento = async (mantenimientoData, actualizarLista) =
     }
 };
 
-
 export const ActualizarMantenimiento = async (id, MantenimientoData) => {
     try {
         const response = await fetch(`${API_URL}/servicios/actualizar_mantenimiento/${id}`, {
@@ -228,7 +222,6 @@ export const ActualizarMantenimiento = async (id, MantenimientoData) => {
         return null;
     }
 };
-
 
 export const EliminarMantenimiento = async (id, actualizarLista) => {
     try {

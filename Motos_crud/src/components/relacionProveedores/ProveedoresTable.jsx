@@ -19,7 +19,11 @@ export const ProveedoresTable = () => {
   const [showInactive, setShowInactive] = useState(false);
 
   const agregarProveedorHandler = (nuevoProveedor) => {
-    setProveedores((prevProveedor) => [...prevProveedor, nuevoProveedor]);
+    setProveedores((prevProveedor) =>
+      [...prevProveedor, nuevoProveedor].sort((a, b) =>
+        a.nombre_empresa.toLowerCase().localeCompare(b.nombre_empresa.toLowerCase())
+      )
+    );
   };
 
   const handleOpenModalAgregar = () => {
@@ -47,20 +51,26 @@ export const ProveedoresTable = () => {
     try {
       const data = await obtenerProveedores();
       if (data) {
-        setProveedores(data);
+        // Ordenar antes de setear en el estado
+        const sortedData = data.sort((a, b) =>
+          a.nombre_empresa.toLowerCase().localeCompare(b.nombre_empresa.toLowerCase())
+        );
+        setProveedores(sortedData);
       }
     } catch (error) {
-      console.error("Error en la peticion al obtener proveedores");
+      console.error("Error en la petición al obtener proveedores");
     }
   };
+
   // * actualizar la lista
   const actualizarLista = (proveedorActualizado) => {
     setProveedores((prevProveedor) =>
-      prevProveedor.map((m) =>
-        m.id === proveedorActualizado.id ? proveedorActualizado : m
-      )
+      prevProveedor
+        .map((m) => (m.id === proveedorActualizado.id ? proveedorActualizado : m))
+        .sort((a, b) => a.nombre_empresa.toLowerCase().localeCompare(b.nombre_empresa.toLowerCase()))
     );
   };
+
 
   // * actualizar status para que desaparezca de la lista pero no se elimine
   const handleActualizarStatus = (id) => {

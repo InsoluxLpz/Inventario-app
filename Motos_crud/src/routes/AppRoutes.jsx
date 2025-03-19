@@ -18,9 +18,6 @@ import { ProductoAlmacenTable } from '../components/entradas/ProductoAlmacenTabl
 import { AgregarProductosAlmacen } from '../components/entradas/AgregarProductosAlmacen';
 import { MovimientosAlmacenTable } from '../components/entradas/MovimientosAlmacenTable.jsx';
 
-
-
-
 export const AppRoutes = () => {
     return (
 

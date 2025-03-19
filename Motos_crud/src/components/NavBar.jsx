@@ -29,6 +29,7 @@ import WarehouseIcon from "@mui/icons-material/Warehouse";
 import LogoutIcon from "@mui/icons-material/Logout";
 // import { ExpandMoreIcon } from "@material-ui/icons";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 
 
 const drawerWidth = 250;
@@ -112,7 +113,7 @@ export const NavBar = () => {
   const [selectedItem, setSelectedItem] = useState(location.pathname);
   const [openProducts, setOpenProducts] = useState(false);
   const [openServices, setOpenServices] = useState(false);
-  const [openAlmacen, setOpenAlmacen] = useState(false);
+  const [openAdmin, setOpenAdmin] = useState(false);
 
   const handleNavigate = (path) => navigate(path);
 
@@ -136,8 +137,8 @@ export const NavBar = () => {
     setOpenServices(!openServices);
   };
 
-  const handleAlmacenClick = () => {
-    setOpenAlmacen(!openAlmacen);
+  const handleAdminClick = () => {
+    setOpenAdmin(!openAdmin);
   };
 
   const handleLogout = () => {
@@ -156,7 +157,8 @@ export const NavBar = () => {
     "/Proveedores": "Catalogo de Proveedores",
     "/servicios/ListaMantenimientos": "Reporte Mantenimientos",
     "/servicios/CatalogoServicios": "Catalogo de servicios",
-    "/almacen/Entradas": "Entradas"
+    "/almacen/Entradas": "Entradas/Salidas",
+    "/servicios/RealizarMantenimiento": "Agregar Mantenimiento"
   };
 
   const currentTitle = routeTitles[location.pathname] || "Inicio";
@@ -209,21 +211,6 @@ export const NavBar = () => {
             <ListItemText primary="Inicio" sx={{ display: open ? "block" : "none" }} />
           </ListItem>
 
-          <ListItem button selected={selectedItem === "/almacen/Entradas"} onClick={() => handleNavigate("/almacen/Entradas")} sx={{ backgroundColor: selectedItem === "/almacen/Entradas" ? "#85929e   " : "transparent" }}>
-            <ListItemIcon sx={{ minWidth: 32 }}>
-              <WarehouseIcon />
-            </ListItemIcon>
-            <ListItemText primary="Entradas" sx={{ display: open ? "block" : "none" }} />
-          </ListItem>
-
-          <ListItem button selected={selectedItem === "/almacen/ProductoAlmacenTable"} onClick={() => handleNavigate("/almacen/ProductoAlmacenTable")} sx={{ backgroundColor: selectedItem === "/almacen/ProductoAlmacenTable" ? "#85929e  " : "transparent" }}>
-            <ListItemIcon sx={{ minWidth: 32 }}>
-              <CategoryIcon sx={{ fontSize: 18 }} />
-            </ListItemIcon>
-            <ListItemText primary="Inventario" sx={{ display: open ? "block" : "none" }} />
-          </ListItem>
-
-          <Divider sx={{ borderColor: "rgba(0, 0, 0, 0.7)", borderWidth: 1 }} />
 
           <ListItem button onClick={handleProductsClick} >
             <ListItemIcon sx={{ minWidth: 32 }}>
@@ -274,12 +261,51 @@ export const NavBar = () => {
                 <ListItemText primary="Productos" sx={{ fontSize: "0.875rem", display: open ? "block" : "none" }} />
               </ListItem>
 
-              <ListItem button selected={selectedItem === "/servicios/CatalogoServicios"} onClick={() => handleNavigate("/servicios/CatalogoServicios")} sx={{ backgroundColor: selectedItem === "/servicios/CatalogoServicios" ? "#85929e  " : "transparent", pl: 3 }}>
+              <ListItem button selected={selectedItem === "/servicios/CatalogoServicios"} onClick={() => handleNavigate("/servicios/CatalogoServicios")} sx={{ backgroundColor: selectedItem === "/servicios/CatalogoServicios" ? "#85929e" : "transparent", pl: 3 }}>
                 <ListItemIcon sx={{ minWidth: 32 }}>
                   <MiscellaneousServicesIcon sx={{ fontSize: 18 }} />
                 </ListItemIcon>
                 <ListItemText primary="Servicios" sx={{ fontSize: "0.875rem", display: open ? "block" : "none" }} />
               </ListItem>
+            </List>
+          </Collapse>
+
+          <Divider sx={{ borderColor: "rgba(0, 0, 0, 0.7)", borderWidth: 1 }} />
+
+          <ListItem button onClick={handleAdminClick} >
+            <ListItemIcon sx={{ minWidth: 32 }}>
+              <AdminPanelSettingsIcon />
+            </ListItemIcon>
+            <ListItemText primary="Administración" sx={{ display: open ? "block" : "none" }} />
+
+            {open && (
+              <ExpandMoreIcon
+                sx={{
+                  transition: "transform 0.3s",
+                  transform: openAdmin ? "rotate(180deg)" : "rotate(0deg)",
+                  marginLeft: "auto",
+                }}
+              />
+            )}
+          </ListItem>
+
+          <Collapse in={openAdmin} timeout="auto" unmountOnExit>
+            <List component="div" disablePadding >
+
+              <ListItem button selected={selectedItem === "/servicios/RealizarMantenimiento"} onClick={() => handleNavigate("/servicios/RealizarMantenimiento")} sx={{ backgroundColor: selectedItem === "/servicios/RealizarMantenimiento" ? "#85929e  " : "transparent", pl: 3 }}>
+                <ListItemIcon sx={{ minWidth: 32 }}>
+                  <CategoryIcon sx={{ fontSize: 18 }} />
+                </ListItemIcon>
+                <ListItemText primary="Agregar Mantenimiento" sx={{ display: open ? "block" : "none" }} />
+              </ListItem>
+
+              <ListItem button selected={selectedItem === "/almacen/Entradas"} onClick={() => handleNavigate("/almacen/Entradas")} sx={{ backgroundColor: selectedItem === "/almacen/Entradas" ? "#85929e   " : "transparent", pl: 3 }}>
+                <ListItemIcon sx={{ minWidth: 32 }}>
+                  <WarehouseIcon sx={{ fontSize: 18 }} />
+                </ListItemIcon>
+                <ListItemText primary="Entradas/Salidas" sx={{ display: open ? "block" : "none" }} />
+              </ListItem>
+
             </List>
           </Collapse>
 
@@ -306,17 +332,25 @@ export const NavBar = () => {
             <List component="div" disablePadding >
               <ListItem button selected={selectedItem === "/servicios/ListaMantenimientos"} onClick={() => handleNavigate("/servicios/ListaMantenimientos")} sx={{ backgroundColor: selectedItem === "/servicios/ListaMantenimientos" ? "#85929e  " : "transparent", pl: 3 }}>
                 <ListItemIcon sx={{ minWidth: 32 }}>
-                  <HandymanIcon fontSize="small" />
+                  <HandymanIcon sx={{ fontSize: 18 }} />
                 </ListItemIcon>
                 <ListItemText primary="Mantenimientos" sx={{ fontSize: "0.875rem", display: open ? "block" : "none" }} />
               </ListItem>
 
               <ListItem button selected={selectedItem === "/almacen/MovimientosAlmacenTable"} onClick={() => handleNavigate("/almacen/MovimientosAlmacenTable")} sx={{ backgroundColor: selectedItem === "/almacen/MovimientosAlmacenTable" ? "#85929e  " : "transparent", pl: 3 }}>
                 <ListItemIcon sx={{ minWidth: 32 }}>
-                  <MoveToInboxIcon fontSize="small" />
+                  <MoveToInboxIcon sx={{ fontSize: 18 }} />
                 </ListItemIcon>
                 <ListItemText primary="Movimientos almacen" sx={{ fontSize: "0.875rem", display: open ? "block" : "none" }} />
               </ListItem>
+
+              <ListItem button selected={selectedItem === "/almacen/ProductoAlmacenTable"} onClick={() => handleNavigate("/almacen/ProductoAlmacenTable")} sx={{ backgroundColor: selectedItem === "/almacen/ProductoAlmacenTable" ? "#85929e  " : "transparent", pl: 3 }}>
+                <ListItemIcon sx={{ minWidth: 32 }}>
+                  <CategoryIcon sx={{ fontSize: 18 }} />
+                </ListItemIcon>
+                <ListItemText primary="Inventario" sx={{ display: open ? "block" : "none" }} />
+              </ListItem>
+
             </List>
           </Collapse>
 

@@ -98,9 +98,6 @@ export const AgregarRefaccionesModal = ({ onClose, modalOpen, agregarProductoATa
         });
     };
 
-
-
-
     return (
         <div className="modal-backdrop">
             <div className="modal fade show" style={{ display: "block" }} aria-labelledby="exampleModalLabel" tabIndex="-1" role="dialog">

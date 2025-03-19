@@ -41,7 +41,6 @@ export const CatalogoServicios = () => {
     };
 
     const agregarServicioLista = (nuevoServicio) => {
-        // Verificar si el nombre del servicio ya existe en cualquier estado
         const nombreExistente = servicios.some(
             (servicio) => servicio.nombre.toLowerCase() === nuevoServicio.nombre.toLowerCase()
         );
@@ -49,10 +48,15 @@ export const CatalogoServicios = () => {
         if (nombreExistente) {
             setError("El nombre del servicio ya existe. Por favor, elija otro nombre.");
         } else {
-            setServicios((prevServicios) => [...prevServicios, nuevoServicio]);
-            setError(null); // Limpiar el mensaje de error si el servicio se agrega correctamente
+            setServicios((prevServicios) =>
+                [...prevServicios, nuevoServicio].sort((a, b) =>
+                    a.nombre.toLowerCase().localeCompare(b.nombre.toLowerCase())
+                )
+            );
+            setError(null);
         }
     };
+
 
     const handleActualizarStatus = (id) => {
         ActualizarStatus(id, (idActualizado) => {
@@ -66,19 +70,21 @@ export const CatalogoServicios = () => {
 
     const actualizarLista = (servicioActualizado) => {
         setServicios((prevServicios) =>
-            prevServicios.map((servicio) =>
-                servicio.id === servicioActualizado.id
-                    ? { ...servicio, ...servicioActualizado }
-                    : servicio
-            )
+            prevServicios
+                .map((servicio) => (servicio.id === servicioActualizado.id ? servicioActualizado : servicio))
+                .sort((a, b) => a.nombre.toLowerCase().localeCompare(b.nombre.toLowerCase()))
         );
     };
+
 
     const cargarServicios = async () => {
         const data = await ObtenerServicios();
         if (data) {
-            setServicios(data);
-            console.log(data);
+            // Ordenar antes de actualizar el estado
+            const sortedData = data.sort((a, b) =>
+                a.nombre.toLowerCase().localeCompare(b.nombre.toLowerCase())
+            );
+            setServicios(sortedData);
         }
     };
 
@@ -97,11 +103,12 @@ export const CatalogoServicios = () => {
                 return "transparent"; // Fondo transparente si no coincide
         }
     };
-
-    const serviciosFiltrados = servicios.filter((servicio) =>
-        (showInactive || servicio.status !== 0) &&
-        servicio.nombre.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const serviciosFiltrados = servicios
+        .filter((servicio) =>
+            (showInactive || servicio.status !== 0) &&
+            servicio.nombre.toLowerCase().includes(searchTerm.toLowerCase())
+        )
+        .sort((a, b) => a.nombre.toLowerCase().localeCompare(b.nombre.toLowerCase()));
 
 
     return (
@@ -141,7 +148,7 @@ export const CatalogoServicios = () => {
                 </Box>
 
 
-                <Box width="90%" maxWidth={2000} margin="0 auto" mt={2}>
+                <Box width="70%" maxWidth={2000} margin="0 auto" mt={2}>
 
                     <Box sx={{ backgroundColor: "#1f618d", padding: "10px 20px", borderRadius: "8px 8px 0 0" }}>
                         <Typography variant="h5" color="white">
@@ -163,12 +170,11 @@ export const CatalogoServicios = () => {
                         </Box>
                     </Box>
                 </Box>
-                <Paper sx={{ width: "90%", maxWidth: "2000px", margin: "0 auto", backgroundColor: "white", padding: 2 }}>
+                <Paper sx={{ width: "70%", maxWidth: "2000px", margin: "0 auto", backgroundColor: "white", padding: 2 }}>
                     <TableContainer sx={{ maxHeight: 800, backgroundColor: "#ffff", border: "1px solid #d7dbdd", borderRadius: "2px" }}>
                         <Table stickyHeader aria-label="sticky table">
                             <TableHead>
                                 <TableRow>
-                                    <TableCell align="left" sx={{ fontWeight: "bold", color: "black", textAlign: "left", width: "16.66%", backgroundColor: "#f4f6f7" }}>Id</TableCell>
                                     <TableCell align="left" sx={{ fontWeight: "bold", color: "black", textAlign: "left", width: "16.66%", backgroundColor: "#f4f6f7" }}>Nombre</TableCell>
                                     <TableCell align="left" sx={{ fontWeight: "bold", color: "black", textAlign: "left", width: "16.66%", backgroundColor: "#f4f6f7" }}>Descripción</TableCell>
                                     <TableCell align="left" sx={{ fontWeight: "bold", color: "black", textAlign: "left", width: "16.66%", backgroundColor: "#f4f6f7" }}>Opciones</TableCell>
@@ -181,7 +187,6 @@ export const CatalogoServicios = () => {
                                             backgroundColor: "#eaecee ",
                                         }
                                     }}>
-                                        <TableCell align="left" sx={{ textAlign: "left", width: "16.66%" }}>{servicio.id}</TableCell>
                                         <TableCell align="left" sx={{ textAlign: "left", width: "16.66%" }}>{servicio.nombre}</TableCell>
                                         <TableCell align="left" sx={{ textAlign: "left", width: "16.66%" }}>{servicio.descripcion}</TableCell>
                                         <TableCell align="left" sx={{ textAlign: "left", width: "16.66%" }}>

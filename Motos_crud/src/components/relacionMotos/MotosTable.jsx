@@ -80,22 +80,34 @@ export const MotosTable = () => {
   };
 
   const agregarMotoLista = (nuevaMoto) => {
-    setMotos((prevMotos) => [...prevMotos, nuevaMoto]);
+    setMotos((prevMotos) =>
+      [...prevMotos, nuevaMoto].sort((a, b) =>
+        a.inciso.localeCompare(b.inciso, undefined, { numeric: true })
+      )
+    );
   };
+
 
   const actualizarLista = (motoActualizada) => {
     setMotos((prevMotos) =>
-      prevMotos.map((m) => (m.id === motoActualizada.id ? motoActualizada : m))
+      prevMotos
+        .map((m) => (m.id === motoActualizada.id ? motoActualizada : m))
+        .sort((a, b) => a.inciso.localeCompare(b.inciso, undefined, { numeric: true }))
     );
   };
+
 
   const fetchMotos = async () => {
     const data = await obtenerMotos();
     if (data) {
-      setMotos(data);
-      console.log(data);
+      // Ordenar las motos por inciso antes de setear el estado
+      const sortedData = data.sort((a, b) =>
+        a.inciso.localeCompare(b.inciso, undefined, { numeric: true })
+      );
+      setMotos(sortedData);
     }
   };
+
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -110,16 +122,15 @@ export const MotosTable = () => {
     }
   };
 
-  const filteredMotos = motos.filter((moto) => {
-    const matchesPlaca = searchPlaca.trim() === "" || moto.placa.toLowerCase().includes(searchPlaca.toLowerCase().trim());
-    const matchesNoSerie = searchNoSerie.trim() === "" || moto.no_serie.toLowerCase().includes(searchNoSerie.toLowerCase().trim());
-    const matchesInciso = searchInciso.trim() === "" || moto.inciso.toLowerCase().includes(searchInciso.toLowerCase().trim());
+  const filteredMotos = motos
+    .filter((moto) => {
+      const matchesPlaca = searchPlaca.trim() === "" || moto.placa.toLowerCase().includes(searchPlaca.toLowerCase().trim());
+      const matchesNoSerie = searchNoSerie.trim() === "" || moto.no_serie.toLowerCase().includes(searchNoSerie.toLowerCase().trim());
+      const matchesInciso = searchInciso.trim() === "" || moto.inciso.toLowerCase().includes(searchInciso.toLowerCase().trim());
 
-    // La moto debe coincidir con TODOS los filtros activos
-    const matchesSearch = matchesPlaca && matchesNoSerie && matchesInciso;
-
-    return showInactive ? matchesSearch : matchesSearch && moto.status !== 0;
-  });
+      return (showInactive ? true : moto.status !== 0) && matchesPlaca && matchesNoSerie && matchesInciso;
+    })
+    .sort((a, b) => a.inciso.localeCompare(b.inciso, undefined, { numeric: true }));
 
 
   useEffect(() => {

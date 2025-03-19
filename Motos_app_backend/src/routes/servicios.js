@@ -173,12 +173,11 @@ router.post('/agregar_mantenimiento', async (req, res) => {
     }
 });
 
-
 router.get('/obtener_mantenimientos', async (req, res) => {
+
     let { fecha_inicio, fecha_final, servicio, moto, todos } = req.query;
     todos = parseInt(todos, 10);
     const connection = await db.getConnection();
-    console.log(todos)
 
     try {
         if (todos !== 1 && !fecha_inicio && !fecha_final && !servicio && !moto) {
@@ -229,7 +228,7 @@ router.get('/obtener_mantenimientos', async (req, res) => {
 
         const queryParams = [];
 
-        if (!todos) { // Si el parámetro "todos" no está presente, se aplican los filtros de fecha.
+        if (!todos) {
             if (fecha_inicio) {
                 query += ` AND m.fecha_inicio >= ?`;
                 queryParams.push(fecha_inicio);
@@ -310,8 +309,6 @@ router.get('/obtener_mantenimientos', async (req, res) => {
     }
 });
 
-
-
 router.put('/actualizar_mantenimiento/:id', async (req, res) => {
     const { id } = req.params;
     const { servicios } = req.body;
@@ -361,7 +358,6 @@ router.put('/actualizar_mantenimiento/:id', async (req, res) => {
         connection.release();
     }
 });
-
 
 router.delete('/cancelar_mantenimiento/:id', async (req, res) => {
     const { id } = req.params;

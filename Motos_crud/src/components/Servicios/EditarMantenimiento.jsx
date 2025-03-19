@@ -60,7 +60,6 @@ export const EditarMantenimiento = ({ modalOpen, onClose, mantenimiento, listaMo
         fetchAutorizo();
     }, []);
 
-
     const validateForm = () => {
         const newErrors = {};
 
@@ -85,21 +84,21 @@ export const EditarMantenimiento = ({ modalOpen, onClose, mantenimiento, listaMo
         e.preventDefault();
 
         const MantenimientoData = {
-            servicios: formData.servicio, // Solo los IDs de los servicios
+            servicios: formData.servicio,
         };
 
         const resultado = await ActualizarMantenimiento(mantenimiento.id, MantenimientoData);
 
         if (resultado && !resultado.error) {
-            onClose(); // Cierra el modal tras éxito
+            onClose();
             setTimeout(() => {
                 window.location.reload();
-            }, 1000);
+            }, 700);
         }
     };
 
     const formatNumber = (value) => {
-        return parseFloat(value).toLocaleString('es-MX'); // Formato para México (1,500.00)
+        return parseFloat(value).toLocaleString('es-MX');
     };
 
     const opcionesMotos = [...motos]
