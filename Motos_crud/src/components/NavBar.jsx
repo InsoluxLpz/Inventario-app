@@ -10,26 +10,26 @@ import IconButton from "@mui/material/IconButton";
 import MenuIcon from "@mui/icons-material/Menu";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import MoveToInboxIcon from '@mui/icons-material/MoveToInbox';
+import MoveToInboxIcon from "@mui/icons-material/MoveToInbox";
 import ListItem from "@mui/material/ListItem";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Collapse, Typography } from "@mui/material";
-import ArticleIcon from '@mui/icons-material/Article';
-import HandymanIcon from '@mui/icons-material/Handyman';
-import NewspaperIcon from '@mui/icons-material/Newspaper';
+import ArticleIcon from "@mui/icons-material/Article";
+import HandymanIcon from "@mui/icons-material/Handyman";
+import NewspaperIcon from "@mui/icons-material/Newspaper";
 import HomeIcon from "@mui/icons-material/Home";
 import TwoWheelerIcon from "@mui/icons-material/TwoWheeler";
-import MiscellaneousServicesIcon from '@mui/icons-material/MiscellaneousServices';
+import MiscellaneousServicesIcon from "@mui/icons-material/MiscellaneousServices";
 import InventoryTwoToneIcon from "@mui/icons-material/InventoryTwoTone";
-import LocalShippingIcon from '@mui/icons-material/LocalShipping';
+import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import CategoryIcon from "@mui/icons-material/Category";
 import WarehouseIcon from "@mui/icons-material/Warehouse";
 import LogoutIcon from "@mui/icons-material/Logout";
-// import { ExpandMore } from "@material-ui/icons";
+// import { ExpandMoreIcon } from "@material-ui/icons";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-
+import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 
 const drawerWidth = 250;
 
@@ -57,10 +57,10 @@ const closedMixin = (theme) => ({
 const DrawerHeader = styled("div")(({ theme }) => ({
   display: "flex",
   alignItems: "center",
-  justifyContent: "space-between",  // Cambié esto para alinear el título
+  justifyContent: "space-between", // Cambié esto para alinear el título
   padding: theme.spacing(0, 1),
   ...theme.mixins.toolbar,
-  backgroundColor: "#f1c40f",  // Color para el header del Drawer
+  backgroundColor: "#f1c40f", // Color para el header del Drawer
 }));
 
 const AppBar = styled(MuiAppBar, {
@@ -81,28 +81,28 @@ const AppBar = styled(MuiAppBar, {
   }),
 }));
 
-const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== "open" })(
-  ({ theme, open }) => ({
-    width: drawerWidth,
-    flexShrink: 0,
-    whiteSpace: "nowrap",
-    boxSizing: "border-box",
-    ...(open && {
+const Drawer = styled(MuiDrawer, {
+  shouldForwardProp: (prop) => prop !== "open",
+})(({ theme, open }) => ({
+  width: drawerWidth,
+  flexShrink: 0,
+  whiteSpace: "nowrap",
+  boxSizing: "border-box",
+  ...(open && {
+    ...openedMixin(theme),
+    "& .MuiDrawer-paper": {
       ...openedMixin(theme),
-      "& .MuiDrawer-paper": {
-        ...openedMixin(theme),
-        backgroundColor: "#e5e8e8 ", // Color para el drawer completo
-      },
-    }),
-    ...(!open && {
+      backgroundColor: "#e5e8e8 ", // Color para el drawer completo
+    },
+  }),
+  ...(!open && {
+    ...closedMixin(theme),
+    "& .MuiDrawer-paper": {
       ...closedMixin(theme),
-      "& .MuiDrawer-paper": {
-        ...closedMixin(theme),
-        backgroundColor: "#e5e8e8 ", // Color para el drawer completo
-      },
-    }),
-  })
-);
+      backgroundColor: "#e5e8e8 ", // Color para el drawer completo
+    },
+  }),
+}));
 
 export const NavBar = () => {
   const navigate = useNavigate();
@@ -151,20 +151,25 @@ export const NavBar = () => {
     "/productos": "Catalogo de Productos",
     "/servicios/RealizarServicio": "Servicios",
     "/servicios/ListaServicios": "Servicios",
-    "/almacen/ProductoAlmacenTable": "Inventario de productos",
+    "/almacen/ProductoAlmacenTable": "Inventario Productos",
     "/almacen/MovimientosAlmacenTable": "Movimientos de productos",
     "/Proveedores": "Catalogo de Proveedores",
     "/servicios/ListaMantenimientos": "Reporte Mantenimientos",
     "/servicios/CatalogoServicios": "Catalogo de servicios",
     "/almacen/Entradas": "Entradas/Salidas",
-    "/servicios/RealizarMantenimiento": "Agregar Mantenimiento"
+    "/servicios/RealizarMantenimiento": "Agregar Mantenimiento",
+    "/almacen/MovXProductosTable":"Movimientos/Productos"
   };
 
   const currentTitle = routeTitles[location.pathname] || "Inicio";
 
   return (
     <Box sx={{ display: "flex" }}>
-      <AppBar position="fixed" open={open} style={{ backgroundColor: "#34495e  " }}>
+      <AppBar
+        position="fixed"
+        open={open}
+        style={{ backgroundColor: "#34495e  " }}
+      >
         <Toolbar>
           <IconButton
             color="inherit"
@@ -181,7 +186,6 @@ export const NavBar = () => {
           <Typography variant="h6" style={{ flexGrow: 1 }}>
             {currentTitle}
           </Typography>
-
         </Toolbar>
       </AppBar>
 
@@ -192,58 +196,46 @@ export const NavBar = () => {
         onMouseLeave={() => setOpen(false)}
       >
         <DrawerHeader>
-          <Typography variant="h6" style={{ color: 'black' }}>
+          <Typography variant="h6" style={{ color: "black" }}>
             MODULOS
           </Typography>
           <IconButton onClick={handleDrawerClose}>
-            {theme.direction === "rtl" ? <ChevronRightIcon /> : <ChevronLeftIcon />}
+            {theme.direction === "rtl" ? (
+              <ChevronRightIcon />
+            ) : (
+              <ChevronLeftIcon />
+            )}
           </IconButton>
         </DrawerHeader>
         <Divider />
 
         <List>
-          <ListItem button selected={selectedItem === "/inicio"} onClick={() => handleNavigate("/inicio")}
-            sx={{ backgroundColor: selectedItem === "/inicio" ? "#85929e   " : "transparent" }}>
+          <ListItem
+            button
+            selected={selectedItem === "/inicio"}
+            onClick={() => handleNavigate("/inicio")}
+            sx={{
+              backgroundColor:
+                selectedItem === "/inicio" ? "#85929e   " : "transparent",
+            }}
+          >
             <ListItemIcon sx={{ minWidth: 32 }}>
               <HomeIcon />
             </ListItemIcon>
-            <ListItemText primary="Inicio" sx={{ display: open ? "block" : "none" }} />
+            <ListItemText
+              primary="Inicio"
+              sx={{ display: open ? "block" : "none" }}
+            />
           </ListItem>
 
-          <ListItem
-            button
-            selected={selectedItem === "/almacen/Entradas"}
-            onClick={() => handleNavigate("/almacen/Entradas")}
-            sx={{
-              backgroundColor: selectedItem === "/almacen/Entradas" ? "#d4ac0d" : "transparent"
-            }}>
-            <ListItemIcon sx={{ minWidth: 32 }}>
-              <WarehouseIcon />
-            </ListItemIcon>
-            <ListItemText primary="Entrada/Salida" sx={{ display: open ? "block" : "none" }} />
-          </ListItem>
-
-
-          <ListItem
-            button
-            selected={selectedItem === "/almacen/ProductoAlmacenTable"}
-            onClick={() => handleNavigate("/almacen/ProductoAlmacenTable")}
-            sx={{
-              backgroundColor: selectedItem === "/almacen/ProductoAlmacenTable" ? "#d4ac0d" : "transparent"
-            }}>
-            <ListItemIcon sx={{ minWidth: 32 }}>
-              <CategoryIcon sx={{ fontSize: 18 }} />
-            </ListItemIcon>
-            <ListItemText primary="Inventario" sx={{ display: open ? "block" : "none" }} />
-          </ListItem>
-
-          <Divider sx={{ borderColor: "rgba(0, 0, 0, 0.7)", borderWidth: 1 }} />
-
-          <ListItem button onClick={handleProductsClick} >
+          <ListItem button onClick={handleProductsClick}>
             <ListItemIcon sx={{ minWidth: 32 }}>
               <NewspaperIcon />
             </ListItemIcon>
-            <ListItemText primary="Catálogos" sx={{ display: open ? "block" : "none" }} />
+            <ListItemText
+              primary="Catálogos"
+              sx={{ display: open ? "block" : "none" }}
+            />
 
             {open && (
               <ExpandMoreIcon
@@ -257,18 +249,29 @@ export const NavBar = () => {
           </ListItem>
 
           <Collapse in={openProducts} timeout="auto" unmountOnExit>
-            <List component="div" disablePadding > {/* Agrega padding a la izquierda */}
+            <List component="div" disablePadding>
               <ListItem
                 button
                 selected={selectedItem === "/Proveedores"}
                 onClick={() => handleNavigate("/Proveedores")}
                 sx={{
-                  backgroundColor: selectedItem === "/Proveedores" ? "#d4ac0d" : "transparent", pl: 3
-                }}>
+                  backgroundColor:
+                    selectedItem === "/Proveedores"
+                      ? "#85929e  "
+                      : "transparent",
+                  pl: 3,
+                }}
+              >
                 <ListItemIcon sx={{ minWidth: 32 }}>
                   <LocalShippingIcon sx={{ fontSize: 18 }} />
                 </ListItemIcon>
-                <ListItemText primary="Proveedores" sx={{ fontSize: "0.875rem", display: open ? "block" : "none" }} />
+                <ListItemText
+                  primary="Proveedores"
+                  sx={{
+                    fontSize: "0.875rem",
+                    display: open ? "block" : "none",
+                  }}
+                />
               </ListItem>
 
               <ListItem
@@ -276,12 +279,21 @@ export const NavBar = () => {
                 selected={selectedItem === "/motos"}
                 onClick={() => handleNavigate("/motos")}
                 sx={{
-                  backgroundColor: selectedItem === "/motos" ? "#d4ac0d" : "transparent", pl: 3
-                }}>
+                  backgroundColor:
+                    selectedItem === "/motos" ? "#85929e  " : "transparent",
+                  pl: 3,
+                }}
+              >
                 <ListItemIcon sx={{ minWidth: 32 }}>
                   <TwoWheelerIcon sx={{ fontSize: 18 }} />
                 </ListItemIcon>
-                <ListItemText primary="Flotilla" sx={{ fontSize: "0.875rem", display: open ? "block" : "none" }} />
+                <ListItemText
+                  primary="Flotilla"
+                  sx={{
+                    fontSize: "0.875rem",
+                    display: open ? "block" : "none",
+                  }}
+                />
               </ListItem>
 
               <ListItem
@@ -289,12 +301,21 @@ export const NavBar = () => {
                 selected={selectedItem === "/productos"}
                 onClick={() => handleNavigate("/productos")}
                 sx={{
-                  backgroundColor: selectedItem === "/productos" ? "#d4ac0d" : "transparent", pl: 3
-                }}>
+                  backgroundColor:
+                    selectedItem === "/productos" ? "#85929e  " : "transparent",
+                  pl: 3,
+                }}
+              >
                 <ListItemIcon sx={{ minWidth: 32 }}>
                   <InventoryTwoToneIcon sx={{ fontSize: 18 }} />
                 </ListItemIcon>
-                <ListItemText primary="Productos" sx={{ fontSize: "0.875rem", display: open ? "block" : "none" }} />
+                <ListItemText
+                  primary="Productos"
+                  sx={{
+                    fontSize: "0.875rem",
+                    display: open ? "block" : "none",
+                  }}
+                />
               </ListItem>
 
               <ListItem
@@ -302,23 +323,37 @@ export const NavBar = () => {
                 selected={selectedItem === "/servicios/CatalogoServicios"}
                 onClick={() => handleNavigate("/servicios/CatalogoServicios")}
                 sx={{
-                  backgroundColor: selectedItem === "/servicios/CatalogoServicios" ? "#d4ac0d" : "transparent", pl: 3
-                }}>
+                  backgroundColor:
+                    selectedItem === "/servicios/CatalogoServicios"
+                      ? "#85929e"
+                      : "transparent",
+                  pl: 3,
+                }}
+              >
                 <ListItemIcon sx={{ minWidth: 32 }}>
                   <MiscellaneousServicesIcon sx={{ fontSize: 18 }} />
                 </ListItemIcon>
-                <ListItemText primary="Servicios" sx={{ fontSize: "0.875rem", display: open ? "block" : "none" }} />
+                <ListItemText
+                  primary="Servicios"
+                  sx={{
+                    fontSize: "0.875rem",
+                    display: open ? "block" : "none",
+                  }}
+                />
               </ListItem>
             </List>
           </Collapse>
 
           <Divider sx={{ borderColor: "rgba(0, 0, 0, 0.7)", borderWidth: 1 }} />
 
-          <ListItem button onClick={handleAdminClick} >
+          <ListItem button onClick={handleAdminClick}>
             <ListItemIcon sx={{ minWidth: 32 }}>
               <AdminPanelSettingsIcon />
             </ListItemIcon>
-            <ListItemText primary="Administración" sx={{ display: open ? "block" : "none" }} />
+            <ListItemText
+              primary="Administración"
+              sx={{ display: open ? "block" : "none" }}
+            />
 
             {open && (
               <ExpandMoreIcon
@@ -332,22 +367,50 @@ export const NavBar = () => {
           </ListItem>
 
           <Collapse in={openAdmin} timeout="auto" unmountOnExit>
-            <List component="div" disablePadding >
-
-              <ListItem button selected={selectedItem === "/servicios/RealizarMantenimiento"} onClick={() => handleNavigate("/servicios/RealizarMantenimiento")} sx={{ backgroundColor: selectedItem === "/servicios/RealizarMantenimiento" ? "#85929e  " : "transparent", pl: 3 }}>
+            <List component="div" disablePadding>
+              <ListItem
+                button
+                selected={selectedItem === "/servicios/RealizarMantenimiento"}
+                onClick={() =>
+                  handleNavigate("/servicios/RealizarMantenimiento")
+                }
+                sx={{
+                  backgroundColor:
+                    selectedItem === "/servicios/RealizarMantenimiento"
+                      ? "#85929e  "
+                      : "transparent",
+                  pl: 3,
+                }}
+              >
                 <ListItemIcon sx={{ minWidth: 32 }}>
                   <CategoryIcon sx={{ fontSize: 18 }} />
                 </ListItemIcon>
-                <ListItemText primary="Agregar Mantenimiento" sx={{ display: open ? "block" : "none" }} />
+                <ListItemText
+                  primary="Agregar Mantenimiento"
+                  sx={{ display: open ? "block" : "none" }}
+                />
               </ListItem>
 
-              <ListItem button selected={selectedItem === "/almacen/Entradas"} onClick={() => handleNavigate("/almacen/Entradas")} sx={{ backgroundColor: selectedItem === "/almacen/Entradas" ? "#85929e   " : "transparent", pl: 3 }}>
+              <ListItem
+                button
+                selected={selectedItem === "/almacen/Entradas"}
+                onClick={() => handleNavigate("/almacen/Entradas")}
+                sx={{
+                  backgroundColor:
+                    selectedItem === "/almacen/Entradas"
+                      ? "#85929e   "
+                      : "transparent",
+                  pl: 3,
+                }}
+              >
                 <ListItemIcon sx={{ minWidth: 32 }}>
                   <WarehouseIcon sx={{ fontSize: 18 }} />
                 </ListItemIcon>
-                <ListItemText primary="Entradas/Salidas" sx={{ display: open ? "block" : "none" }} />
+                <ListItemText
+                  primary="Entradas/Salidas"
+                  sx={{ display: open ? "block" : "none" }}
+                />
               </ListItem>
-
             </List>
           </Collapse>
 
@@ -357,7 +420,10 @@ export const NavBar = () => {
             <ListItemIcon sx={{ minWidth: 32 }}>
               <ArticleIcon />
             </ListItemIcon>
-            <ListItemText primary="Reportes" sx={{ display: open ? "block" : "none" }} />
+            <ListItemText
+              primary="Reportes"
+              sx={{ display: open ? "block" : "none" }}
+            />
 
             {open && (
               <ExpandMoreIcon
@@ -371,33 +437,97 @@ export const NavBar = () => {
           </ListItem>
 
           <Collapse in={openServices} timeout="auto" unmountOnExit>
-            <List component="div" disablePadding >
-
+            <List component="div" disablePadding>
               <ListItem
                 button
                 selected={selectedItem === "/servicios/ListaMantenimientos"}
                 onClick={() => handleNavigate("/servicios/ListaMantenimientos")}
                 sx={{
-                  backgroundColor: selectedItem === "/servicios/ListaMantenimientos" ? "#d4ac0d" : "transparent", pl: 3
-                }}>
+                  backgroundColor:
+                    selectedItem === "/servicios/ListaMantenimientos"
+                      ? "#85929e  "
+                      : "transparent",
+                  pl: 3,
+                }}
+              >
                 <ListItemIcon sx={{ minWidth: 32 }}>
                   <HandymanIcon sx={{ fontSize: 18 }} />
                 </ListItemIcon>
-                <ListItemText primary="Mantenimientos" sx={{ fontSize: "0.875rem", display: open ? "block" : "none" }} />
+                <ListItemText
+                  primary="Mantenimientos"
+                  sx={{
+                    fontSize: "0.875rem",
+                    display: open ? "block" : "none",
+                  }}
+                />
               </ListItem>
 
-              <ListItem button selected={selectedItem === "/almacen/MovimientosAlmacenTable"} onClick={() => handleNavigate("/almacen/MovimientosAlmacenTable")} sx={{ backgroundColor: selectedItem === "/almacen/MovimientosAlmacenTable" ? "#d4ac0d" : "transparent", pl: 3 }}>
+              <ListItem
+                button
+                selected={selectedItem === "/almacen/MovimientosAlmacenTable"}
+                onClick={() =>
+                  handleNavigate("/almacen/MovimientosAlmacenTable")
+                }
+                sx={{
+                  backgroundColor:
+                    selectedItem === "/almacen/MovimientosAlmacenTable"
+                      ? "#85929e  "
+                      : "transparent",
+                  pl: 3,
+                }}
+              >
                 <ListItemIcon sx={{ minWidth: 32 }}>
                   <MoveToInboxIcon sx={{ fontSize: 18 }} />
                 </ListItemIcon>
-                <ListItemText primary="Movimientos almacen" sx={{ fontSize: "0.875rem", display: open ? "block" : "none" }} />
+                <ListItemText
+                  primary="Movimientos almacen"
+                  sx={{
+                    fontSize: "0.875rem",
+                    display: open ? "block" : "none",
+                  }}
+                />
               </ListItem>
 
-              <ListItem button selected={selectedItem === "/almacen/ProductoAlmacenTable"} onClick={() => handleNavigate("/almacen/ProductoAlmacenTable")} sx={{ backgroundColor: selectedItem === "/almacen/ProductoAlmacenTable" ? "#85929e  " : "transparent", pl: 3 }}>
+              <ListItem
+                button
+                selected={selectedItem === "/almacen/ProductoAlmacenTable"}
+                onClick={() => handleNavigate("/almacen/ProductoAlmacenTable")}
+                sx={{
+                  backgroundColor:
+                    selectedItem === "/almacen/ProductoAlmacenTable"
+                      ? "#85929e  "
+                      : "transparent",
+                  pl: 3,
+                }}
+              >
                 <ListItemIcon sx={{ minWidth: 32 }}>
                   <CategoryIcon sx={{ fontSize: 18 }} />
                 </ListItemIcon>
-                <ListItemText primary="Inventario" sx={{ display: open ? "block" : "none" }} />
+                <ListItemText
+                  primary="Inventario"
+                  sx={{ display: open ? "block" : "none" }}
+                />
+              </ListItem>
+              {/* movimientos por productos */}
+              <ListItem
+                button
+                selected={selectedItem === "/almacen/MovXProductosTable"}
+                onClick={() => handleNavigate("/almacen/MovXProductosTable")}
+                sx={{
+                  backgroundColor:
+                    selectedItem === "/almacen/MovXProductosTable"
+                      ? "#85929e  "
+                      : "transparent",
+                  pl: 3,
+                }}
+              >
+                <ListItemIcon sx={{ minWidth: 32 }}>
+                  <CategoryIcon sx={{ fontSize: 18 }} />
+                </ListItemIcon>
+                <ListItemText
+                  primary="Movimientos/Productos"
+                  sx={{ display: open ? "block" : "none" }}
+                />
               </ListItem>
 
             </List>
@@ -407,9 +537,9 @@ export const NavBar = () => {
 
           <ListItem button onClick={handleLogout}>
             <ListItemIcon>
-              <LogoutIcon sx={{ fontSize: 18, color: 'red' }} />
+              <LogoutIcon sx={{ fontSize: 18, color: "red" }} />
             </ListItemIcon>
-            <ListItemText primary="Cerrar sesión" sx={{ color: 'red' }} />
+            <ListItemText primary="Cerrar sesión" sx={{ color: "red" }} />
           </ListItem>
         </List>
       </Drawer>
@@ -420,8 +550,7 @@ export const NavBar = () => {
           bgcolor: "background.default",
           paddingTop: "60px",
         }}
-      >
-      </Box>
+      ></Box>
     </Box>
   );
 };

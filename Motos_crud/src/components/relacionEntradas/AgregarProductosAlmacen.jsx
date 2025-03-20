@@ -18,6 +18,12 @@ export const AgregarProductosAlmacen = () => {
   const navigate = useNavigate();
 
   const cantidadRef = useRef(null); // Referencia al input de cantidad
+  // * para este caso de cantidad a costo unitario en el foco capturamos el evento enter
+  const costoUnitarioRef = useRef(null); // Referencia al input de costoUnitario
+  // * para este otro caso de costo unitraio al bonton de agregar en el foco capturamos el evento enter 
+  const agregarRef = useRef(null);
+  // * para este otro caso de el bonton de agregar al campo de producto en el foco capturamos el evento enter 
+  const productosRef = useRef(null);
 
   const [listaProveedores, setListaProveedores] = useState([]);
   const [listaProductos, setListaProductos] = useState([]);
@@ -205,13 +211,50 @@ export const AgregarProductosAlmacen = () => {
       }));
     }
 
-    // * mover el cursor a cantidad cuando se seleccione producto
-    // Cuando se selecciona un producto, hacer foco en el input de cantidad
+    // * Cuando se selecciona un producto, hacer foco en el input de cantidad
     if (name === "producto" && cantidadRef.current) {
       cantidadRef.current.focus();
     }
   };
 
+  // * evento enter para cambiar el foco de cantidad a costo unitario aunque ya tenga puesto el precio
+  const handleKeyDownCostoUnit = (e) => {
+    if (e.key === "Enter" && costoUnitarioRef.current) {
+      e.preventDefault(); // Evita que el Enter envíe el formulario
+      costoUnitarioRef.current.focus(); // Mueve el foco al campo de costo unitario
+    }
+  };
+
+  // * evento enter para cambiar el foco de costo unitario a agregar aunque ya tenga puesto el costoUnitario
+  const handleKeyDownAgregar = (e) => {
+    if (e.key === "Enter" && agregarRef.current) {
+      e.preventDefault(); // Evita que el Enter envíe el formulario
+      agregarRef.current.focus(); // Mueve el foco al campo de costo unitario
+    }
+  };
+
+  // * evento enter para cambiar el foco de costo unitario a agregar aunque ya tenga puesto el costoUnitario
+  const handleKeyDownProductos = (e) => {
+    if (e.key === "Enter" && productosRef.current) {
+      e.preventDefault();
+      console.log("Pasando el foco al Select de productos");
+      productosRef.current.focus();
+    }
+  };
+  
+  const handleCombinedKeyDown = (event) => {
+    console.log(`Tecla presionada: ${event.key}`);
+    if (event.key === "Enter") {
+      console.log("Ejecutando handleSubmit...");
+      handleSubmit(event);
+      console.log("Ejecutando handleKeyDownProductos...");
+      handleKeyDownProductos(event);
+    }
+  };
+  
+  
+  
+// * validacion para no permitir enviar ningun valor vacio del formulario
   const validateForm = () => {
     const newErrors = {};
     Object.keys(formData).forEach((key) => {
@@ -399,7 +442,7 @@ export const AgregarProductosAlmacen = () => {
     setTotal(nuevoTotal);
   }, [productosAgregados]);
 
-  const miniDrawerWidth = 50;
+  const miniDrawerWidth = 0;
 
   // * funcion para formato de dinero
   const formatearDinero = (valor) => {
@@ -412,64 +455,18 @@ export const AgregarProductosAlmacen = () => {
   return (
     <>
       <NavBar />
-      <div
-        style={{
-          display: "flex",
-          flexdirection: "row",
-          justifyContent: "flex-end",
-          gap: "16px", // Espacio entre los botones
-          position: "fixed",
-          right: 50,
-          top: 80,
-        }}
-      >
-        <Button
-          variant="contained"
-          sx={{
-            backgroundColor: "#1f618d",
-            color: "white",
-            ":hover": { opacity: 0.7 },
-            borderRadius: "8px",
-            padding: "10px 20px",
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
-          }}
-          onClick={() => navigate("/almacen/ProductoAlmacenTable")}
-        >
-          <WarehouseIcon sx={{ fontSize: 24 }} />
-          Inventario
-        </Button>
-
-        <Button
-          variant="contained"
-          sx={{
-            backgroundColor: "#1f618d",
-            color: "white",
-            ":hover": { opacity: 0.7 },
-            borderRadius: "8px",
-            padding: "10px 20px",
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
-          }}
-          onClick={() => navigate("/almacen/MovimientosAlmacenTable")}
-        >
-          <MoveToInboxIcon sx={{ fontSize: 24 }} />
-          Movimientos
-        </Button>
-      </div>
-
+      {/*  <<<<<<<<<<<<<------------------------ PRIMERA TABLA ------------------------>>>>>>>>>>>>>>> */}
       <div className="container mt-4">
         <Box
           sx={{
             backgroundColor: "#1f618d",
             padding: "10px 20px",
             borderRadius: "8px 8px 0 0",
-            marginTop: "70px", // Ajusta el valor de marginTop según lo que necesites
+            marginTop: "10px", // Ajusta el valor de marginTop según lo que necesites
             display: "flex",
-            flexDirection: "column",
-            justifyContent: "flex-end", // Esto mantiene el contenido alineado al fondo
+            // flexDirection: "column",
+            justifyContent: "center",
+            alignItems: "center",
             height: "100%", // Asegúrate de que el contenedor tenga suficiente altura
           }}
         >
@@ -550,6 +547,7 @@ export const AgregarProductosAlmacen = () => {
                 <ContentPasteSearchIcon sx={{ fontSize: 29 }} />
               </IconButton>
               <Select
+                ref={productosRef}
                 options={listaProductos}
                 value={formData.producto}
                 onChange={(opcion) => handleSelectChange("producto", opcion)}
@@ -569,6 +567,7 @@ export const AgregarProductosAlmacen = () => {
                 value={formData.cantidad}
                 onChange={handleChange}
                 ref={cantidadRef}
+                onKeyDown={handleKeyDownCostoUnit}
               />
               {errors.cantidad && (
                 <div className="text-danger">{errors.cantidad}</div>
@@ -583,6 +582,8 @@ export const AgregarProductosAlmacen = () => {
                 className="form-control"
                 value={formData.costo_unitario}
                 onChange={handleChange}
+                ref={costoUnitarioRef}
+                onKeyDown={handleKeyDownAgregar}
               />
               {errors.costo_unitario && (
                 <div className="text-danger">{errors.costo_unitario}</div>
@@ -607,7 +608,7 @@ export const AgregarProductosAlmacen = () => {
             className="mt-1"
             style={{ display: "flex", justifyContent: "flex-start" }}
           >
-            <Button type="submit" variant="contained" color="primary">
+            <Button type="submit" variant="contained" color="primary" ref={agregarRef} onKeyDown={handleCombinedKeyDown}>
               Agregar
             </Button>
           </div>
@@ -615,13 +616,13 @@ export const AgregarProductosAlmacen = () => {
       </div>
 
       {/*   LINEA DIVISORA ENTRE AGREGAR Y LOS PRODUCTOS YA AGREGADOS */}
-      <hr />
+      {/* <hr /> */}
 
-      {/* ESTADO DE PRODUCTOS AGREGADOS */}
+      {/* <<<<<<<<<----------------------- SEGUNDA TABLA : ESTADO DE PRODUCTOS AGREGADOS ------------------>>>>>>>>>>>>*/}
 
       <Box
         sx={{
-          backgroundColor: "#f2f3f4",
+          backgroundColor: "withe",
           minHeight: "100vh",
           paddingBottom: 5,
           transition: "margin 0.3s ease-in-out",

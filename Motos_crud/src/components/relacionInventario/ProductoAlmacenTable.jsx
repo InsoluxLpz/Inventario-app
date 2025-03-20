@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from "react";
-import WarehouseIcon from "@mui/icons-material/Warehouse";
-import PlaylistAddCircleIcon from "@mui/icons-material/PlaylistAddCircle";
 import Paper from "@mui/material/Paper";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -9,14 +7,12 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import { Box, Button, Typography, IconButton, TextField } from "@mui/material";
+import FeedIcon from "@mui/icons-material/Feed";
 import { NavBar } from "../NavBar";
+// import { ModalInventarioDetalles } from "../relacionInventario/ModalInventarioDetalles";
 import { cargarListasCampos } from "../../api/almacenProductosApi";
-import AddchartIcon from "@mui/icons-material/Addchart";
-import InventoryIcon from "@mui/icons-material/Inventory";
-import { EditarProductoAlmacenModal } from "./EditarProductoAlmacenModal";
-import { obtenerProductos } from "../../api/productosApi";
-import { obtenerProveedores } from "../../api/proveedoresApi";
 import { useNavigate } from "react-router";
+import { MovXProductosTable } from "./MovXProductosTable";
 
 export const ProductoAlmacenTable = () => {
   const navigate = useNavigate();
@@ -28,6 +24,13 @@ export const ProductoAlmacenTable = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [showInactive, setShowInactive] = useState(false);
 
+  // * modal para inventario detalle
+  // const [openModal, setOpenModal] = useState(false);
+  // const [selectedMovimiento, setSelectedMovimiento] = useState(null);
+
+  // const [showDetalles, setShowDetalles] = useState(false);
+  // const [selectedMovimiento, setSelectedMovimiento] = useState(null);
+
   //  * filtro para el inventario
   const [filtro, setFiltro] = useState({
     codigo: "",
@@ -35,6 +38,19 @@ export const ProductoAlmacenTable = () => {
     unidadMedida: "",
   });
 
+  // * funcion para el modal de el icono de detalles del movimiento en el inventario
+  // const handleOpenModal = () => {
+  //   setSelectedMovimiento(id);
+  //   setOpenModal(true);
+  // }
+
+  // const handleCloseModal =  () => {
+  //   setOpenModal(false);
+  //   setSelectedMovimiento(null);
+  // }
+
+
+  // * peticion
   useEffect(() => {
     fetchInventario();
   }, []);
@@ -69,29 +85,6 @@ export const ProductoAlmacenTable = () => {
     });
   };
 
-  //   * formato de dinero
-  // const formatearDinero = (valor) => {
-  //   return new Intl.NumberFormat("es-MX", {
-  //     style: "currency",
-  //     currency: "MXN",
-  //   }).format(valor);
-  // };
-
-  // const filteredInventario = inventario.filter((producto) => {
-  //   const matchesSearch =
-  //     (producto.nombre?.toLowerCase() || "").includes(
-  //       searchTerm.toLowerCase()
-  //     ) ||
-  //     (producto.codigo?.toLowerCase() || "").includes(
-  //       searchTerm.toLowerCase()
-  //     ) ||
-  //     (producto.grupo?.toLowerCase() || "").includes(searchTerm.toLowerCase());
-
-  //   return showInactive
-  //     ? matchesSearch
-  //     : matchesSearch && producto.status !== 0;
-  // });
-
   const handleFiltroChange = (e) => {
     setFiltro({ ...filtro, [e.target.name]: e.target.value });
   };
@@ -119,69 +112,23 @@ export const ProductoAlmacenTable = () => {
     return codigoMatch && unidadMedidaMatch && fechaMatch;
   });
 
+  // *  funcion para ordenar alfabeticamente
+  const sortedInventario = [...filteredInventario].sort((a, b) =>
+    a.nombreProducto.localeCompare(b.nombreProducto)
+  );
+
   return (
     <>
       <NavBar onSearch={setSearchTerm} />
 
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "row",
-          justifyContent: "flex-end",
-          gap: "30px", // Espacio entre los botones
-          position: "fixed",
-          right: 50,
-          top: 80,
-        }}
-      >
-        <Button
-          variant="contained"
-          sx={{
-            backgroundColor: "#1f618d",
-            color: "white",
-            ":hover": { opacity: 0.7 },
-            position: "absolute",
-            right: 20,
-            borderRadius: "8px",
-            padding: "10px 20px",
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
-            marginRight: 28,
-          }}
-          onClick={() => navigate("/almacen/MovimientosAlmacenTable")}
-        >
-          <WarehouseIcon sx={{ fontSize: 24 }} />
-          Movimientos
-        </Button>
-
-        <Button
-          variant="contained"
-          sx={{
-            backgroundColor: "#1f618d",
-            color: "white",
-            ":hover": { opacity: 0.7 },
-            borderRadius: "8px",
-            padding: "10px 20px",
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
-          }}
-          onClick={() => navigate("/almacen/entradas")}
-        >
-          <PlaylistAddCircleIcon sx={{ fontSize: 24 }} />
-          Agregar entradas
-        </Button>
-      </div>
-
-      <Box display="flex" justifyContent="center" gap={1} my={2} mt={10}>
+      <Box display="flex" justifyContent="center" gap={1} my={2} mt={5}>
         <TextField
           label="Codigo"
           name="codigo"
           value={filtro.codigo}
           onChange={handleFiltroChange}
         />
-        <TextField
+        {/* <TextField
           label="Filtrar por"
           name="fecha"
           type="date"
@@ -189,7 +136,7 @@ export const ProductoAlmacenTable = () => {
           onChange={handleFiltroChange}
           onFocus={(e) => (e.target.showPicker ? e.target.showPicker() : null)} // Agregar verificación para `showPicker`
           InputLabelProps={{ shrink: true }}
-        />
+        /> */}
 
         <TextField
           label="Unidad de medida"
@@ -223,6 +170,7 @@ export const ProductoAlmacenTable = () => {
                     "Producto",
                     "Cantidad",
                     "Unidad de medida",
+                    "Detalles",
                   ].map((header) => (
                     <TableCell
                       key={header}
@@ -240,9 +188,8 @@ export const ProductoAlmacenTable = () => {
               </TableHead>
 
               <TableBody>
-                {filteredInventario.map((producto) => (
+                {sortedInventario.map((producto) => (
                   <TableRow key={producto.id}>
-                    {/* <TableCell align="center">{producto.idProducto}</TableCell> */}
                     <TableCell align="center">{producto.codigo}</TableCell>
                     <TableCell align="center">
                       {producto.nombreProducto}
@@ -253,26 +200,16 @@ export const ProductoAlmacenTable = () => {
                     <TableCell align="center">
                       {producto.unidadMedida}
                     </TableCell>
-                    {/* <TableCell align="center">
+                    <TableCell align="center">
                       <IconButton
                         sx={{ color: "black" }}
-                        onClick={() => {
-                          setProductoSeleccionado(producto);
-                          setOpenModalEditar(true);
-                        }}
+                        onClick={() =>
+                          handleOpenDetalles(producto.idMovimiento)
+                        }
                       >
-                        <EditIcon sx={{ fontSize: 20 }} />
+                        <FeedIcon sx={{ fontSize: 24 }} />
                       </IconButton>
-
-                      <IconButton
-                        variant="contained"
-                        color="error"
-                        style={{ marginLeft: "10px" }}
-                        onClick={() => handleActualizarStatus(producto.id)}
-                      >
-                        <InventoryIcon sx={{ fontSize: 20 }} />
-                      </IconButton>
-                    </TableCell> */}
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -281,12 +218,18 @@ export const ProductoAlmacenTable = () => {
         </Paper>
       </Box>
 
-      <EditarProductoAlmacenModal
-        modalOpen={openModalEditar}
-        onClose={() => setOpenModalEditar(false)}
-        producto={productoSeleccionado}
-        actualizarLista={actualizarLista}
-      />
+      {/* en caso de que se acepte un modal aqui  */}
+      {/* <ModalInventarioDetalles
+      open={openModal}
+      onClose={handleCloseModal}
+      idMovimiento={selectedMovimiento}
+      /> */}
+
+      {/* <MovXProductosTable
+        visible={showDetalles}
+        idMovimiento={selectedMovimiento}
+        onClose={handleCloseDetalles}
+      /> */}
     </>
   );
 };

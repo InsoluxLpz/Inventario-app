@@ -265,6 +265,44 @@ router.get('/buscar_producto/:codigo', async (req, res) => {
     }
 });
 
+// * consulta para la tabla movimientos por productos en el almacen
+router.get('/obtener_movimientosXProductos_detalles/:idProducto', async (req, res) => {
+    const { idProducto } = req.params;
+    console.log("idProducto ", idProducto);
+
+    try {
+        const [result] = await db.query(`
+            SELECT 
+                iad.id AS idDetalle,
+                iad.idMovimiento,
+                iad.idProducto,
+                iad.idTipoMovimiento,
+                iad.cantidad,
+                iad.costo_unitario,
+                iad.existencia_anterior,
+                iad.existencia_nueva,
+                iad.fecha as fecha_movimiento,
+                iad.idUsuario,
+                iad.idUnidadMedida,
+                iad.origen_movimiento,
+                ia.cantidad AS stock_actual
+            FROM inventario_almacen_detalle iad
+            JOIN inventario_almacen ia ON iad.idProducto = ia.idProducto
+            WHERE iad.idProducto = ?
+            ORDER BY iad.fecha DESC;
+        `, [idProducto]);
+
+        // Si hay resultados, enviarlos como respuesta
+        if (result.length > 0) {
+            res.status(200).json(result);
+        } else {
+            res.status(404).json({ message: "Detalles no encontrados" });
+        }
+    } catch (error) {
+        console.error("Error al obtener datos:", error);
+        res.status(500).json({ message: "Error en el servidor" });
+    }
+});
 
 
 

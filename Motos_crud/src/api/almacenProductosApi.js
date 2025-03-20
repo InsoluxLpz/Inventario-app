@@ -208,6 +208,26 @@ export const cargarListasMovimientosDetalles = async (idMovimiento) => {
     }
 };
 
+//  * consulta para tener los movimientos_almacen_detalle
+export const cargarListasMovimientosXProductosDetalles = async (idProducto) => {
+    try {
+        const response = await fetch(`${API_URL}/entrada/obtener_movimientosXProductos_detalles/${idProducto}`, {
+            method: "GET",
+            headers: {
+                'Content-Type': 'application/json'
+            },
+        });
+        if (response.ok) {
+            const data = await response.json();
+            return data;
+        }
+    } catch (error) {
+        console.error('Error al realizar la solicitud', error);
+        Swal.fire('Error', 'Hubo un problema al conectar con el servidor.', 'error');
+        return null;
+    }
+};
+
 
 // * consulta para buscar productos por codigo
 export const buscarProducto = async (codigo) => {
