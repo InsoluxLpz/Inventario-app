@@ -78,7 +78,12 @@ export const EditarServiciosModal = ({ onClose, modalOpen, servicio, actualizarL
         }
     };
 
-
+    const handleKeyDown = (e, nextField) => {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            document.getElementById(nextField)?.focus();
+        }
+    };
 
     return (
         <div className="modal-backdrop">
@@ -93,19 +98,20 @@ export const EditarServiciosModal = ({ onClose, modalOpen, servicio, actualizarL
                                 <div className="row">
                                     <div className="col-md-12 mb-3">
                                         <label className="form-label">Nombre</label>
-                                        <input type="text" name="nombre" className={`form-control ${errors.nombre ? "is-invalid" : ""}`} value={formData.nombre} onChange={handleChange} />
+                                        <input id="nombre" type="text" name="nombre" className={`form-control ${errors.nombre ? "is-invalid" : ""}`} value={formData.nombre} onChange={handleChange} onKeyDown={(e) => handleKeyDown(e, "descripcion")} />
                                         {errors.nombre && <div className="invalid-feedback">{errors.nombre}</div>}
                                     </div>
 
                                     <div className="col-md-12 mb-3">
                                         <label className="form-label">Descripcion</label>
-                                        <textarea type="text" name="descripcion" className={`form-control ${errors.descripcion ? "is-invalid" : ""}`} value={formData.descripcion} onChange={handleChange} />
+                                        <textarea id="descripcion" type="text" name="descripcion" className={`form-control ${errors.descripcion ? "is-invalid" : ""}`} value={formData.descripcion} onChange={handleChange} onKeyDown={(e) => handleKeyDown(e, "status")} />
                                         {errors.descripcion && <div className="invalid-feedback">{errors.descripcion}</div>}
                                     </div>
 
                                     <div className="col-md-6 mb-3">
                                         <label className="form-label">Activar/DesActivar servicio</label>
                                         <select
+                                            id="status"
                                             name="status"
                                             className={`form-control ${errors.status ? "is-invalid" : ""}`}
                                             value={formData.status}  // Asegúrate de que `formData.status` proviene de la BD

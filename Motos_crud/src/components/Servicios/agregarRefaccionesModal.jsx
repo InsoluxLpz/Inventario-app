@@ -1,7 +1,7 @@
 
 import { Button } from "@mui/material";
 import { obtenerProductos } from "../../api/productosApi";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Select from "react-select";
 
 export const AgregarRefaccionesModal = ({ onClose, modalOpen, agregarProductoATabla }) => {
@@ -16,6 +16,8 @@ export const AgregarRefaccionesModal = ({ onClose, modalOpen, agregarProductoATa
     const [refacciones, setRefacciones] = useState([]);
     const [errors, setErrors] = useState({});
     const [stockDisponible, setStockDisponible] = useState({});
+    const inputCantidadRef = useRef(null);
+    const selectProductoRef = useRef(null);
 
 
     useEffect(() => {
@@ -29,6 +31,12 @@ export const AgregarRefaccionesModal = ({ onClose, modalOpen, agregarProductoATa
         fetchProductos();
     }, []);
 
+    useEffect(() => {
+        if (formData.producto) {
+            inputCantidadRef.current?.focus();  // Mueve el foco al input de cantidad
+        }
+    }, [formData.producto]);
+
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData((prev) => {
@@ -40,6 +48,8 @@ export const AgregarRefaccionesModal = ({ onClose, modalOpen, agregarProductoATa
                     nuevoEstado.precioTotal = productoSeleccionado.precio * (prev.cantidad || 1);
                     setStockDisponible(productoSeleccionado.stock_disponible); // Guardamos el stock disponible
                 }
+                // Mover el foco al input de cantidad
+                inputCantidadRef.current?.focus();
             }
 
             if (name === "cantidad") {
@@ -96,7 +106,13 @@ export const AgregarRefaccionesModal = ({ onClose, modalOpen, agregarProductoATa
             cantidad: "",
             precioTotal: 0,
         });
+
+        setErrors({});
+        setTimeout(() => {
+            selectProductoRef.current?.focus();
+        }, 100);
     };
+
 
     return (
         <div className="modal-backdrop">
@@ -109,22 +125,22 @@ export const AgregarRefaccionesModal = ({ onClose, modalOpen, agregarProductoATa
                         <form onSubmit={handleSubmit}>
                             <div className="modal-body">
                                 <div className="row">
-                                    {/* Selección de Producto */}
                                     <div className="col-md-12 mb-3">
                                         <label className="form-label">Artículo del almacén</label>
                                         <Select
+                                            ref={selectProductoRef}
                                             name="producto"
                                             classNamePrefix="select"
                                             options={opcionesProductos}
-                                            value={opcionesProductos.find((op) => op.value === formData.producto)} // Selección actual
-                                            onChange={(selectedOption) => setFormData({ ...formData, producto: selectedOption.value })}
-                                            isSearchable={true} // Permite buscar
+                                            value={formData.producto ? opcionesProductos.find((op) => op.value === formData.producto) : null}
+                                            onChange={(selectedOption) => setFormData({ ...formData, producto: selectedOption?.value || "" })}
+                                            isSearchable={true}
                                             placeholder="SELECCIONA"
                                             styles={{
                                                 menuList: (provided) => ({
                                                     ...provided,
-                                                    maxHeight: "130px", // Limita la altura del dropdow
-                                                    overflowY: "auto",  // Habilita scroll si hay muchos elementos
+                                                    maxHeight: "130px",
+                                                    overflowY: "auto",
                                                 }),
                                                 control: (base) => ({
                                                     ...base,
@@ -139,7 +155,7 @@ export const AgregarRefaccionesModal = ({ onClose, modalOpen, agregarProductoATa
                                     {/* Cantidad */}
                                     <div className="col-md-12 mb-3">
                                         <label className="form-label">Cantidad</label>
-                                        <input type="number" name="cantidad" className={`form-control ${errors.cantidad ? "is-invalid" : ""}`} onChange={handleChange} value={formData.cantidad} />
+                                        <input type="number" name="cantidad" className={`form-control ${errors.cantidad ? "is-invalid" : ""}`} onChange={handleChange} value={formData.cantidad} ref={inputCantidadRef} />
                                         {errors.cantidad && <div className="invalid-feedback">{errors.cantidad}</div>}
                                     </div>
 

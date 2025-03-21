@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { actualizarProductos } from "../../api/productosApi";
 import { Button } from "@mui/material";
 import Select from "react-select";
@@ -26,6 +26,10 @@ export const EditarProductoModal = ({ onClose, modalOpen, producto, actualizarLi
   });
 
   const [errors, setErrors] = useState({});
+  const marcaRef = useRef(null);
+  const unidadRef = useRef(null);
+  const proveedoresRef = useRef(null);
+
   useEffect(() => {
     if (producto && ListaProveedores.length > 0) {
       console.log("Producto cargado:", producto);
@@ -51,7 +55,6 @@ export const EditarProductoModal = ({ onClose, modalOpen, producto, actualizarLi
     }
   }, [producto, ListaProveedores]);
 
-
   const handleChange = (e) => {
     const { name, value } = e.target;
     let newValue = value;
@@ -61,8 +64,6 @@ export const EditarProductoModal = ({ onClose, modalOpen, producto, actualizarLi
     setFormData((prev) => ({ ...prev, [name]: newValue }));
     setErrors((prev) => ({ ...prev, [name]: "" }));
   };
-
-
 
   const validateForm = () => {
     const newErrors = {};
@@ -78,7 +79,6 @@ export const EditarProductoModal = ({ onClose, modalOpen, producto, actualizarLi
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -163,7 +163,6 @@ export const EditarProductoModal = ({ onClose, modalOpen, producto, actualizarLi
     return '$0.00';  // Valor por defecto si no hay valor
   };
 
-
   const opcionesGrupos = [...grupos]
     .sort((a, b) => a.nombre.localeCompare(b.nombre))
     .map((grupo) => ({ value: grupo.id, label: grupo.nombre }));
@@ -176,6 +175,16 @@ export const EditarProductoModal = ({ onClose, modalOpen, producto, actualizarLi
     .filter(prov => prov.status !== 0)
     .map(prov => ({ value: prov.id, label: prov.nombre_proveedor }));
 
+  const handleKeyDown = (e, nextField, isSelect = false) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      if (isSelect && nextField.current) {
+        nextField.current.focus();
+      } else {
+        document.getElementById(nextField)?.focus();
+      }
+    }
+  }
 
   return (
     <>
@@ -193,38 +202,47 @@ export const EditarProductoModal = ({ onClose, modalOpen, producto, actualizarLi
                     <div className="col-md-6 mb-3">
                       <label className="form-label">Código</label>
                       <input
+                        id="codigo"
                         type="text"
                         name="codigo"
                         className={`form-control ${errors.codigo ? "is-invalid" : ""}`}
                         value={formData.codigo}
                         onChange={handleChange}
+                        onKeyDown={(e) => handleKeyDown(e, "nombre")}
                       />
                       {errors.codigo && (
                         <div className="invalid-feedback">{errors.codigo}</div>
                       )}
                     </div>
+
                     <div className="col-md-6 mb-3">
                       <label className="form-label">Nombre</label>
                       <input
+                        id="nombre"
                         type="text"
                         name="nombre"
                         className={`form-control ${errors.nombre ? "is-invalid" : ""}`}
                         value={formData.nombre}
                         onChange={handleChange}
+                        onKeyDown={(e) => handleKeyDown(e, marcaRef, true)}
                       />
                       {errors.nombre && (
                         <div className="invalid-feedback">{errors.nombre}</div>
                       )}
                     </div>
+
                     <div className="col-md-6 mb-3">
                       <label className="form-label">Grupo</label>
                       <Select
+                        ref={marcaRef}
+                        id="grupo"
                         name="grupo"
                         options={opcionesGrupos}
                         placeholder="SELECCIONA"
                         value={opcionesGrupos.find((op) => op.value === formData.grupo)}
                         isSearchable={true}
                         onChange={(selectedOption) => setFormData({ ...formData, grupo: selectedOption.value })}
+                        onKeyDown={(e) => handleKeyDown(e, "precio")}
                         styles={{
                           menuList: (provided) => ({
                             ...provided,
@@ -242,6 +260,7 @@ export const EditarProductoModal = ({ onClose, modalOpen, producto, actualizarLi
                         <div className="invalid-feedback">{errors.grupo}</div>
                       )}
                     </div>
+
                     <div className="col-md-6 mb-3">
                       <label className="form-label">Precio</label>
                       <div className="input-group">
@@ -249,11 +268,13 @@ export const EditarProductoModal = ({ onClose, modalOpen, producto, actualizarLi
                           $
                         </span>
                         <input
+                          id="precio"
                           type="text"
                           name="precio"
                           readOnly
                           className={`form-control ${errors.precio ? "is-invalid" : ""}`}
                           value={formatCurrency(formData.precio)}
+                          onKeyDown={(e) => handleKeyDown(e, unidadRef, true)}
                         />
                       </div>
                       {errors.precio && (
@@ -261,16 +282,18 @@ export const EditarProductoModal = ({ onClose, modalOpen, producto, actualizarLi
                       )}
                     </div>
 
-
                     <div className="col-md-6 mb-3">
                       <label className="form-label">Unidad de Medida</label>
                       <Select
+                        ref={unidadRef}
+                        id='unidad_medida'
                         name="unidad_medida"
                         options={opcionesUnidad}
                         placeholder="SELECCIONA"
                         value={opcionesUnidad.find((um) => um.value === formData.unidad_medida)}
                         isSearchable={true}
                         onChange={(selectedOption) => setFormData({ ...formData, unidad_medida: selectedOption.value })}
+                        onKeyDown={(e) => handleKeyDown(e, proveedoresRef, true)}
                         styles={{
                           menuList: (provided) => ({
                             ...provided,
@@ -292,6 +315,8 @@ export const EditarProductoModal = ({ onClose, modalOpen, producto, actualizarLi
                     <div className="col-md-6 mb-3">
                       <label className="form-label">Proveedor</label>
                       <Select
+                        ref={proveedoresRef}
+                        id='unidad_medida'
                         name="proveedores"
                         options={opcioneProveedor}
                         placeholder="SELECCIONA"
@@ -304,6 +329,7 @@ export const EditarProductoModal = ({ onClose, modalOpen, producto, actualizarLi
                             proveedores: selectedOptions || []
                           });
                         }}
+                        onKeyDown={(e) => handleKeyDown(e, "status")}
                       />
 
                       {errors.proveedores && (
@@ -315,10 +341,12 @@ export const EditarProductoModal = ({ onClose, modalOpen, producto, actualizarLi
                   <div className="col-md-6 mb-3">
                     <label className="form-label">Activar/Desactivar producto</label>
                     <select
+                      id="status"
                       name="status"
                       className={`form-control ${errors.status ? "is-invalid" : ""}`}
                       value={formData.status}  // Asegúrate de que `formData.status` proviene de la BD
                       onChange={handleChange}
+                      onKeyDown={(e) => handleKeyDown(e, "descripcion")}
                     >
                       <option value="">Seleccionar</option>
                       <option value="1">Activo</option>
@@ -332,6 +360,7 @@ export const EditarProductoModal = ({ onClose, modalOpen, producto, actualizarLi
                   <div className="col-md-12 mb-3">
                     <label className="form-label">Descripción</label>
                     <textarea
+                      id="descripcion"
                       name="descripcion"
                       className={`form-control ${errors.descripcion ? "is-valid" : ""
                         }`}

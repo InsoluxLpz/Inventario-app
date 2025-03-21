@@ -112,7 +112,7 @@ router.post('/agregar_mantenimiento', async (req, res) => {
 
     const { fecha_inicio, odometro, costo, comentario, moto, idAutorizo, idUsuario, idCancelo, fecha_cancelacion, servicios, productos } = req.body;
 
-    if (!fecha_inicio || !moto || !odometro || !costo || !idUsuario || !idAutorizo) {
+    if (!fecha_inicio || !moto || !costo || !idUsuario || !idAutorizo) {
         return res.status(400).json({ error: "Faltan datos obligatorios" });
     }
 

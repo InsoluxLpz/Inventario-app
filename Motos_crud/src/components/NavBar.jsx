@@ -27,6 +27,7 @@ import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import CategoryIcon from "@mui/icons-material/Category";
 import WarehouseIcon from "@mui/icons-material/Warehouse";
 import LogoutIcon from "@mui/icons-material/Logout";
+import Swal from 'sweetalert2';
 // import { ExpandMoreIcon } from "@material-ui/icons";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
@@ -140,10 +141,24 @@ export const NavBar = () => {
     setOpenAdmin(!openAdmin);
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    navigate("/");
+  const handleLogout = async () => {
+    const result = await Swal.fire({
+      title: "Cerrar Sesión",
+      text: "¿Quieres cerrar sesión?",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonColor: "#f1c40f",
+      cancelButtonColor: "#7f8c8d",
+      confirmButtonText: "Sí,Cerrar",
+      cancelButtonText: "Cancelar"
+    });
+
+    if (result.isConfirmed) {
+      localStorage.removeItem("token");
+      navigate("/");
+    }
   };
+
 
   const routeTitles = {
     "/inicio": "Inicio",
@@ -157,8 +172,7 @@ export const NavBar = () => {
     "/servicios/ListaMantenimientos": "Reporte Mantenimientos",
     "/servicios/CatalogoServicios": "Catalogo de servicios",
     "/almacen/Entradas": "Entradas/Salidas",
-    "/servicios/RealizarMantenimiento": "Agregar Mantenimiento",
-    "/almacen/MovXProductosTable":"Movimientos/Productos"
+    "/servicios/RealizarMantenimiento": "Agregar Mantenimiento"
   };
 
   const currentTitle = routeTitles[location.pathname] || "Inicio";
@@ -536,11 +550,12 @@ export const NavBar = () => {
           <Divider sx={{ borderColor: "rgba(0, 0, 0, 0.7)", borderWidth: 1 }} />
 
           <ListItem button onClick={handleLogout}>
-            <ListItemIcon>
-              <LogoutIcon sx={{ fontSize: 18, color: "red" }} />
+            <ListItemIcon sx={{ minWidth: 32 }}>
+              <LogoutIcon sx={{ fontSize: 20, color: 'red' }} />
             </ListItemIcon>
-            <ListItemText primary="Cerrar sesión" sx={{ color: "red" }} />
+            <ListItemText primary="Cerrar sesión" sx={{ color: 'red', display: open ? "block" : "none" }} />
           </ListItem>
+
         </List>
       </Drawer>
 

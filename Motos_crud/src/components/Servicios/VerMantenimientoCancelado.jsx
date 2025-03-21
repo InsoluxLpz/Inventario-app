@@ -41,13 +41,16 @@ export const VerMantenimientoCancelado = ({ modalOpen, onClose, mantenimiento, l
                 servicio: mantenimiento.servicios.map(s => s.id) || [],
                 productos: mantenimiento.productos || [],
                 comentario: mantenimiento.comentario || "",
-                costo_total: mantenimiento.costo_total || 0,
+                costo_total: mantenimiento.costo_total
+                    ? parseFloat(mantenimiento.costo_total) // ✅ Convertir a número correctamente
+                    : 0.00, // ✅ Si está vacío, ponerlo en 0.00
                 nombre: mantenimiento.nombre || "",
             });
         }
-        console.log(mantenimiento)
-
     }, [mantenimiento]);
+
+
+
 
     useEffect(() => {
         const fetchAutorizo = async () => {
@@ -81,7 +84,7 @@ export const VerMantenimientoCancelado = ({ modalOpen, onClose, mantenimiento, l
         <>
             <div className="modal-backdrop">
                 <div className="modal fade show" style={{ display: "block" }} tabIndex="-1" role="dialog">
-                    <div className="modal-dialog" role="document" style={{ maxWidth: "60vw", marginTop: 90 }}>
+                    <div className="modal-dialog" role="document" style={{ maxWidth: "40vw", marginTop: 90 }}>
                         <div className="modal-content w-100">
                             <div className="modal-header" style={{ backgroundColor: '#c0392b' }}>
                                 <h5 className="modal-title" style={{ color: 'white' }}>Servicio Cancelado</h5>
@@ -156,22 +159,22 @@ export const VerMantenimientoCancelado = ({ modalOpen, onClose, mantenimiento, l
 
                                 <h6 className="mb-2">Desglose de Partes/Refacciones de Almacén</h6>
                                 <div className="table-responsive">
-                                    <table className="table">
+                                    <table className="table" style={{ maxWidth: "80%", margin: "auto" }}>
                                         <thead>
                                             <tr>
-                                                <th style={{ textAlign: "left", width: "16.66%" }}>Producto</th>
-                                                <th style={{ textAlign: "left", width: "16.66%" }}>Costo Unitario</th>
-                                                <th style={{ textAlign: "left", width: "16.66%" }}>Cantidad</th>
-                                                <th style={{ textAlign: "left", width: "16.66%" }}>Subtotal</th>
+                                                <th style={{ textAlign: "center", width: "15%" }}>Producto</th>
+                                                <th style={{ textAlign: "right", width: "15%" }}>Costo Unitario</th>
+                                                <th style={{ textAlign: "right", width: "15%" }}>Cantidad</th>
+                                                <th style={{ textAlign: "right", width: "15%" }}>Subtotal</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             {formData.productos.map((producto, index) => (
                                                 <tr key={index}>
-                                                    <td style={{ textAlign: "left", width: "16.66%" }}>{producto.nombre}</td>
-                                                    <td style={{ textAlign: "left", width: "16.66%" }}>${formatNumber(producto.costo)}</td>
-                                                    <td style={{ textAlign: "left", width: "16.66%" }}>{producto.cantidad}</td>
-                                                    <td style={{ textAlign: "left", width: "16.66%" }}>${formatNumber(producto.costo * producto.cantidad)}</td>
+                                                    <td style={{ textAlign: "center", width: "15%" }}>{producto.nombre}</td>
+                                                    <td style={{ textAlign: "right", width: "15%" }}>${formatNumber(producto.costo)}.00</td>
+                                                    <td style={{ textAlign: "right", width: "15%" }}>{producto.cantidad}</td>
+                                                    <td style={{ textAlign: "right", width: "15%" }}>${formatNumber(producto.costo * producto.cantidad)}.00</td>
                                                 </tr>
                                             ))}
                                         </tbody>
@@ -191,18 +194,18 @@ export const VerMantenimientoCancelado = ({ modalOpen, onClose, mantenimiento, l
 
                                     </div>
                                     <div className="col-md-2 offset-md-6">
-                                        <label className="form-label">Costo Total</label>
+                                        <label className="form-label text-end d-block">Costo Total</label>
                                         <div className="input-group">
-                                            <span className="input-group-text" style={{ height: 47 }}>
-                                                $
-                                            </span>
                                             <input
                                                 type="text"
-                                                name="costo_refacciones"
+                                                name="costo_total"
                                                 className="form-control"
-                                                value={new Intl.NumberFormat('es-MX').format(formData.costo_total)}
+                                                value={`$${(formData.costo_total || 0).toLocaleString('es-MX', { minimumFractionDigits: 2 })}`}
                                                 readOnly
+                                                style={{ textAlign: "right" }}
                                             />
+
+
                                         </div>
                                     </div>
 

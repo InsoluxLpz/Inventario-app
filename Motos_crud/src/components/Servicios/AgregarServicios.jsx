@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Box, Button } from "@mui/material";
 import { AgregarServicio } from "../../api/ServiciosApi";
-import { useNavigate } from "react-router";
 
 export const AgregarServicios = ({ modalOpen, onClose, agregarServicioLista }) => {
     if (!modalOpen) return null;
@@ -61,6 +60,13 @@ export const AgregarServicios = ({ modalOpen, onClose, agregarServicioLista }) =
         }
     };
 
+    const handleKeyDown = (e, nextField) => {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            document.getElementById(nextField)?.focus();
+        }
+    };
+
     return (
         <div className="modal-backdrop">
             <div className="modal fade show" style={{ display: "block" }} aria-labelledby="exampleModalLabel" tabIndex="-1" role="dialog">
@@ -76,11 +82,13 @@ export const AgregarServicios = ({ modalOpen, onClose, agregarServicioLista }) =
                                     <div className="col-md-6 mb-3">
                                         <label className="form-label">Nombre</label>
                                         <input
+                                            id="nombre"
                                             type="text"
                                             name="nombre"
                                             className={`form-control ${errors.nombre ? "is-invalid" : ""} `}
                                             value={servicio.nombre}
                                             onChange={handleChange}
+                                            onKeyDown={(e) => handleKeyDown(e, "descripcion")}
                                         />
                                         {errors.nombre && (
                                             <div className="invalid-feedback">{errors.nombre}</div>
@@ -91,6 +99,7 @@ export const AgregarServicios = ({ modalOpen, onClose, agregarServicioLista }) =
                                     <div className="col-md-6 mb-3">
                                         <label className="form-label">Descripción</label>
                                         <textarea
+                                            id="descripcion"
                                             type="text"
                                             name="descripcion"
                                             className={`form-control ${errors.descripcion ? "is-invalid" : ""}`}

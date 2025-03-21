@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { ActualizarMoto } from "../../api/motosApi";
 import { Button } from '@mui/material';
 import '../../styles/LoginScreen.css';
@@ -13,6 +13,8 @@ export const EditarModal = ({ onClose, modalOpen, moto, actualizarLista, listaMa
         if (!fecha) return "";
         return fecha.split("T")[0];
     };
+
+    const marcaRef = useRef(null);
 
     const [formData, setFormData] = useState({
         inciso: moto.inciso,
@@ -53,6 +55,12 @@ export const EditarModal = ({ onClose, modalOpen, moto, actualizarLista, listaMa
 
     const handleChange = (e) => {
         const { name, value } = e.target;
+
+        if ((name === "inciso" || name === "anio") && value < 0) {
+            cleanedValue = "0"; // Reemplazar con 0 si el número es negativo
+        }
+
+
         const fieldsToClean = ["placa", "inciso", "no_serie"];
         let cleanedValue = value;
         if (fieldsToClean.includes(name)) {
@@ -114,6 +122,17 @@ export const EditarModal = ({ onClose, modalOpen, moto, actualizarLista, listaMa
 
     };
 
+    const handleKeyDown = (e, nextField, isSelect = false) => {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            if (isSelect && nextField.current) {
+                nextField.current.focus();
+            } else {
+                document.getElementById(nextField)?.focus();
+            }
+        }
+    };
+
     return (
         <div className="modal-backdrop">
             <div className="modal fade show" style={{ display: "block" }} aria-labelledby="exampleModalLabel" tabIndex="-1" role="dialog">
@@ -127,18 +146,21 @@ export const EditarModal = ({ onClose, modalOpen, moto, actualizarLista, listaMa
                                 <div className="row">
                                     <div className="col-md-4 mb-3">
                                         <label className="form-label">Inciso</label>
-                                        <input type="number" name="inciso" className={`form-control ${errors.inciso ? "is-invalid" : ""}`} value={formData.inciso} onChange={handleChange} />
+                                        <input id="inciso" type="number" name="inciso" className={`form-control ${errors.inciso ? "is-invalid" : ""}`} value={formData.inciso} onChange={handleChange} onKeyDown={(e) => handleKeyDown(e, marcaRef, true)} />
                                         {errors.inciso && <div className="invalid-feedback">{errors.inciso}</div>}
                                     </div>
                                     <div className="col-md-4 mb-3">
                                         <label className="form-label">Marca</label>
                                         <Select
+                                            ref={marcaRef}
+                                            id="idMarca"
                                             name="idMarca"
                                             options={opcionesMarcas}
                                             placeholder="SELECCIONA"
                                             value={opcionesMarcas.find((op) => op.value === formData.idMarca)}
                                             isSearchable={true}
                                             onChange={(selectedOption) => setFormData({ ...formData, idMarca: selectedOption.value })}
+                                            onKeyDown={(e) => handleKeyDown(e, "anio")}
                                             styles={{
                                                 menuList: (provided) => ({
                                                     ...provided,
@@ -156,7 +178,7 @@ export const EditarModal = ({ onClose, modalOpen, moto, actualizarLista, listaMa
                                     </div>
                                     <div className="col-md-4 mb-3">
                                         <label className="form-label">Año</label>
-                                        <input type="number" name="anio" className={`form-control ${errors.anio ? "is-invalid" : ""}`} value={formData.anio} onChange={handleChange} />
+                                        <input id="anio" type="number" name="anio" className={`form-control ${errors.anio ? "is-invalid" : ""}`} value={formData.anio} onChange={handleChange} onKeyDown={(e) => handleKeyDown(e, "modelo")} />
                                         {errors.anio && <div className="invalid-feedback">{errors.anio}</div>}
                                     </div>
                                 </div>
@@ -164,18 +186,18 @@ export const EditarModal = ({ onClose, modalOpen, moto, actualizarLista, listaMa
                                 <div className="row">
                                     <div className="col-md-4 mb-3">
                                         <label className="form-label">Modelo</label>
-                                        <input type="text" name="modelo" className={`form-control ${errors.modelo ? "is-invalid" : ""}`} value={formData.modelo} onChange={handleChange} />
+                                        <input id="modelo" type="text" name="modelo" className={`form-control ${errors.modelo ? "is-invalid" : ""}`} value={formData.modelo} onChange={handleChange} onKeyDown={(e) => handleKeyDown(e, "color")} />
                                         {errors.modelo && <div className="invalid-feedback">{errors.modelo}</div>}
                                     </div>
 
                                     <div className="col-md-4 mb-3">
                                         <label className="form-label">Color</label>
-                                        <input type="text" name="color" className={`form-control ${errors.color ? "is-invalid" : ""}`} value={formData.color} onChange={handleChange} />
+                                        <input id="color" type="text" name="color" className={`form-control ${errors.color ? "is-invalid" : ""}`} value={formData.color} onChange={handleChange} onKeyDown={(e) => handleKeyDown(e, "no_serie")} />
                                         {errors.color && <div className="invalid-feedback">{errors.color}</div>}
                                     </div>
                                     <div className="col-md-4 mb-3">
                                         <label className="form-label">No. Serie</label>
-                                        <input type="text" name="no_serie" className={`form-control ${errors.no_serie ? "is-invalid" : ""}`} value={formData.no_serie} onChange={handleChange} />
+                                        <input id="no_serie" type="text" name="no_serie" className={`form-control ${errors.no_serie ? "is-invalid" : ""}`} value={formData.no_serie} onChange={handleChange} onKeyDown={(e) => handleKeyDown(e, "motor")} />
                                         {errors.no_serie && <div className="invalid-feedback">{errors.no_serie}</div>}
                                     </div>
                                 </div>
@@ -183,17 +205,17 @@ export const EditarModal = ({ onClose, modalOpen, moto, actualizarLista, listaMa
                                 <div className="row">
                                     <div className="col-md-4 mb-3">
                                         <label className="form-label">Motor</label>
-                                        <input type="text" name="motor" className={`form-control ${errors.motor ? "is-invalid" : ""}`} value={formData.motor} onChange={handleChange} />
+                                        <input id="motor" type="text" name="motor" className={`form-control ${errors.motor ? "is-invalid" : ""}`} value={formData.motor} onChange={handleChange} onKeyDown={(e) => handleKeyDown(e, "placa")} />
                                         {errors.motor && <div className="invalid-feedback">{errors.motor}</div>}
                                     </div>
                                     <div className="col-md-4 mb-3">
                                         <label className="form-label">Placa</label>
-                                        <input type="text" name="placa" className={`form-control ${errors.placa ? "is-invalid" : ""}`} value={formData.placa} onChange={handleChange} />
+                                        <input id="placa" type="text" name="placa" className={`form-control ${errors.placa ? "is-invalid" : ""}`} value={formData.placa} onChange={handleChange} onKeyDown={(e) => handleKeyDown(e, "propietario")} />
                                         {errors.placa && <div className="invalid-feedback">{errors.placa}</div>}
                                     </div>
                                     <div className="col-md-4 mb-3">
                                         <label className="form-label">Propietario</label>
-                                        <input type="text" name="propietario" className={`form-control ${errors.propietario ? "is-invalid" : ""}`} value={formData.propietario} onChange={handleChange} />
+                                        <input id="propietario" type="text" name="propietario" className={`form-control ${errors.propietario ? "is-invalid" : ""}`} value={formData.propietario} onChange={handleChange} onKeyDown={(e) => handleKeyDown(e, "fecha_compra")} />
                                         {errors.propietario && <div className="invalid-feedback">{errors.propietario}</div>}
                                     </div>
                                 </div>
@@ -201,16 +223,18 @@ export const EditarModal = ({ onClose, modalOpen, moto, actualizarLista, listaMa
                                 <div className="row">
                                     <div className="col-md-4 mb-3">
                                         <label className="form-label">Fecha de Compra</label>
-                                        <input type="date" name="fecha_compra" onFocus={(e) => e.target.showPicker()} className={`form-control ${errors.fecha_compra ? "is-invalid" : ""}`} value={formData.fecha_compra} onChange={handleChange} />
+                                        <input id="fecha_compra" type="date" name="fecha_compra" onFocus={(e) => e.target.showPicker()} className={`form-control ${errors.fecha_compra ? "is-invalid" : ""}`} value={formData.fecha_compra} onChange={handleChange} onKeyDown={(e) => handleKeyDown(e, "status")} />
                                         {errors.fecha_compra && <div className="invalid-feedback">{errors.fecha_compra}</div>}
                                     </div>
                                     <div className="col-md-4 mb-3">
                                         <label className="form-label">Status</label>
                                         <select
+                                            id="status"
                                             name="status"
                                             className={`form-control ${errors.status ? "is-invalid" : ""}`}
                                             value={formData.status}
                                             onChange={handleChange}
+                                            onKeyDown={(e) => handleKeyDown(e, "nota")}
                                         >
                                             <option value="" disabled>Selecciona</option>
                                             <option value="1">Activa</option>
@@ -224,7 +248,7 @@ export const EditarModal = ({ onClose, modalOpen, moto, actualizarLista, listaMa
                                 <div>
                                     <div className="mb-3">
                                         <label className="form-label">Nota</label>
-                                        <textarea name="nota" className={`form-control`} value={formData.nota} onChange={handleChange}></textarea>
+                                        <textarea id="nota" name="nota" className={`form-control`} value={formData.nota} onChange={handleChange}></textarea>
                                     </div>
                                 </div>
 

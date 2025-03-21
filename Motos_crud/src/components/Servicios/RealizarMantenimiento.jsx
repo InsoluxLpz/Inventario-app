@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { Button } from '@mui/material';
 import { NavBar } from '../NavBar'
 import Select from "react-select";
@@ -6,6 +6,8 @@ import { obtenerMotos } from '../../api/motosApi';
 import { AgregarMantenimiento, ObtenerMantenimientos, ObtenerServicios } from '../../api/ServiciosApi';
 import { AgregarRefaccionesModal } from './agregarRefaccionesModal';
 import { cargarListasEntradas } from '../../api/almacenProductosApi';
+import { useNavigate } from "react-router";
+import VisibilityIcon from '@mui/icons-material/Visibility';
 
 export const RealizarMantenimiento = () => {
 
@@ -27,6 +29,10 @@ export const RealizarMantenimiento = () => {
     const [autorizaciones, setAutorizaciones] = useState([]);
     const [servicio, setServicio] = useState([]);
     const [productosSeleccionados, setProductosSeleccionados] = useState([]);
+    const navigate = useNavigate();
+    const motoRef = useRef(null);
+    const servicioRef = useRef(null);
+    const autorizoRef = useRef(null);
 
     const agregarProductoATabla = (productoData) => {
         setProductosSeleccionados((prevProductos) => {
@@ -47,14 +53,18 @@ export const RealizarMantenimiento = () => {
                 nuevosProductos = [...prevProductos, productoData];
             }
 
+            // Calcular el total
             const total = nuevosProductos.reduce((acc, prod) => acc + prod.subtotal, 0);
-            const totalFormateado = total.toLocaleString('es-MX');
-            setFormData((prev) => ({ ...prev, costo_total: totalFormateado }));
+
+            // Formatear el total con dos decimales y agregarlo al estado
+            const totalFormateado = total.toFixed(2); // Esto asegura que tenga .00
+
+            // Guardar en estado como número
+            setFormData((prev) => ({ ...prev, costo_total: parseFloat(totalFormateado) }));
 
             return nuevosProductos;
         });
     };
-
 
     const eliminarProductoDeTabla = (index) => {
         setProductosSeleccionados((prevProductos) => {
@@ -63,15 +73,15 @@ export const RealizarMantenimiento = () => {
             // Calcular el nuevo costo total
             const total = nuevosProductos.reduce((acc, prod) => acc + prod.subtotal, 0);
 
-            // Formatear el costo total con comas
-            const formattedTotal = new Intl.NumberFormat('es-MX').format(total);
+            // Formatear el costo total con 2 decimales
+            const formattedTotal = total.toFixed(2); // Esto asegura que tenga .00
 
-            setFormData((prev) => ({ ...prev, costo_total: formattedTotal }));
+            // Guardar en estado como número
+            setFormData((prev) => ({ ...prev, costo_total: parseFloat(formattedTotal) }));
 
             return nuevosProductos;
         });
     };
-
 
     const handleOpenModal = () => setIsModalOpen(true);
     const handleCloseModal = () => setIsModalOpen(false);
@@ -79,7 +89,8 @@ export const RealizarMantenimiento = () => {
     const fetchMotos = async () => {
         const data = await obtenerMotos();
         if (data) {
-            setMotos(data);
+            const motosOrdenadas = data.sort((a, b) => a.inciso - b.inciso);
+            setMotos(motosOrdenadas);
         }
     };
 
@@ -103,11 +114,17 @@ export const RealizarMantenimiento = () => {
     useEffect(() => {
         const cargarServicios = async () => {
             const data = await ObtenerServicios();
-            console.log(data)
+            console.log(data);
+
             if (data) {
-                setServicio(data.map((serv) => ({ value: serv.id, label: serv.nombre })));
+                const serviciosFiltrados = data
+                    .filter((serv) => serv.status !== 0) // Filtrar solo los servicios con status === 1
+                    .map((serv) => ({ value: serv.id, label: serv.nombre }));
+
+                setServicio(serviciosFiltrados);
             }
         };
+
         cargarServicios();
         fetchMotos();
         fetchAutorizo();
@@ -119,17 +136,23 @@ export const RealizarMantenimiento = () => {
         if (name === "odometro" || name === "costo_total") {
             // Restringir solo a números
             const numericValue = value.replace(/[^\d]/g, '');
-            const formattedValue = new Intl.NumberFormat('es-MX').format(numericValue);
-            setFormData((prev) => ({ ...prev, [name]: numericValue }));
 
+            // Si es costo_total, asegurarse de que tenga dos decimales
             if (name === "costo_total") {
-                e.target.value = formattedValue;
+                const formattedValue = parseFloat(numericValue).toFixed(2);  // Aseguramos dos decimales
+                setFormData((prev) => ({ ...prev, [name]: parseFloat(formattedValue) }));
+            } else {
+                setFormData((prev) => ({ ...prev, [name]: parseFloat(numericValue) }));
             }
         } else {
             setFormData((prev) => ({ ...prev, [name]: value }));
         }
 
         setErrors((prev) => ({ ...prev, [name]: "" }));
+    };
+
+    const formatCurrency = (value) => {
+        return value.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' });
     };
 
     const handleSelectChange = (selectedOptions) => {
@@ -143,10 +166,9 @@ export const RealizarMantenimiento = () => {
         const newErrors = {};
 
         Object.keys(formData).forEach((key) => {
-            if (key === "comentario") return; // Excluir el comentario de la validación
+            if (key === "comentario" || key === "odometro") return;
 
             const value = formData[key];
-
 
             if (Array.isArray(value)) {
                 if (value.length === 0) {
@@ -192,7 +214,6 @@ export const RealizarMantenimiento = () => {
         if (respuesta && !respuesta.error) {
             console.log("Mantenimiento agregado correctamente:", respuesta);
 
-            // Limpiar formulario y estado
             setFormData({
                 fecha_inicio: "",
                 vehiculo: "",
@@ -225,30 +246,59 @@ export const RealizarMantenimiento = () => {
         return localDate.toISOString().slice(0, 16); // Convierte a ISO y corta al formato adecuado
     };
 
+    const handleKeyDown = (e, nextField, isSelect = false) => {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            if (isSelect && nextField.current) {
+                nextField.current.focus();
+            } else {
+                document.getElementById(nextField)?.focus();
+            }
+        }
+    };
+
     return (
         <>
             <NavBar />
-            <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "80vh", backgroundColor: "#f2f3f4", }}>
-                <div style={{ backgroundColor: "#ffffff", padding: "15px", borderRadius: "10px", boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)", maxWidth: "70vw", width: "100%", }}>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", minHeight: "100vh", backgroundColor: "#f2f3f4", paddingTop: "2vh", }}>
+
+                {/* Botón agregado aquí */}
+                <div style={{ width: "63vw", display: "flex", justifyContent: "flex-end", marginBottom: "10px" }}>
+                    <Button
+                        variant="contained"
+                        sx={{ backgroundColor: "#1f618d", color: "white", ":hover": { opacity: 0.7 }, right: 20, borderRadius: "8px", padding: "5px 10px", display: "flex", alignItems: "center", gap: "8px" }} onClick={() => navigate("/servicios/ListaMantenimientos")}>
+                        <VisibilityIcon sx={{ fontSize: 24 }} />
+                        Ver Mantenimientos
+                    </Button>
+                </div>
+
+                <div style={{ backgroundColor: "#ffffff", padding: "15px", borderRadius: "10px", boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)", maxWidth: "60vw", width: "100%" }}>
                     <div style={{ backgroundColor: "#1f618d", padding: "10px", borderRadius: "5px" }}>
                         <h5 style={{ color: "white", textAlign: "center", margin: 0 }}>Realizar Mantenimiento</h5>
                     </div>
+
+
                     <form onSubmit={handleSubmit} style={{ marginTop: 10 }}>
                         <div className="row">
                             <div className="col-md-3 mb-2">
                                 <label className="form-label">Fecha de inicio</label>
                                 <input
+                                    id="fecha_inicio"
                                     name="fecha_inicio"
                                     type="datetime-local"
                                     className={`form-control form-control-sm ${errors.fecha_inicio ? "is-invalid" : ""}`}
                                     value={formData.fecha_inicio ? getLocalDateTime() : ''}
                                     onChange={handleChange}
+                                    onKeyDown={(e) => handleKeyDown(e, motoRef, true)}
+                                    readOnly
                                 />
                             </div>
 
                             <div className="col-md-4 mb-2">
                                 <label className="form-label">Moto</label>
                                 <Select
+                                    ref={motoRef}
+                                    id="vehiculo"
                                     name="vehiculo"
                                     options={opcionesVehiculos}
                                     placeholder="SELECCIONA"
@@ -257,6 +307,7 @@ export const RealizarMantenimiento = () => {
                                         setFormData({ ...formData, vehiculo: selectedOption.value });
                                         setErrors((prev) => ({ ...prev, vehiculo: "" }));
                                     }}
+                                    onKeyDown={(e) => handleKeyDown(e, "odometro")}
 
                                     styles={{
                                         control: (base) => ({
@@ -280,11 +331,13 @@ export const RealizarMantenimiento = () => {
                             <div className="col-md-4 mb-2">
                                 <label className="form-label">Odómetro/Horómetro</label>
                                 <input
+                                    id='odometro'
                                     type="text"
                                     name="odometro"
                                     className={`form-control form-control-sm ${errors.odometro ? "is-invalid" : ""}`}
                                     value={new Intl.NumberFormat('es-MX').format(formData.odometro)} // Formatea el valor mostrado
                                     onChange={handleChange}
+                                    onKeyDown={(e) => handleKeyDown(e, servicioRef, true)}
                                 />
                                 {errors.odometro && <div className="invalid-feedback">{errors.odometro}</div>}
                             </div>
@@ -294,6 +347,8 @@ export const RealizarMantenimiento = () => {
                             <div className="col-md-10 mb-2">
                                 <label className="form-label">Servicio(s)</label>
                                 <Select
+                                    ref={servicioRef}
+                                    id="servicio"
                                     name="servicio"
                                     options={[...servicio].sort((a, b) => a.label.localeCompare(b.label))}
                                     isMulti
@@ -307,7 +362,7 @@ export const RealizarMantenimiento = () => {
                                         setFormData({ ...formData, servicio: serviciosSeleccionados });
                                         setErrors((prev) => ({ ...prev, servicio: "" }));
                                     }}
-
+                                    onKeyDown={(e) => handleKeyDown(e, autorizoRef, true)}
                                     styles={{
                                         control: (base) => ({
                                             ...base,
@@ -337,25 +392,25 @@ export const RealizarMantenimiento = () => {
 
                         <h6 className="mb-2">Desglose de Partes/Refacciones de Almacén</h6>
                         <div className="table-responsive">
-                            <table className="table">
+                            <table className="table" style={{ maxWidth: "80%", margin: "auto" }}>
                                 <thead>
                                     <tr>
-                                        <th style={{ textAlign: "left", width: "16.66%" }}>Producto</th>
-                                        <th style={{ textAlign: "left", width: "16.66%" }}>Costo Unitario</th>
-                                        <th style={{ textAlign: "left", width: "16.66%" }}>Cantidad</th>
-                                        <th style={{ textAlign: "left", width: "16.66%" }}>Subtotal</th>
-                                        <th style={{ textAlign: "left", width: "16.66%" }}>Acciones</th>
+                                        <th style={{ textAlign: "center", width: "15%" }}>Producto</th>
+                                        <th style={{ textAlign: "right", width: "15%" }}>Costo Unitario</th>
+                                        <th style={{ textAlign: "right", width: "15%" }}>Cantidad</th>
+                                        <th style={{ textAlign: "right", width: "15%" }}>Subtotal</th>
+                                        <th style={{ textAlign: "right", width: "15%" }}>Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {productosSeleccionados.map((producto, index) => (
                                         <tr key={index}>
-                                            <td style={{ textAlign: "left", width: "16.66%" }}>{producto.producto}</td>
-                                            <td style={{ textAlign: "left", width: "16.66%" }}>${formatNumber(producto.costo_unitario)}</td>
-                                            <td style={{ textAlign: "left", width: "16.66%" }}>{producto.cantidad}</td>
-                                            <td style={{ textAlign: "left", width: "16.66%" }}>${formatNumber(producto.subtotal)}</td>
-                                            <td style={{ textAlign: "left", width: "16.66%" }}>
-                                                <button className="btn btn-danger btn-sm" onClick={() => eliminarProductoDeTabla(index)}>
+                                            <td style={{ textAlign: "center", width: "15%" }}>{producto.producto}</td>
+                                            <td style={{ textAlign: "right", width: "15%" }}>${formatNumber(producto.costo_unitario)}.00</td>
+                                            <td style={{ textAlign: "right", width: "15%" }}>{producto.cantidad}.00</td>
+                                            <td style={{ textAlign: "right", }}>${formatNumber(producto.subtotal)}.00</td>
+                                            <td style={{ textAlign: "right", width: "15%" }}>
+                                                <button type="button" className="btn btn-danger btn-sm" onClick={() => eliminarProductoDeTabla(index)}>
                                                     Eliminar
                                                 </button>
                                             </td>
@@ -370,6 +425,8 @@ export const RealizarMantenimiento = () => {
                             <div className="col-md-4 mb-2">
                                 <label className="form-label">Autorizó</label>
                                 <Select
+                                    ref={autorizoRef}
+                                    id="idAutorizo"
                                     name="idAutorizo"
                                     options={autorizaciones}
                                     value={autorizaciones.find(option => option.value === formData.idAutorizo)}
@@ -378,7 +435,7 @@ export const RealizarMantenimiento = () => {
                                         setFormData({ ...formData, idAutorizo: selectedOption.value });
                                         setErrors((prev) => ({ ...prev, idAutorizo: "" }));
                                     }}
-
+                                    onKeyDown={(e) => handleKeyDown(e, "costo_refacciones")}
                                     styles={{
                                         control: (base) => ({
                                             ...base,
@@ -398,18 +455,19 @@ export const RealizarMantenimiento = () => {
                             </div>
 
                             <div className="col-md-2 offset-md-6">
-                                <label className="form-label">Costo Total</label>
+                                <label className="form-label text-end d-block">Costo Total</label>
                                 <div className="input-group">
-                                    <span className="input-group-text" style={{ height: 47 }}>
-                                        $
-                                    </span>
                                     <input
+                                        id="costo_refacciones"
                                         type="text"
                                         name="costo_refacciones"
                                         className="form-control"
-                                        value={new Intl.NumberFormat('es-MX').format(formData.costo_total)}
+                                        value={formatCurrency(formData.costo_total)}
                                         readOnly
+                                        onKeyDown={(e) => handleKeyDown(e, "comentario")}
+                                        style={{ textAlign: "right" }}
                                     />
+
                                     {errors.costo_total && <div className="invalid-feedback">{errors.costo_total}</div>}
                                 </div>
                             </div>
@@ -417,14 +475,13 @@ export const RealizarMantenimiento = () => {
 
                         <div className="col-md-12 mb-2 ">
                             <label className="form-label">Comentario</label>
-                            <textarea name="comentario" type="text" className={`form-control form-control-sm`} value={formData.comentario} onChange={handleChange} />
+                            <textarea id="comentario" name="comentario" type="text" className={`form-control form-control-sm`} value={formData.comentario} onChange={handleChange} />
                         </div>
 
                         <div className="modal-footer">
                             <Button type="submit" style={{ backgroundColor: "#f1c40f", color: "white" }}>
                                 Guardar
                             </Button>
-
                             <Button type="button" style={{ backgroundColor: "#7f8c8d", color: "white", marginLeft: 7 }} >
                                 Cancelar
                             </Button>

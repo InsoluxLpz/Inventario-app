@@ -31,10 +31,17 @@ export const EditarProveedoresModal = ({ onClose, modalOpen, proveedor, actualiz
         status: proveedor.status || ""
       });
     }
+    console.log(proveedor)
   }, [proveedor]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+
+    // Validar si el campo es un número de teléfono y si el valor es negativo
+    if ((name === "telefono_contacto" || name === "telefono_empresa") && Number(value) < 0) {
+      return; // No permite establecer valores negativos
+    }
+
     setFormData((prev) => ({ ...prev, [name]: value }));
     setErrors((prev) => ({ ...prev, [name]: "" }));
   };
@@ -43,6 +50,9 @@ export const EditarProveedoresModal = ({ onClose, modalOpen, proveedor, actualiz
     const newErrors = {};
     Object.keys(formData).forEach((key) => {
       const value = formData[key];
+
+      // Si el campo es "status", lo ignoramos en la validación
+      if (key === "status") return;
 
       if (typeof value === "string" && !value.trim()) {
         newErrors[key] = "Este campo es obligatorio";
@@ -54,6 +64,7 @@ export const EditarProveedoresModal = ({ onClose, modalOpen, proveedor, actualiz
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -100,6 +111,13 @@ export const EditarProveedoresModal = ({ onClose, modalOpen, proveedor, actualiz
     }
   };
 
+  const handleKeyDown = (e, nextField) => {
+    if (e.key === "Enter") {
+      e.preventDefault(); // Evita que el formulario se envíe
+      document.getElementById(nextField)?.focus(); // Mueve el cursor al siguiente campo
+    }
+  };
+
   return (
     <div className="modal-backdrop">
       <div className="modal fade show" style={{ display: "block" }} aria-labelledby="exampleModalLabel" tabIndex="-1" role="dialog">
@@ -115,12 +133,14 @@ export const EditarProveedoresModal = ({ onClose, modalOpen, proveedor, actualiz
                   <div className="col-md-6 mb-3">
                     <label className="form-label">Empresa</label>
                     <input
+                      id="nombre_empresa"
                       type="text"
                       name="nombre_empresa"
                       className={`form-control ${errors.nombre_empresa ? "is-invalid" : ""
                         }`}
                       value={formData.nombre_empresa}
                       onChange={handleChange}
+                      onKeyDown={(e) => handleKeyDown(e, "nombre_proveedor")}
                     />
                     {errors.nombre_empresa && (
                       <div className="invalid-feedback">
@@ -129,14 +149,16 @@ export const EditarProveedoresModal = ({ onClose, modalOpen, proveedor, actualiz
                     )}
                   </div>
                   <div className="col-md-6 mb-3">
-                    <label className="form-label">Nombre Proveedor</label>
+                    <label className="form-label">Contacto</label>
                     <input
+                      id="nombre_proveedor"
                       type="text"
                       name="nombre_proveedor"
                       className={`form-control ${errors.nombre_proveedor ? "is-invalid" : ""
                         }`}
                       value={formData.nombre_proveedor}
                       onChange={handleChange}
+                      onKeyDown={(e) => handleKeyDown(e, "telefono_contacto")}
                     />
                     {errors.nombre_proveedor && (
                       <div className="invalid-feedback">
@@ -151,12 +173,14 @@ export const EditarProveedoresModal = ({ onClose, modalOpen, proveedor, actualiz
                   <div className="col-md-6 mb-3">
                     <label className="form-label">Teléfono de Contacto</label>
                     <input
+                      id="telefono_contacto"
                       type="number"
                       name="telefono_contacto"
                       className={`form-control ${errors.telefono_contacto ? "is-invalid" : ""
                         }`}
                       value={formData.telefono_contacto}
                       onChange={handleChange}
+                      onKeyDown={(e) => handleKeyDown(e, "rfc")}
                     />
                     {errors.telefono_contacto && (
                       <div className="invalid-feedback">
@@ -167,11 +191,13 @@ export const EditarProveedoresModal = ({ onClose, modalOpen, proveedor, actualiz
                   <div className="col-md-6 mb-3">
                     <label className="form-label">RFC</label>
                     <input
+                      id="rfc"
                       type="text"
                       name="rfc"
                       className={`form-control ${errors.rfc ? "is-invalid" : ""}`}
                       value={formData.rfc}
                       onChange={handleChange}
+                      onKeyDown={(e) => handleKeyDown(e, "telefono_empresa")}
                     />
                     {errors.rfc && (
                       <div className="invalid-feedback">{errors.rfc}</div>
@@ -183,12 +209,14 @@ export const EditarProveedoresModal = ({ onClose, modalOpen, proveedor, actualiz
                   <div className="col-md-6 mb-3">
                     <label className="form-label">Teléfono de la Empresa</label>
                     <input
+                      id="telefono_empresa"
                       type="number"
                       name="telefono_empresa"
                       className={`form-control ${errors.telefono_empresa ? "is-invalid" : ""
                         }`}
                       value={formData.telefono_empresa}
                       onChange={handleChange}
+                      onKeyDown={(e) => handleKeyDown(e, "status")}
                     />
                     {errors.telefono_empresa && (
                       <div className="invalid-feedback">
@@ -199,6 +227,7 @@ export const EditarProveedoresModal = ({ onClose, modalOpen, proveedor, actualiz
                   <div className="col-md-6 mb-3">
                     <label className="form-label">¿Desea reactivar el proveedor?</label>
                     <select
+                      id="status"
                       name="status"
                       className={`form-control ${errors.status ? "is-invalid" : ""}`}
                       value={formData.status}  // Asegúrate de que `formData.status` proviene de la BD

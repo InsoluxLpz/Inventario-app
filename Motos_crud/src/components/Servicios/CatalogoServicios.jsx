@@ -175,11 +175,12 @@ export const CatalogoServicios = () => {
                         <Table stickyHeader aria-label="sticky table">
                             <TableHead>
                                 <TableRow>
-                                    <TableCell align="left" sx={{ fontWeight: "bold", color: "black", textAlign: "left", width: "16.66%", backgroundColor: "#f4f6f7" }}>Nombre</TableCell>
-                                    <TableCell align="left" sx={{ fontWeight: "bold", color: "black", textAlign: "left", width: "16.66%", backgroundColor: "#f4f6f7" }}>Descripción</TableCell>
-                                    <TableCell align="left" sx={{ fontWeight: "bold", color: "black", textAlign: "left", width: "16.66%", backgroundColor: "#f4f6f7" }}>Opciones</TableCell>
+                                    <TableCell align="center" sx={{ fontWeight: "bold", color: "black", textAlign: "left", width: "40%", backgroundColor: "#f4f6f7" }}>Nombre</TableCell>
+                                    <TableCell align="center" sx={{ fontWeight: "bold", color: "black", textAlign: "left", width: "30%", backgroundColor: "#f4f6f7" }}>Descripción</TableCell>
+                                    <TableCell align="center" sx={{ fontWeight: "bold", color: "black", textAlign: "center", width: "30%", backgroundColor: "#f4f6f7" }}>Acciones</TableCell>
                                 </TableRow>
                             </TableHead>
+
                             <TableBody>
                                 {serviciosFiltrados.map((servicio) => (
                                     <TableRow key={servicio.id} sx={{
@@ -187,14 +188,14 @@ export const CatalogoServicios = () => {
                                             backgroundColor: "#eaecee ",
                                         }
                                     }}>
-                                        <TableCell align="left" sx={{ textAlign: "left", width: "16.66%" }}>{servicio.nombre}</TableCell>
-                                        <TableCell align="left" sx={{ textAlign: "left", width: "16.66%" }}>{servicio.descripcion}</TableCell>
-                                        <TableCell align="left" sx={{ textAlign: "left", width: "16.66%" }}>
+                                        <TableCell align="centre" sx={{ textAlign: "left", width: "25%" }}>{servicio.nombre}</TableCell>
+                                        <TableCell align="centre" sx={{ textAlign: "left", width: "25%" }}>{servicio.descripcion}</TableCell>
+                                        <TableCell align="center" sx={{ textAlign: "center", width: "25%" }}>
                                             <IconButton sx={{ color: 'black' }} onClick={() => handleOpenModalEdit(servicio)}>
                                                 <EditIcon sx={{ fontSize: 20 }} />
                                             </IconButton>
-                                            <IconButton sx={{ marginLeft: "10px", color: 'black' }} onClick={() => handleActualizarStatus(servicio.id)}>
-                                                <InventoryIcon sx={{ fontSize: 20, color: 'red' }} />
+                                            <IconButton sx={{ color: 'red' }} onClick={() => handleActualizarStatus(servicio.id)}>
+                                                <InventoryIcon sx={{ fontSize: 20 }} />
                                             </IconButton>
                                         </TableCell>
                                     </TableRow>

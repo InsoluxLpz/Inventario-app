@@ -13,7 +13,6 @@ import { NavBar } from "../NavBar";
 import { EliminarMantenimiento, ObtenerMantenimientos, ObtenerServicios, } from "../../api/ServiciosApi";
 import DeleteIcon from "@mui/icons-material/Delete";
 import CleaningServicesIcon from '@mui/icons-material/CleaningServices';
-import { RealizarMantenimiento } from "./RealizarMantenimiento";
 import { EditarMantenimiento } from "./EditarMantenimiento";
 import { obtenerProductos } from "../../api/productosApi";
 import { obtenerMotos } from "../../api/motosApi";
@@ -21,16 +20,17 @@ import InfoIcon from "@mui/icons-material/Info";
 import { VerMantenimientoCancelado } from "./VerMantenimientoCancelado";
 import SearchIcon from '@mui/icons-material/Search';
 import Select from "react-select";
+import { useNavigate } from "react-router";
 
 export const ListaMantenimientos = () => {
   const [mantenimientos, setMantenimientos] = useState([]);
   const [mantenimientoSeleccionado, setMantenimientoSeleccionado] = useState(null);
-  const [openModalAgregar, setOpenModalAgregar] = useState(false);
   const [openModalEditar, setOpenModalEditar] = useState(false);
   const [openModalInfo, setOpenModalInfo] = useState(false);
   const [servicios, setServicios] = useState([]);
   const [productos, setProductos] = useState([]);
   const [todos, setTodos] = useState(false);
+  const navigate = useNavigate();
   const [motos, setMotos] = useState([]);
   const [filtro, setFiltro] = useState({
     fecha_inicio: "",
@@ -38,9 +38,6 @@ export const ListaMantenimientos = () => {
     servicio: "",
     moto: "",
   });
-
-  const handleOpenModalAgregar = () => setOpenModalAgregar(true);
-  const handleCloseModalAgregar = () => setOpenModalAgregar(false);
 
   const handleOpenModalEditar = (mantenimiento) => {
     setOpenModalEditar(true);
@@ -202,7 +199,7 @@ export const ListaMantenimientos = () => {
                   control={
                     <Switch
                       checked={todos}
-                      onChange={(e) => setTodos(e.target.checked)} // Solo actualiza el estado, sin llamar a la API
+                      onChange={(e) => setTodos(e.target.checked)}
                     />
                   }
                   label="Mostrar todos"
@@ -304,8 +301,7 @@ export const ListaMantenimientos = () => {
                   </Button>
                   <Button
                     variant="contained"
-                    sx={{ backgroundColor: "#1f618d", color: "white", ":hover": { opacity: 0.7 }, right: 20, borderRadius: "8px", padding: "5px 10px", display: "flex", alignItems: "center", gap: "8px", marginRight: 8 }}
-                    onClick={handleOpenModalAgregar}>
+                    sx={{ backgroundColor: "#1f618d", color: "white", ":hover": { opacity: 0.7 }, right: 20, borderRadius: "8px", padding: "5px 10px", display: "flex", alignItems: "center", gap: "8px", marginRight: 8 }} onClick={() => navigate("/servicios/RealizarMantenimiento")}>
                     <AddchartIcon sx={{ fontSize: 24 }} />
                     Agregar Mantenimiento
                   </Button>
@@ -329,7 +325,7 @@ export const ListaMantenimientos = () => {
                 <TableHead>
                   <TableRow>
                     {["Vehiculo", "Servicio(s)", "Refacciones Almacen", "Fecha de Inicio", "Comentario", "Costo Total", "status", "Acciones"].map((header) => (
-                      <TableCell key={header} align="center" sx={{ fontWeight: "bold", backgroundColor: "#f4f6f7", color: "black", textAlign: "left", width: "16.66%" }}>
+                      <TableCell key={header} align="center" sx={{ fontWeight: "bold", backgroundColor: "#f4f6f7", color: "black", textAlign: "left", width: "6.66%" }}>
                         {header}
                       </TableCell>
                     ))}
@@ -347,34 +343,34 @@ export const ListaMantenimientos = () => {
                           },
                         }}
                       >
-                        <TableCell align="center" sx={{ textAlign: "left", width: "16.66%" }}>
+                        <TableCell align="center" sx={{ textAlign: "left", width: "6.66%" }}>
                           {mantenimiento.moto_inciso}
                         </TableCell>
-                        <TableCell align="center" sx={{ textAlign: "left", width: "16.66%" }}>
+                        <TableCell align="center" sx={{ textAlign: "left", width: "15%" }}>
                           {mantenimiento.servicios.length > 0
                             ? mantenimiento.servicios.map((s) => s.nombre).join(", ")
                             : "N/A"}
                         </TableCell>
-                        <TableCell align="center" sx={{ textAlign: "left", width: "16.66%" }}>
+                        <TableCell align="center" sx={{ textAlign: "left", width: "15%" }}>
                           {mantenimiento.productos.length > 0
                             ? mantenimiento.productos.map((p) => p.nombre).join(", ")
                             : "N/A"}
                         </TableCell>
-                        <TableCell align="center" sx={{ textAlign: "left", width: "16.66%" }}>
+                        <TableCell align="center" sx={{ textAlign: "left", width: "15%" }}>
                           {new Date(mantenimiento.fecha_inicio).toLocaleString("es-MX")}
                         </TableCell>
 
-                        <TableCell align="center" sx={{ textAlign: "left", width: "16.66%" }}>
+                        <TableCell align="center" sx={{ textAlign: "left", width: "10%" }}>
                           {mantenimiento.comentario}
                         </TableCell>
-                        <TableCell align="center" sx={{ textAlign: "left", width: "16.66%" }}>
+                        <TableCell align="center" sx={{ textAlign: "center", }}>
                           {formatearDinero(mantenimiento.costo_total)}
                         </TableCell>
-                        <TableCell align="center" sx={{ textAlign: "left", width: "16.66%", fontWeight: "bold", color: mantenimiento.status === 0 ? "red" : "green" }}>
+                        <TableCell align="center" sx={{ textAlign: "left", fontWeight: "bold", color: mantenimiento.status === 0 ? "red" : "green" }}>
                           {mantenimiento.status === 0 ? "Cancelado" : "Activo"}
                         </TableCell>
 
-                        <TableCell align="center" sx={{ textAlign: "right", width: "16.66%" }}>
+                        <TableCell align="center" sx={{ textAlign: "right" }}>
                           {mantenimiento.status === 1 ? (
                             <>
                               <IconButton
@@ -426,12 +422,6 @@ export const ListaMantenimientos = () => {
                 </Typography>
               </Box>
             </Box>
-
-
-            <RealizarMantenimiento
-              modalOpen={openModalAgregar}
-              onClose={handleCloseModalAgregar}
-            />
 
             <EditarMantenimiento
               modalOpen={openModalEditar}

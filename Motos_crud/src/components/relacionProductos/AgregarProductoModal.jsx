@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { Button } from '@mui/material';
 import Select from "react-select";
 import { agregarProductos } from '../../api/productosApi';
@@ -20,6 +20,9 @@ export const AgregarProductoModal = ({ modalOpen, onClose, grupos, unidadMedida,
 
     const [errors, setErrors] = useState({});
     const [proveedores, setProveedores] = useState([]);
+    const marcaRef = useRef(null);
+    const unidadRef = useRef(null);
+    const proveedoresRef = useRef(null);
 
     useEffect(() => {
         const cargarProveedores = async () => {
@@ -143,7 +146,16 @@ export const AgregarProductoModal = ({ modalOpen, onClose, grupos, unidadMedida,
         }
     };
 
-
+    const handleKeyDown = (e, nextField, isSelect = false) => {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            if (isSelect && nextField.current) {
+                nextField.current.focus();
+            } else {
+                document.getElementById(nextField)?.focus();
+            }
+        }
+    };
 
     return (
         <div className="modal-backdrop">
@@ -160,11 +172,13 @@ export const AgregarProductoModal = ({ modalOpen, onClose, grupos, unidadMedida,
                                     <div className="col-md-6 mb-3">
                                         <label className="form-label">Código</label>
                                         <input
+                                            id="codigo"
                                             type="text"
                                             name="codigo"
                                             className={`form-control ${errors.codigo ? "is-invalid" : ""}`}
                                             value={formData.codigo}
                                             onChange={handleChange}
+                                            onKeyDown={(e) => handleKeyDown(e, "nombre")}
                                         />
                                         {errors.codigo && <div className="invalid-feedback">{errors.codigo}</div>}
                                     </div>
@@ -172,11 +186,13 @@ export const AgregarProductoModal = ({ modalOpen, onClose, grupos, unidadMedida,
                                     <div className="col-md-6 mb-3">
                                         <label className="form-label">Nombre</label>
                                         <input
+                                            id="nombre"
                                             type="text"
                                             name="nombre"
                                             className={`form-control ${errors.nombre ? "is-invalid" : ""}`}
                                             value={formData.nombre}
                                             onChange={handleChange}
+                                            onKeyDown={(e) => handleKeyDown(e, marcaRef, true)}
                                         />
                                         {errors.nombre && <div className="invalid-feedback">{errors.nombre}</div>}
                                     </div>
@@ -186,10 +202,13 @@ export const AgregarProductoModal = ({ modalOpen, onClose, grupos, unidadMedida,
                                     <div className="col-md-6 mb-3">
                                         <label className="form-label">Grupo</label>
                                         <Select
+                                            ref={marcaRef}
+                                            id="grupo"
                                             options={opcionesGrupos}
                                             placeholder="SELECCIONA"
                                             value={opcionesGrupos.find(gr => gr.value === formData.grupo)}
                                             onChange={(selectedOption) => setFormData({ ...formData, grupo: selectedOption.value })}
+                                            onKeyDown={(e) => handleKeyDown(e, "precio")}
                                         />
                                         {errors.grupo && <div className="text-danger small">{errors.grupo}</div>}
                                     </div>
@@ -201,11 +220,13 @@ export const AgregarProductoModal = ({ modalOpen, onClose, grupos, unidadMedida,
                                                 $
                                             </span>
                                             <input
+                                                id="precio"
                                                 type="text"
                                                 name="precio"
                                                 className={`form-control ${errors.precio ? "is-invalid" : ""}`}
                                                 value={formData.precio}
                                                 onChange={handleChange}
+                                                onKeyDown={(e) => handleKeyDown(e, unidadRef, true)}
                                             />
 
                                             {errors.precio && <div className="invalid-feedback">{errors.precio}</div>}
@@ -217,10 +238,13 @@ export const AgregarProductoModal = ({ modalOpen, onClose, grupos, unidadMedida,
                                     <div className="col-md-6 mb-3">
                                         <label className="form-label">Unidad de Medida</label>
                                         <Select
+                                            ref={unidadRef}
+                                            id='unidad_medida'
                                             options={opcionesUnidad}
                                             placeholder="SELECCIONA"
                                             value={opcionesUnidad.find(um => um.value === formData.unidad_medida)}
                                             onChange={(selectedOption) => setFormData({ ...formData, unidad_medida: selectedOption.value })}
+                                            onKeyDown={(e) => handleKeyDown(e, proveedoresRef, true)}
                                         />
                                         {errors.unidad_medida && <div className="text-danger small">{errors.unidad_medida}</div>}
                                     </div>
@@ -228,11 +252,14 @@ export const AgregarProductoModal = ({ modalOpen, onClose, grupos, unidadMedida,
                                     <div className="col-md-6 mb-3">
                                         <label className="form-label">Proveedores</label>
                                         <Select
+                                            ref={proveedoresRef}
+                                            id='unidad_medida'
                                             options={proveedores}
                                             isMulti
                                             placeholder="SELECCIONA"
                                             value={proveedores.filter(p => formData.proveedores.includes(p.value))}
                                             onChange={handleSelectChange}
+                                            onKeyDown={(e) => handleKeyDown(e, "descripcion")}
                                         />
                                         {errors.proveedores && <div className="text-danger small">{errors.proveedores}</div>}
                                     </div>
@@ -242,6 +269,7 @@ export const AgregarProductoModal = ({ modalOpen, onClose, grupos, unidadMedida,
                                     <div className="col-md-12 mb-3">
                                         <label className="form-label">Descripción</label>
                                         <textarea
+                                            id='descripcion'
                                             name="descripcion"
                                             className="form-control"
                                             value={formData.descripcion}
