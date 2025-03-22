@@ -217,19 +217,6 @@ export const ProductoAlmacenTable = () => {
           </TableContainer>
         </Paper>
       </Box>
-
-      {/* en caso de que se acepte un modal aqui  */}
-      {/* <ModalInventarioDetalles
-      open={openModal}
-      onClose={handleCloseModal}
-      idMovimiento={selectedMovimiento}
-      /> */}
-
-      {/* <MovXProductosTable
-        visible={showDetalles}
-        idMovimiento={selectedMovimiento}
-        onClose={handleCloseDetalles}
-      /> */}
     </>
   );
 };

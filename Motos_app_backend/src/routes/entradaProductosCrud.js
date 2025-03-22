@@ -45,14 +45,13 @@ router.post('/agregar_inventario', async (req, res) => {
         const idMovimiento = result.insertId; // Usar el mismo idMovimiento para todos los productos
         console.log('Movimiento insertado con ID:', result.insertId); // Verifica si el movimiento se inserta solo una vez
 
-
         // Insertar cada producto en movimientos_almacen_detalle
         const queryDetalle = `
-    INSERT INTO movimientos_almacen_detalle
-    (idMovimiento, idProducto, idProveedor, cantidad, costo_unitario, subtotal)
-    VALUES (?, ?, ?, ?, ?, ?)`;
+            INSERT INTO movimientos_almacen_detalle
+            (idMovimiento, idProducto, idProveedor, cantidad, costo_unitario, subtotal)
+            VALUES (?, ?, ?, ?, ?, ?)`;
 
-        // Para cada producto, asignamos el mismo idMovimiento
+        // Para cada producto, asignamos el mismo idMovimiento y el idTipoSubmovimiento
         for (let producto of productos) {
             const idProducto = producto.idProducto?.value || producto.idProducto;
             const idProveedor = producto.idProveedor?.value || null;
@@ -82,6 +81,7 @@ router.post('/agregar_inventario', async (req, res) => {
         if (connection) connection.release(); // Liberar la conexión
     }
 });
+
 
 
 
@@ -246,63 +246,73 @@ router.get('/obtener_movimientos_detalles/:idMovimiento', async (req, res) => {
 
 
 // * buscar productos por codigo de producto
-router.get('/buscar_producto/:codigo', async (req, res) => {
-    const { codigo } = req.params;
-
-    const query = `SELECT * FROM productos WHERE codigo = ? AND status = 1`;
-
-    try {
-        const [results] = await db.query(query, [codigo]);
-
-        if (results.length === 0) {
-            return res.status(404).json({ message: 'Producto no encontrado' });
-        }
-
-        return res.status(200).json(results[0]); // Retorna solo un producto
-    } catch (error) {
-        console.error('Error al obtener el producto:', error);
-        return res.status(500).json({ message: 'Error al obtener el producto' });
-    }
-});
-
-// * consulta para la tabla movimientos por productos en el almacen
 router.get('/obtener_movimientosXProductos_detalles/:idProducto', async (req, res) => {
     const { idProducto } = req.params;
-    console.log("idProducto ", idProducto);
+    const { fechaInicio, fechaFin } = req.query;
 
     try {
-        const [result] = await db.query(`
-            SELECT 
-                iad.id AS idDetalle,
-                iad.idMovimiento,
-                iad.idProducto,
-                iad.idTipoMovimiento,
-                iad.cantidad,
-                iad.costo_unitario,
-                iad.existencia_anterior,
-                iad.existencia_nueva,
-                iad.fecha as fecha_movimiento,
-                iad.idUsuario,
-                iad.idUnidadMedida,
-                iad.origen_movimiento,
-                ia.cantidad AS stock_actual
-            FROM inventario_almacen_detalle iad
-            JOIN inventario_almacen ia ON iad.idProducto = ia.idProducto
-            WHERE iad.idProducto = ?
-            ORDER BY iad.fecha DESC;
-        `, [idProducto]);
-
-        // Si hay resultados, enviarlos como respuesta
-        if (result.length > 0) {
-            res.status(200).json(result);
-        } else {
-            res.status(404).json({ message: "Detalles no encontrados" });
+        // 1. Verificar si el producto existe
+        const [producto] = await db.query(`SELECT * FROM productos WHERE id = ?`, [idProducto]);
+        if (producto.length === 0) {
+            return res.status(404).json({ message: "El producto no existe" });
         }
+
+        // 2. Construir la consulta de movimientos
+        let query = `
+           SELECT iad.id AS idDetalle, 
+       iad.idMovimiento, 
+       iad.idProducto, 
+       p.nombre AS nombreProducto, 
+       iad.idTipoMovimiento, 
+       tm.movimiento AS tipoMovimiento, 
+       sm.tipoSubMovimiento, 
+       iad.cantidad, 
+       iad.costo_unitario, 
+       iad.existencia_anterior, 
+       iad.existencia_nueva, 
+       iad.fecha AS fecha_movimiento, 
+       iad.idUsuario, 
+       u.nombre AS nombreUsuario, 
+       ud.nombre AS nombreUnidadMedida, 
+       iad.idUnidadMedida, 
+       iad.origen_movimiento, 
+       ia.cantidad AS stock_actual
+FROM inventario_almacen_detalle iad 
+JOIN inventario_almacen ia ON iad.idProducto = ia.idProducto 
+JOIN usuarios u ON u.idUsuario = iad.idUsuario 
+JOIN tipo_movimiento tm ON tm.idMovimiento = iad.idTipoMovimiento 
+JOIN productos p ON p.id = iad.idProducto 
+JOIN sub_movimientos sm ON sm.id = iad.idTipoSubmovimiento  
+JOIN cat_unidad_medida ud ON ud.id = iad.idUnidadMedida
+WHERE iad.idProducto = ?
+        `;
+
+        const queryParams = [idProducto];
+
+        // 3. Agregar rango de fechas si se proporciona
+        if (fechaInicio && fechaFin) {
+            query += " AND iad.fecha BETWEEN ? AND ?";
+            queryParams.push(fechaInicio, fechaFin);
+        }
+
+        query += " ORDER BY iad.fecha DESC";
+
+        // 4. Ejecutar la consulta de movimientos
+        const [result] = await db.query(query, queryParams);
+
+        if (result.length === 0) {
+            return res.status(200).json({ message: "No hay movimientos en el rango de fechas especificado", data: [] });
+        }
+
+        res.status(200).json(result);
+        
     } catch (error) {
         console.error("Error al obtener datos:", error);
         res.status(500).json({ message: "Error en el servidor" });
     }
 });
+
+
 
 
 

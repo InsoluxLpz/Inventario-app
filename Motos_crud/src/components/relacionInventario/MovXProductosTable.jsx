@@ -1,31 +1,39 @@
 import React, { useState, useEffect } from "react";
-import PlaylistAddCircleIcon from "@mui/icons-material/PlaylistAddCircle";
-import Paper from "@mui/material/Paper";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
-import { Box, Button, Typography, IconButton, TextField } from "@mui/material";
-import { NavBar } from "../NavBar";
-import { cargarListasMovimientosXProductosDetalles } from "../../api/almacenProductosApi";
+import {
+  Box,
+  Button,
+  Typography,
+  TextField,
+  IconButton,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Modal,
+} from "@mui/material";
 import FeedIcon from "@mui/icons-material/Feed";
 import { useNavigate } from "react-router";
+import { NavBar } from "../NavBar";
+import { cargarListasMovimientosXProductosDetalles } from "../../api/almacenProductosApi";
+import { ModalMovProductoDetalle } from "./ModalMovProductoDetalle"; // Importar el modal
+import CleaningServicesIcon from '@mui/icons-material/CleaningServices';
 
 export const MovXProductosTable = () => {
   const navigate = useNavigate();
   const [inventario, setInventario] = useState([]);
   const [filtro, setFiltro] = useState({
     idMovimiento: "",
-    fecha: "",
+    fechaInicio: "",
+    fechaFin: "",
     nombreUsuario: "",
-    idProducto: "", // <-- Agregar idProducto
+    idProducto: "",
   });
 
-  useEffect(() => {
-    fetchInventario();
-  }, []);
+  const [openModal, setOpenModal] = useState(false);
+  const [detalleMovimiento, setDetalleMovimiento] = useState(null);
 
   const fetchInventario = async () => {
     try {
@@ -35,7 +43,9 @@ export const MovXProductosTable = () => {
       }
 
       const data = await cargarListasMovimientosXProductosDetalles(
-        filtro.idProducto
+        filtro.idProducto,
+        filtro.fechaInicio,
+        filtro.fechaFin
       );
 
       if (data) {
@@ -50,51 +60,69 @@ export const MovXProductosTable = () => {
     setFiltro({ ...filtro, [e.target.name]: e.target.value });
   };
 
-  const movimientosFiltrados = inventario.filter((m) => {
-    const nombreUsuarioMatch =
-      filtro.nombreUsuario === "" ||
-      (m.nombreUsuario &&
-        m.nombreUsuario
-          .toLowerCase()
-          .includes(filtro.nombreUsuario.toLowerCase().trim()));
+  const handleOpenModal = (producto) => {
+    setDetalleMovimiento(producto);
+    setOpenModal(true);
+  };
 
-    const idMovimientoMatch =
-      filtro.idMovimiento === "" ||
-      m.idMovimiento?.toString().includes(filtro.idMovimiento.toString());
+  const handleCloseModal = () => {
+    setOpenModal(false);
+    setDetalleMovimiento(null);
+  };
 
-    const fechaMatch =
-      filtro.fecha === "" || m.fecha_movimiento?.includes(filtro.fecha);
+  // * funcion para limpiar el filtro
+  const limpiarFiltros = () => {
+    setFiltro({
+      idMovimiento: "",
+      fechaInicio: "",
+      fechaFin: "",
+      nombreUsuario: "",
+      idProducto: "",
+    });
+    setInventario([]); // Opcional: limpiar la tabla también
+  };
 
-    return nombreUsuarioMatch && idMovimientoMatch && fechaMatch;
-  });
+  
 
   return (
     <>
       <NavBar />
-      <Box display="flex" justifyContent="center" gap={1} my={2} mt={3}>
-        <TextField
-          label="No. Movimiento"
-          name="idMovimiento"
-          value={filtro.idMovimiento}
-          onChange={handleFiltroChange}
-        />
-        <TextField
-          label="Filtrar por Fecha"
-          name="fecha"
-          type="date"
-          value={filtro.fecha}
-          onChange={handleFiltroChange}
-          InputLabelProps={{ shrink: true }}
-        />
-        <TextField
-          label="Usuario"
-          name="nombreUsuario"
-          value={filtro.nombreUsuario}
-          onChange={handleFiltroChange}
-        />
-      </Box>
 
       <Box display="flex" justifyContent="center" gap={1} my={2} mt={3}>
+        <Button
+          variant="contained"
+          sx={{
+            backgroundColor: "#566573",
+            color: "white",
+            ":hover": { opacity: 0.7 },
+            borderRadius: "8px",
+            padding: "5px 10px",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+          }}
+          onClick={limpiarFiltros}
+        >
+          <CleaningServicesIcon sx={{ fontSize: 24 }} />
+        </Button>
+        <TextField
+          label="Fecha Inicio"
+          name="fechaInicio"
+          type="date"
+          value={filtro.fechaInicio}
+          onChange={handleFiltroChange}
+          InputLabelProps={{ shrink: true }}
+          onFocus={(e) => e.target.showPicker()}
+        />
+        <TextField
+          label="Fecha Fin"
+          name="fechaFin"
+          type="date"
+          value={filtro.fechaFin}
+          onChange={handleFiltroChange}
+          InputLabelProps={{ shrink: true }}
+          onFocus={(e) => e.target.showPicker()}
+        />
         <TextField
           label="ID Producto"
           name="idProducto"
@@ -107,29 +135,17 @@ export const MovXProductosTable = () => {
       </Box>
 
       <Box width="90%" maxWidth={2000} margin="0 auto" mt={2}>
-        <Box
-          sx={{
-            backgroundColor: "#1f618d",
-            padding: "10px 20px",
-            borderRadius: "8px 8px 0 0",
-          }}
-        >
-          <Typography variant="h5" fontWeight="bold" color="white">
-            Movimientos en el almacén
-          </Typography>
-        </Box>
-
         <Paper sx={{ width: "100%" }}>
           <TableContainer sx={{ maxHeight: 600, backgroundColor: "#eaeded" }}>
             <Table stickyHeader>
               <TableHead>
                 <TableRow>
                   {[
-                    "No. Movimiento",
+                    "Movimiento número",
                     "Fecha",
-                    "Realizó Mov.",
-                    "Autorizó",
-                    "Detalles",
+                    "Realizó Movimiento",
+                    "Tipo de movimiento",
+                    "Informe",
                   ].map((header) => (
                     <TableCell
                       key={header}
@@ -146,32 +162,26 @@ export const MovXProductosTable = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {movimientosFiltrados.map((producto) => (
+                {inventario.map((producto) => (
                   <TableRow key={producto.idMovimiento}>
                     <TableCell align="center">
                       {producto.idMovimiento}
                     </TableCell>
                     <TableCell align="center">
-                      {producto.fecha_movimiento
-                        ? new Date(
-                            producto.fecha_movimiento
-                          ).toLocaleDateString("es-MX")
-                        : "Fecha no disponible"}
+                      {new Date(producto.fecha_movimiento).toLocaleDateString(
+                        "es-MX"
+                      )}
                     </TableCell>
                     <TableCell align="center">
                       {producto.nombreUsuario}
                     </TableCell>
                     <TableCell align="center">
-                      {producto.nombreAutorizo}
+                      {producto.tipoMovimiento}
                     </TableCell>
                     <TableCell align="center">
                       <IconButton
                         sx={{ color: "black" }}
-                        onClick={() =>
-                          navigate(
-                            `/detalle-movimiento/${producto.idMovimiento}`
-                          )
-                        }
+                        onClick={() => handleOpenModal(producto)}
                       >
                         <FeedIcon sx={{ fontSize: 29 }} />
                       </IconButton>
@@ -183,6 +193,13 @@ export const MovXProductosTable = () => {
           </TableContainer>
         </Paper>
       </Box>
+
+      {/* Modal */}
+      <ModalMovProductoDetalle
+        open={openModal}
+        handleClose={handleCloseModal}
+        detalle={detalleMovimiento}
+      />
     </>
   );
 };
