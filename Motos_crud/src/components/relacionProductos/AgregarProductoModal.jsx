@@ -32,7 +32,7 @@ export const AgregarProductoModal = ({ modalOpen, onClose, grupos, unidadMedida,
                 console.log("Proveedores filtrados:", proveedoresFiltrados);
                 setProveedores(proveedoresFiltrados.map(prov => ({
                     value: prov.id,
-                    label: prov.nombre_proveedor,
+                    label: prov.nombre_empresa,
                 })));
             }
         };
@@ -107,37 +107,22 @@ export const AgregarProductoModal = ({ modalOpen, onClose, grupos, unidadMedida,
         };
 
         try {
-            const nuevoProducto = await agregarProductos(formDataConUsuario);
+            console.log("Enviando datos al backend:", formDataConUsuario);
+            const response = await agregarProductos(formDataConUsuario);
+            console.log("Respuesta del backend:", response);
 
-            if (nuevoProducto && nuevoProducto.producto && nuevoProducto.producto.length > 0) {
-                const producto = nuevoProducto.producto[0]; // Accede al primer producto del arreglo
+            if (response && response.message === "Producto agregado correctamente") {
+                console.log("Producto guardado correctamente. Cerrando modal...");
+                onClose();
 
-                const grupoSeleccionado = opcionesGrupos.find(gr => gr.value === producto.idGrupo);
-                const unidadSeleccionada = opcionesUnidad.find(uni => uni.value === producto.idUnidadMedida);
-
-                // Crear el objeto de producto con los nombres de grupo y unidad de medida
-                const productoCompleto = {
-                    ...producto,
-                    grupo: grupoSeleccionado ? grupoSeleccionado.label : "No disponible",
-                    unidad_medida: unidadSeleccionada ? unidadSeleccionada.label : "No disponible",
-                };
-
-                if (productoCompleto.nombre && productoCompleto.precio && productoCompleto.grupo && productoCompleto.unidad_medida) {
-                    setFormData({
-                        codigo: "",
-                        nombre: "",
-                        grupo: "",
-                        precio: "",
-                        descripcion: "",
-                        unidad_medida: "",
-                        proveedores: [],
-                    });
-                    setErrors({});
-                    agregarProducto(productoCompleto);
-                    onClose();
-                } else {
-                    console.error("Producto incompleto:", productoCompleto);
-                }
+                // Recargar la página después de 1 segundo
+                setTimeout(() => {
+                    console.log("Recargando página...");
+                    window.location.reload();
+                }, 1000);
+            } else {
+                console.error("Error en la respuesta del backend:", response);
+                setErrors((prev) => ({ ...prev, general: "Ocurrió un error al agregar el producto. Inténtelo de nuevo." }));
             }
 
         } catch (error) {

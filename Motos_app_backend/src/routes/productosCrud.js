@@ -35,17 +35,6 @@ router.post('/agregar_producto', async (req, res) => {
         const [productoResult] = await connection.query(insertProductoQuery, valuesProducto);
         const idProducto = productoResult.insertId;
 
-        console.log("idProducto:", idProducto);
-
-        // Obtener el producto recién insertado
-        const getProductoQuery = `
-            SELECT p.id, p.codigo, p.nombre, p.precio, p.descripcion, p.idGrupo, p.idUnidadMedida, p.idUsuario, p.fecha_registro,
-                   g.nombre AS grupoNombre, u.nombre AS unidadMedidaNombre
-            FROM productos p
-            JOIN cat_grupos_prueba g ON p.idGrupo = g.id
-            JOIN cat_unidad_medida u ON p.idUnidadMedida = u.id
-            WHERE p.id = ?`;
-        const [producto] = await connection.query(getProductoQuery, [idProducto]);
 
         if (proveedores.length > 0) {
             const valuesProveedores = proveedores.map(idProveedor => [idProducto, idProveedor]);
@@ -54,7 +43,7 @@ router.post('/agregar_producto', async (req, res) => {
         }
 
         await connection.commit();
-        return res.status(200).json({ message: 'Producto agregado correctamente', producto });
+        return res.status(200).json({ message: 'Producto agregado correctamente' });
 
     } catch (error) {
         await connection.rollback();

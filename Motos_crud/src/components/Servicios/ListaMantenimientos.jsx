@@ -161,8 +161,8 @@ export const ListaMantenimientos = () => {
   };
 
   const calcularTotales = () => {
-    const activos = mantenimientos.filter(m => m.status === 1); // Activos
-    const cancelados = mantenimientos.filter(m => m.status === 0); // Cancelados
+    const activos = mantenimientos.filter(m => m.status === 1);
+    const cancelados = mantenimientos.filter(m => m.status === 0);
 
     const totalActivos = activos.reduce((total, mantenimiento) => total + mantenimiento.costo_total, 0);
     const totalCancelados = cancelados.reduce((total, mantenimiento) => total + mantenimiento.costo_total, 0);
@@ -271,6 +271,7 @@ export const ListaMantenimientos = () => {
                   InputLabelProps={{ shrink: true }}
                 />
               </Grid2>
+
               <Grid2 item sm={6} md={3}>
                 <TextField
                   fullWidth

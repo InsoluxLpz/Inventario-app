@@ -159,7 +159,6 @@ export const NavBar = () => {
     }
   };
 
-
   const routeTitles = {
     "/inicio": "Inicio",
     "/motos": "Flotilla",

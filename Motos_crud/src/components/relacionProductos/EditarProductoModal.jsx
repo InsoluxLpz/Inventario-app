@@ -47,7 +47,7 @@ export const EditarProductoModal = ({ onClose, modalOpen, producto, actualizarLi
             const proveedorEncontrado = ListaProveedores.find(p => p.id === prov.id);
             return {
               value: prov.id,
-              label: proveedorEncontrado ? proveedorEncontrado.nombre_proveedor : "Proveedor no disponible"
+              label: proveedorEncontrado ? proveedorEncontrado.nombre_empresa : "Proveedor no disponible"
             };
           })
           : [],
@@ -173,7 +173,7 @@ export const EditarProductoModal = ({ onClose, modalOpen, producto, actualizarLi
 
   const opcioneProveedor = Proveedor
     .filter(prov => prov.status !== 0)
-    .map(prov => ({ value: prov.id, label: prov.nombre_proveedor }));
+    .map(prov => ({ value: prov.id, label: prov.nombre_empresa }));
 
   const handleKeyDown = (e, nextField, isSelect = false) => {
     if (e.key === "Enter") {
@@ -246,8 +246,8 @@ export const EditarProductoModal = ({ onClose, modalOpen, producto, actualizarLi
                         styles={{
                           menuList: (provided) => ({
                             ...provided,
-                            maxHeight: "200px", // Limita la altura del dropdow
-                            overflowY: "auto",  // Habilita scroll si hay muchos elementos
+                            maxHeight: "200px",
+                            overflowY: "auto",
                           }),
                           control: (base) => ({
                             ...base,

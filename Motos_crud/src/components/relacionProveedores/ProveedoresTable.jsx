@@ -112,8 +112,6 @@ export const ProveedoresTable = () => {
       return 0;
     });
 
-
-
   const getStatusColor = (status) => {
     switch (status) {
       case 0:

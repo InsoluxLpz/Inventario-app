@@ -22,7 +22,7 @@ router.post('/agregar_proveedor', async (req, res) => {
         }
 
         // Si no existe, insertar el nuevo proveedor
-        const insertQuery = `INSERT INTO proveedores (nombre_empresa,nombre_proveedor,  telefono_contacto,rfc, telefono_empresa ) VALUES (?, ?, ?, ?, ?)`;
+        const insertQuery = `INSERT INTO proveedores (nombre_empresa,nombre_proveedor,rfc, telefono_contacto, telefono_empresa ) VALUES (?, ?, ?, ?, ?)`;
         const values = [nombre_empresa, nombre_proveedor, rfc, telefono_contacto, telefono_empresa];
 
         await db.query(insertQuery, values);

@@ -187,7 +187,7 @@ router.get('/obtener_mantenimientos', async (req, res) => {
             inicioSemana.setDate(hoy.getDate() - diaSemana);
 
             const finSemana = new Date(inicioSemana);
-            finSemana.setDate(inicioSemana.getDate() + 6);
+            finSemana.setDate(inicioSemana.getDate() + 7);
 
             fecha_inicio = inicioSemana.toISOString().split('T')[0];
             fecha_final = finSemana.toISOString().split('T')[0];

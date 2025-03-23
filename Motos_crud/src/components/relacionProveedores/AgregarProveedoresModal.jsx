@@ -64,9 +64,12 @@ export const AgregarProveedoresModal = ({ onClose, modalOpen, agregarProveedorHa
       }
       return;
     }
-
     agregarProveedorHandler(cleanedFormData);
     onClose();
+
+    setTimeout(() => {
+      window.location.reload();  // Recarga la página
+    }, 700);  // Tiempo en milisegundos (2 segundos de espera)
   };
 
   const handleKeyDown = (e, nextField) => {

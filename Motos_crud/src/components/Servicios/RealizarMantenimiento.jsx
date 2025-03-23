@@ -241,9 +241,9 @@ export const RealizarMantenimiento = () => {
 
     const getLocalDateTime = () => {
         const date = new Date();
-        const offset = date.getTimezoneOffset(); // Obtiene el desfase horario en minutos
-        const localDate = new Date(date.getTime() - offset * 60000); // Ajusta la fecha por el desfase horario
-        return localDate.toISOString().slice(0, 16); // Convierte a ISO y corta al formato adecuado
+        const offset = date.getTimezoneOffset();
+        const localDate = new Date(date.getTime() - offset * 60000);
+        return localDate.toISOString().slice(0, 16);
     };
 
     const handleKeyDown = (e, nextField, isSelect = false) => {
@@ -263,14 +263,14 @@ export const RealizarMantenimiento = () => {
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", minHeight: "100vh", backgroundColor: "#f2f3f4", paddingTop: "2vh", }}>
 
                 {/* Botón agregado aquí */}
-                <div style={{ width: "63vw", display: "flex", justifyContent: "flex-end", marginBottom: "10px" }}>
+                {/* <div style={{ width: "63vw", display: "flex", justifyContent: "flex-end", marginBottom: "10px" }}>
                     <Button
                         variant="contained"
                         sx={{ backgroundColor: "#1f618d", color: "white", ":hover": { opacity: 0.7 }, right: 20, borderRadius: "8px", padding: "5px 10px", display: "flex", alignItems: "center", gap: "8px" }} onClick={() => navigate("/servicios/ListaMantenimientos")}>
                         <VisibilityIcon sx={{ fontSize: 24 }} />
                         Ver Mantenimientos
                     </Button>
-                </div>
+                </div> */}
 
                 <div style={{ backgroundColor: "#ffffff", padding: "15px", borderRadius: "10px", boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)", maxWidth: "60vw", width: "100%" }}>
                     <div style={{ backgroundColor: "#1f618d", padding: "10px", borderRadius: "5px" }}>
@@ -383,7 +383,6 @@ export const RealizarMantenimiento = () => {
                         </div>
 
                         <hr />
-                        {/* Botón para agregar refacciones */}
                         <div className="d-flex justify-content-end mb-3">
                             <Button variant="contained" color="primary" size="small" onClick={handleOpenModal}>
                                 Agregar Refacción
@@ -482,7 +481,7 @@ export const RealizarMantenimiento = () => {
                             <Button type="submit" style={{ backgroundColor: "#f1c40f", color: "white" }}>
                                 Guardar
                             </Button>
-                            <Button type="button" style={{ backgroundColor: "#7f8c8d", color: "white", marginLeft: 7 }} >
+                            <Button type="button" style={{ backgroundColor: "#7f8c8d", color: "white", marginLeft: 7 }} onClick={() => navigate("/servicios/ListaMantenimientos")}>
                                 Cancelar
                             </Button>
                         </div>
