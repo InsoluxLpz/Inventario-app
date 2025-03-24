@@ -314,6 +314,47 @@ WHERE iad.idProducto = ?
 
 
 
+// * Buscar productos por nombre
+router.get('/buscar_productos_nombre/:busqueda', async (req, res) => {
+    // Decodificar el parámetro de la URL en caso de que haya espacios u otros caracteres codificados
+    const busqueda = decodeURIComponent(req.params.busqueda);
+
+    console.log('nombre recibido', busqueda); // Para verificar que lo estás recibiendo correctamente
+
+    if (!busqueda) {
+        return res.status(400).json({ message: "El nombre del producto es requerido." });
+    }
+
+    try {
+        // Consulta para buscar productos cuyo nombre coincida parcialmente
+        const query = `
+            SELECT id AS idProducto, nombre 
+            FROM productos
+            WHERE nombre LIKE ? 
+            ORDER BY nombre ASC
+            LIMIT 20; 
+        `;
+        
+        // Usar comodines para búsqueda flexible
+        const [result] = await db.query(query, [`%${busqueda}%`]);
+
+        if (result.length === 0) {
+            return res.status(404).json({ message: "No se encontraron productos." });
+        }
+
+        res.status(200).json(result);
+
+    } catch (error) {
+        console.error("Error al buscar productos:", error);
+        res.status(500).json({ message: "Error en el servidor" });
+    }
+});
+
+
+
+
+
+
 
 
 module.exports = router;

@@ -246,31 +246,6 @@ export const cargarListasMovimientosXProductosDetalles = async (idProducto, fech
     }
 };
 
-// export const cargarListasMovimientosXProductosDetalles = async (idProducto, fechaInicio, fechaFin) => {
-//     try {
-//         const response = await fetch(`${API_URL}/entrada/obtener_movimientosXProductos_detalles/${idProducto}?fechaInicio=${fechaInicio}&fechaFin=${fechaFin}`, {
-//             method: "GET",
-//             headers: { 'Content-Type': 'application/json' }
-//         });
-
-//         if (!data || Object.keys(data).length === 0) {
-//             Swal.fire("Producto no encontrado", "El producto especificado no existe.", "warning");
-//             return [];
-//         }
-
-//         if (response.ok) {
-//             return await response.json();
-//         } else {
-//             Swal.fire( "No hay movimiento de productos en ese rango de fecha", "error");
-//         }
-//     } catch (error) {
-//         console.error("Error al realizar la solicitud", error);
-//         Swal.fire("Error", "Hubo un problema al conectar con el servidor.", "error");
-//         return null;
-//     }
-// };
-
-
 // * consulta para buscar productos por codigo
 export const buscarProducto = async (codigo) => {
     try {
@@ -289,3 +264,24 @@ export const buscarProducto = async (codigo) => {
         return null;
     }
 };
+
+
+// * consulta para buscar productos por nombre del producto
+export const buscarProductoPorNombre = async (busqueda) => {
+    try {
+        const response = await fetch(`${API_URL}/entrada/buscar_productos_nombre/${busqueda}`, {
+            method: "GET",
+            headers: { 'Content-Type': 'application/json' }
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            return data;
+        }
+    } catch (error) {
+        console.error('Error al realizar la solicitud', error);
+        Swal.fire('Error', 'Hubo un problema al conectar con el servidor.', 'error');
+        return null;
+    }
+};
+

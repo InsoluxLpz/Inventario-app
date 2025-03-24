@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import {
   Box,
@@ -14,10 +15,11 @@ import {
   TableRow,
   Modal,
 } from "@mui/material";
+import SearchIcon from "@mui/icons-material/Search";
 import FeedIcon from "@mui/icons-material/Feed";
 import { useNavigate } from "react-router";
 import { NavBar } from "../NavBar";
-import { cargarListasMovimientosXProductosDetalles } from "../../api/almacenProductosApi";
+import { buscarProducto, cargarListasMovimientosXProductosDetalles, buscarProductoPorNombre } from "../../api/almacenProductosApi";
 import { ModalMovProductoDetalle } from "./ModalMovProductoDetalle"; // Importar el modal
 import CleaningServicesIcon from '@mui/icons-material/CleaningServices';
 
@@ -32,8 +34,12 @@ export const MovXProductosTable = () => {
     idProducto: "",
   });
 
+  const [openSearchModal, setOpenSearchModal] = useState(false);
+  const [openDetailModal, setOpenDetailModal] = useState(false);
   const [openModal, setOpenModal] = useState(false);
   const [detalleMovimiento, setDetalleMovimiento] = useState(null);
+  const [productos, setProductos] = useState([]);
+  const [busqueda, setBusqueda] = useState("");
 
   const fetchInventario = async () => {
     try {
@@ -55,6 +61,31 @@ export const MovXProductosTable = () => {
       console.error("Error en la petición al obtener Inventario:", error);
     }
   };
+
+   // * Selección de producto desde el modal
+   const handleSelectProducto = (idProducto) => {
+    setFiltro({ ...filtro, idProducto });
+    setOpenSearchModal(false);
+  };
+
+  // * Abrir modal de detalles
+  const handleOpenDetailModal = (producto) => {
+    setDetalleMovimiento(producto);
+    setOpenDetailModal(true);
+  };
+
+    // * Búsqueda de productos por nombre
+    const handleSearchProductos = async () => {
+      try {
+        if (!busqueda.trim()) {
+          return Swal.fire("Atención", "Ingresa un nombre para buscar.", "warning");
+        }
+        const data = await buscarProductoPorNombre(busqueda);
+        setProductos(data || []); 
+      } catch (error) {
+        console.error("Error al buscar productos:", error);
+      }
+    };
 
   const handleFiltroChange = (e) => {
     setFiltro({ ...filtro, [e.target.name]: e.target.value });
@@ -81,8 +112,6 @@ export const MovXProductosTable = () => {
     });
     setInventario([]); // Opcional: limpiar la tabla también
   };
-
-  
 
   return (
     <>
@@ -123,11 +152,18 @@ export const MovXProductosTable = () => {
           InputLabelProps={{ shrink: true }}
           onFocus={(e) => e.target.showPicker()}
         />
-        <TextField
+          <TextField
           label="ID Producto"
           name="idProducto"
           value={filtro.idProducto}
           onChange={handleFiltroChange}
+          InputProps={{
+            endAdornment: (
+              <IconButton color="primary" onClick={() => setOpenSearchModal(true)}>
+                <SearchIcon />
+              </IconButton>
+            ),
+          }}
         />
         <Button variant="contained" color="primary" onClick={fetchInventario}>
           Buscar
@@ -193,6 +229,33 @@ export const MovXProductosTable = () => {
           </TableContainer>
         </Paper>
       </Box>
+
+        {/* Modal de búsqueda de productos */}
+        <Modal open={openSearchModal} onClose={() => setOpenSearchModal(false)}>
+        <Box p={2} bgcolor="white" margin="auto" mt="10%" width={400} borderRadius={2}>
+          <Typography variant="h6" mb={2}>Buscar Producto</Typography>
+          <TextField
+            label="Nombre del producto"
+            fullWidth
+            value={busqueda}
+            onChange={(e) => setBusqueda(e.target.value)}
+          />
+          <Button variant="contained" fullWidth onClick={handleSearchProductos} sx={{ mt: 2 }}>
+            Buscar
+          </Button>
+          {productos.map((prod) => (
+            <Button
+              key={prod.idProducto}
+              variant="outlined"
+              fullWidth
+              onClick={() => handleSelectProducto(prod.idProducto)}
+              sx={{ mt: 1 }}
+            >
+              {prod.nombre}
+            </Button>
+          ))}
+        </Box>
+      </Modal>
 
       {/* Modal */}
       <ModalMovProductoDetalle
