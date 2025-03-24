@@ -149,7 +149,7 @@ export const ProductoAlmacenTable = () => {
         />
       </Box>
 
-      <Box width="90%" maxWidth={1500} margin="0 auto" mt={2}>
+      <Box width="100%" maxWidth={1300} margin="0 auto" mt={2}>
         <Box
           sx={{
             backgroundColor: "#1f618d",
@@ -162,8 +162,8 @@ export const ProductoAlmacenTable = () => {
           </Typography>
         </Box>
 
-        <Paper sx={{ width: "100%" }}>
-          <TableContainer sx={{ maxHeight: 600, backgroundColor: "#eaeded" }}>
+        <Paper sx={{ width: "100%", margin: "0 auto" }}>
+          <TableContainer sx={{  maxHeight: "600", backgroundColor: "#eaeded" }}>
             <Table stickyHeader>
               <TableHead>
                 <TableRow>
@@ -173,11 +173,10 @@ export const ProductoAlmacenTable = () => {
                     "Producto",
                     "Cantidad",
                     "Unidad de medida",
-                    // "Detalles",
                   ].map((header) => (
                     <TableCell
                       key={header}
-                      align="center"
+                      align="left" // Cambia a "left" para alinear todo a la izquierda
                       sx={{
                         fontWeight: "bold",
                         backgroundColor: "#f4f6f7",
@@ -193,26 +192,14 @@ export const ProductoAlmacenTable = () => {
               <TableBody>
                 {sortedInventario.map((producto) => (
                   <TableRow key={producto.id}>
-                    <TableCell align="center">{producto.codigo}</TableCell>
-                    <TableCell align="center">
+                    <TableCell align="left">{producto.codigo}</TableCell>
+                    <TableCell align="left">
                       {producto.nombreProducto}
                     </TableCell>
-                    <TableCell align="center">
+                    <TableCell align="left">
                       {Math.round(producto.cantidad)}
                     </TableCell>
-                    <TableCell align="center">
-                      {producto.unidadMedida}
-                    </TableCell>
-                    {/* <TableCell align="center">
-                      <IconButton
-                        sx={{ color: "black" }}
-                        onClick={() =>
-                          handleOpenDetalles(producto.idMovimiento)
-                        }
-                      >
-                        <FeedIcon sx={{ fontSize: 24 }} />
-                      </IconButton>
-                    </TableCell> */}
+                    <TableCell align="left">{producto.unidadMedida}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>

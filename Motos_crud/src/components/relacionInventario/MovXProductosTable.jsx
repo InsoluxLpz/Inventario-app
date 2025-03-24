@@ -195,7 +195,7 @@ export const MovXProductosTable = () => {
                   ].map((header) => (
                     <TableCell
                       key={header}
-                      align="center"
+                      align="left"
                       sx={{
                         fontWeight: "bold",
                         backgroundColor: "#f4f6f7",
@@ -210,21 +210,21 @@ export const MovXProductosTable = () => {
               <TableBody>
                 {inventario.map((producto) => (
                   <TableRow key={producto.idMovimiento}>
-                    <TableCell align="center">
+                    <TableCell align="left">
                       {producto.idMovimiento}
                     </TableCell>
-                    <TableCell align="center">
+                    <TableCell align="left">
                       {new Date(producto.fecha_movimiento).toLocaleDateString(
                         "es-MX"
                       )}
                     </TableCell>
-                    <TableCell align="center">
+                    <TableCell align="left">
                       {producto.nombreUsuario}
                     </TableCell>
                     <TableCell align="center">
                       {producto.tipoMovimiento}
                     </TableCell>
-                    <TableCell align="center">
+                    <TableCell align="left">
                       <IconButton
                         sx={{ color: "black" }}
                         onClick={() => handleOpenModal(producto)}

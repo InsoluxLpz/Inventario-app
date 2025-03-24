@@ -61,25 +61,38 @@ export const ModalMovimientosDetalles = ({ open, onClose, idMovimiento }) => {
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
+      {/* open={open}
+      onClose={onClose}
+      maxWidth="sm" // Reduce el ancho máximo
+      sx={{
+        "& .MuiDialog-paper": {
+          maxWidth: "1000px", // Ajusta el ancho máximo del modal
+          minWidth: "1000px", // Ajusta el ancho mínimo si es necesario
+          maxHeight: "600px", // Ajusta la altura máxima del modal
+          borderRadius: "12px", // Bordes redondeados
+          padding: "10px", // Espaciado interno
+        },
+      }}
+    > */}
       {/* Encabezado */}
       <Box
-  sx={{
-    backgroundColor: movimientoInfo
-      ? getColorByTipoMovimiento(movimientoInfo.tipo_movimiento)
-      : "#ccc", // Color gris mientras carga
-    padding: "10px 20px",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    height: "100%",
-  }}
->
-  <Typography variant="h5" fontWeight="bold" color="white">
-    {movimientoInfo
-      ? `DETALLES DEL MOVIMIENTO #${idMovimiento}`
-      : "Cargando..."}
-  </Typography>
-</Box>
+        sx={{
+          backgroundColor: movimientoInfo
+            ? getColorByTipoMovimiento(movimientoInfo.tipo_movimiento)
+            : "#ccc", // Color gris mientras carga
+          padding: "10px 20px",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100%",
+        }}
+      >
+        <Typography variant="h5" fontWeight="bold" color="white">
+          {movimientoInfo
+            ? `DETALLES DEL MOVIMIENTO #${idMovimiento}`
+            : "Cargando..."}
+        </Typography>
+      </Box>
 
       {/* Contenido */}
       <DialogContent dividers>
@@ -190,7 +203,7 @@ export const ModalMovimientosDetalles = ({ open, onClose, idMovimiento }) => {
                   <Table>
                     <TableHead>
                       <TableRow sx={{ backgroundColor: "#f2f2f2" }}>
-                        <TableCell>
+                        <TableCell align="left">
                           <Typography
                             variant="body1"
                             fontWeight="bold"
@@ -203,7 +216,7 @@ export const ModalMovimientosDetalles = ({ open, onClose, idMovimiento }) => {
                             #
                           </Typography>
                         </TableCell>
-                        <TableCell>
+                        <TableCell align="left">
                           <Typography
                             variant="body1"
                             fontWeight="bold"
@@ -216,7 +229,7 @@ export const ModalMovimientosDetalles = ({ open, onClose, idMovimiento }) => {
                             Producto
                           </Typography>
                         </TableCell>
-                        <TableCell>
+                        <TableCell align="left">
                           <Typography
                             variant="body1"
                             fontWeight="bold"
@@ -229,7 +242,7 @@ export const ModalMovimientosDetalles = ({ open, onClose, idMovimiento }) => {
                             Cantidad
                           </Typography>
                         </TableCell>
-                        <TableCell>
+                        <TableCell align="right">
                           <Typography
                             variant="body1"
                             fontWeight="bold"
@@ -242,7 +255,7 @@ export const ModalMovimientosDetalles = ({ open, onClose, idMovimiento }) => {
                             Costo Unitario
                           </Typography>
                         </TableCell>
-                        <TableCell>
+                        <TableCell align="right">
                           <Typography
                             variant="body1"
                             fontWeight="bold"
@@ -262,14 +275,17 @@ export const ModalMovimientosDetalles = ({ open, onClose, idMovimiento }) => {
                       {detalleMovimiento.length > 0 ? (
                         detalleMovimiento.map((detalle, index) => (
                           <TableRow key={`producto-${index}`}>
-                            <TableCell>{index + 1}</TableCell>{" "}
-                            {/* ID autoincremental */}
-                            <TableCell>{detalle.producto}</TableCell>
-                            <TableCell>{detalle.cantidad}</TableCell>
-                            <TableCell>
+                            <TableCell align="left">{index + 1}</TableCell>
+                            <TableCell align="left">
+                              {detalle.producto}
+                            </TableCell>
+                            <TableCell align="left">
+                              {detalle.cantidad}
+                            </TableCell>
+                            <TableCell align="right">
                               {formatearDinero(detalle.costo_unitario)}
                             </TableCell>
-                            <TableCell>
+                            <TableCell align="right">
                               {formatearDinero(detalle.subtotal)}
                             </TableCell>
                           </TableRow>
@@ -290,11 +306,10 @@ export const ModalMovimientosDetalles = ({ open, onClose, idMovimiento }) => {
               <Box
                 sx={{
                   backgroundColor: "#f2f2f2",
-                  padding: 3,
+                  padding: 2,
                   display: "flex",
                   justifyContent: "flex-end",
                   borderTop: "1px solid #ddd",
-                  marginRight: "90px", // Ajusta el margen según sea necesario
                   paddingLeft: "10px", // Aumenta el espacio interno a la izquierda
                 }}
               >

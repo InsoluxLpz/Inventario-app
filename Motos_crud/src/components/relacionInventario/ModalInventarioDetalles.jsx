@@ -59,27 +59,28 @@ export const ModalInventarioDetalles = ({ open, onClose, idMovimiento }) => {
     return tipo === "ENTRADA" ? "#1565c0" : "#c62828"; // Azul fuerte para entrada, Rojo fuerte para salida
   };
 
+  //  * UI
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
       {/* Encabezado */}
       <Box
-  sx={{
-    backgroundColor: movimientoInfo
-      ? getColorByTipoMovimiento(movimientoInfo.tipo_movimiento)
-      : "#ccc", // Color gris mientras carga
-    padding: "10px 20px",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    height: "100%",
-  }}
->
-  <Typography variant="h5" fontWeight="bold" color="white">
-    {movimientoInfo
-      ? `DETALLES DEL MOVIMIENTO #${idMovimiento}`
-      : "Cargando..."}
-  </Typography>
-</Box>
+        sx={{
+          backgroundColor: movimientoInfo
+            ? getColorByTipoMovimiento(movimientoInfo.tipo_movimiento)
+            : "#ccc", // Color gris mientras carga
+          padding: "10px 20px",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100%",
+        }}
+      >
+        <Typography variant="h5" fontWeight="bold" color="white">
+          {movimientoInfo
+            ? `DETALLES DEL MOVIMIENTO #${idMovimiento}`
+            : "Cargando..."}
+        </Typography>
+      </Box>
 
       {/* Contenido */}
       <DialogContent dividers>

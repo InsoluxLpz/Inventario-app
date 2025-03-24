@@ -61,51 +61,74 @@ export const MovimientosAlmacenTable = () => {
       fetchInventario(filtro.fechaInicio, filtro.fechaFin, newPage); // Asegúrate de pasar los valores correctos
     }
   };
-  
 
   // * cargar los movimientos de la semana
   useEffect(() => {
     const today = new Date();
-    const firstDayOfWeek = new Date(today.setDate(today.getDate() - today.getDay() + 1)); // Lunes
-    const lastDayOfWeek = new Date(today.setDate(today.getDate() - today.getDay() + 7)); // Domingo
-  
+    const firstDayOfWeek = new Date(
+      today.setDate(today.getDate() - today.getDay() + 1)
+    ); // Lunes
+    const lastDayOfWeek = new Date(
+      today.setDate(today.getDate() - today.getDay() + 7)
+    ); // Domingo
+
     const fechaInicio = firstDayOfWeek.toISOString().split("T")[0];
     const fechaFin = lastDayOfWeek.toISOString().split("T")[0];
-  
+
     setFiltro({ ...filtro, fechaInicio, fechaFin });
-    fetchInventario(fechaInicio, fechaFin);  // Llama a la función para cargar los movimientos inicialmente
+    fetchInventario(fechaInicio, fechaFin); // Llama a la función para cargar los movimientos inicialmente
   }, []); // Esto solo se ejecutará una vez al cargar el componente.
-  
-// * peticion al backend
-const fetchInventario = async (fechaInicio, fechaFin, page = 1, limit = 10, idMovimiento = "") => {
-  console.log('idMovimiento', idMovimiento); // Verifica estos valores en la consola
-  console.log("Página:", page, "Límite:", limit, "Fecha Inicio:", fechaInicio, "Fecha Fin:", fechaFin); // Verifica estos valores en la consola
-  
-  try {
+
+  // * peticion al backend
+  const fetchInventario = async (
+    fechaInicio,
+    fechaFin,
+    page = 1,
+    limit = 10,
+    idMovimiento = ""
+  ) => {
+    console.log("idMovimiento", idMovimiento); // Verifica estos valores en la consola
+    console.log(
+      "Página:",
+      page,
+      "Límite:",
+      limit,
+      "Fecha Inicio:",
+      fechaInicio,
+      "Fecha Fin:",
+      fechaFin
+    ); // Verifica estos valores en la consola
+
+    try {
       // Si existe idMovimiento, ignoramos el rango de fechas
       if (!idMovimiento && (!fechaInicio || !fechaFin)) {
-          console.error("Las fechas proporcionadas no son válidas:", fechaInicio, fechaFin);
-          return;
+        console.error(
+          "Las fechas proporcionadas no son válidas:",
+          fechaInicio,
+          fechaFin
+        );
+        return;
       }
 
       // Llamada a la función que carga los movimientos, pasando idMovimiento como un argumento
-      const data = await cargarListasMovimientos(fechaInicio, fechaFin, page, idMovimiento); // Aquí pasas idMovimiento
+      const data = await cargarListasMovimientos(
+        fechaInicio,
+        fechaFin,
+        page,
+        idMovimiento
+      ); // Aquí pasas idMovimiento
 
       console.log("Datos cargados:", data);
 
       if (data && data.data) {
-          setInventario(data.data); // Actualiza el inventario con los datos de la página actual
-          const totalRecords = data.meta.total || 0; // Asegúrate de que 'total' esté disponible
-          setTotalPages(Math.ceil(totalRecords / limit)); // Calcula el total de páginas
+        setInventario(data.data); // Actualiza el inventario con los datos de la página actual
+        const totalRecords = data.meta.total || 0; // Asegúrate de que 'total' esté disponible
+        setTotalPages(Math.ceil(totalRecords / limit)); // Calcula el total de páginas
       }
-  } catch (error) {
+    } catch (error) {
       console.error("Error en la petición al obtener Inventario", error);
-  }
-};
-
-
-  
-
+    }
+  };
 
   const actualizarLista = (productoActualizado) => {
     setInventario((prevInventario) =>
@@ -128,8 +151,6 @@ const fetchInventario = async (fechaInicio, fechaFin, page = 1, limit = 10, idMo
       fetchInventario(filtro.fechaInicio, filtro.fechaFin, 1); // Usamos fechas si no hay idMovimiento
     }
   };
-  
-  
 
   const movimientosFiltrados = inventario.filter((m) => {
     const nombreUsuarioMatch =
@@ -137,17 +158,17 @@ const fetchInventario = async (fechaInicio, fechaFin, page = 1, limit = 10, idMo
       m.nombreUsuario
         ?.toLowerCase()
         .includes(filtro.nombreUsuario.toLowerCase().trim());
-  
+
     const idMovimientoMatch =
       !filtro.idMovimiento ||
       m.idMovimiento?.toString() === filtro.idMovimiento.toString(); // Asegúrate de que se haga una comparación exacta
-  
+
     const fechaInicioMatch =
       !filtro.fechaInicio || m.fecha_movimiento >= filtro.fechaInicio;
-  
+
     const fechaFinMatch =
       !filtro.fechaFin || m.fecha_movimiento <= filtro.fechaFin;
-  
+
     return (
       nombreUsuarioMatch &&
       idMovimientoMatch &&
@@ -155,25 +176,10 @@ const fetchInventario = async (fechaInicio, fechaFin, page = 1, limit = 10, idMo
       fechaFinMatch
     );
   });
-  
 
-  // console.log("movimientosFiltrados", movimientosFiltrados);
-
-  // * limpiar los filtros
-  // const limpiarFiltros = () => {
-  //   setFiltro({
-  //     idMovimiento: "",
-  //     nombreUsuario: "",
-  //     fechaInicio: "",
-  //     fechaFin: "",
-  //   });
-  //   setInventario([]);
-  // };
   const limpiarFiltros = () => {
-    window.location.reload(); 
+    window.location.reload();
   };
-
-
 
   return (
     <>
@@ -221,12 +227,16 @@ const fetchInventario = async (fechaInicio, fechaFin, page = 1, limit = 10, idMo
           InputLabelProps={{ shrink: true }}
           onFocus={(e) => e.target.showPicker()}
         />
-        <Button variant="contained" color="primary" onClick={handleFiltroSearch}>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={handleFiltroSearch}
+        >
           Buscar
         </Button>
       </Box>
 
-      <Box width="90%" maxWidth={1500} margin="0 auto" mt={2}>
+      <Box width="90%" maxWidth={1300} margin="0 auto" mt={2}>
         <Box
           sx={{
             backgroundColor: "#1f618d",
@@ -253,7 +263,7 @@ const fetchInventario = async (fechaInicio, fechaFin, page = 1, limit = 10, idMo
                   ].map((header) => (
                     <TableCell
                       key={header}
-                      align="center"
+                      align="left" // Alineado a la izquierda
                       sx={{
                         fontWeight: "bold",
                         backgroundColor: "#f4f6f7",
@@ -268,23 +278,23 @@ const fetchInventario = async (fechaInicio, fechaFin, page = 1, limit = 10, idMo
               <TableBody>
                 {inventario.map((producto) => (
                   <TableRow key={producto.idMovimiento}>
-                    <TableCell align="center">
+                    <TableCell align="left">
                       {producto.idMovimiento}
                     </TableCell>
-                    <TableCell align="center">
+                    <TableCell align="left">
                       {producto.fecha_movimiento
                         ? new Date(
                             producto.fecha_movimiento
                           ).toLocaleDateString("es-MX")
                         : "Fecha no disponible"}
                     </TableCell>
-                    <TableCell align="center">
+                    <TableCell align="left">
                       {producto.nombreUsuario}
                     </TableCell>
-                    <TableCell align="center">
+                    <TableCell align="left">
                       {producto.nombreAutorizo}
                     </TableCell>
-                    <TableCell align="center">
+                    <TableCell align="left">
                       <IconButton
                         sx={{ color: "black" }}
                         onClick={() => handleOpenModal(producto.idMovimiento)}

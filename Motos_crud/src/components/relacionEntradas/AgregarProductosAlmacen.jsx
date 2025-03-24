@@ -20,9 +20,9 @@ export const AgregarProductosAlmacen = () => {
   const cantidadRef = useRef(null); // Referencia al input de cantidad
   // * para este caso de cantidad a costo unitario en el foco capturamos el evento enter
   const costoUnitarioRef = useRef(null); // Referencia al input de costoUnitario
-  // * para este otro caso de costo unitraio al bonton de agregar en el foco capturamos el evento enter 
+  // * para este otro caso de costo unitraio al bonton de agregar en el foco capturamos el evento enter
   const agregarRef = useRef(null);
-  // * para este otro caso de el bonton de agregar al campo de producto en el foco capturamos el evento enter 
+  // * para este otro caso de el bonton de agregar al campo de producto en el foco capturamos el evento enter
   const productosRef = useRef(null);
 
   const [listaProveedores, setListaProveedores] = useState([]);
@@ -241,7 +241,7 @@ export const AgregarProductosAlmacen = () => {
       productosRef.current.focus();
     }
   };
-  
+
   const handleCombinedKeyDown = (event) => {
     console.log(`Tecla presionada: ${event.key}`);
     if (event.key === "Enter") {
@@ -251,10 +251,8 @@ export const AgregarProductosAlmacen = () => {
       handleKeyDownProductos(event);
     }
   };
-  
-  
-  
-// * validacion para no permitir enviar ningun valor vacio del formulario
+
+  // * validacion para no permitir enviar ningun valor vacio del formulario
   const validateForm = () => {
     const newErrors = {};
     Object.keys(formData).forEach((key) => {
@@ -608,7 +606,13 @@ export const AgregarProductosAlmacen = () => {
             className="mt-1"
             style={{ display: "flex", justifyContent: "flex-start" }}
           >
-            <Button type="submit" variant="contained" color="primary" ref={agregarRef} onKeyDown={handleCombinedKeyDown}>
+            <Button
+              type="submit"
+              variant="contained"
+              color="primary"
+              ref={agregarRef}
+              onKeyDown={handleCombinedKeyDown}
+            >
               Agregar
             </Button>
           </div>
@@ -665,8 +669,8 @@ export const AgregarProductosAlmacen = () => {
                 <tr>
                   <th>Producto</th>
                   <th>Cantidad</th>
-                  <th>Costo unitario</th>
-                  <th>Subtotal</th>
+                  <th style={{ paddingLeft: "50px" }}>Costo unitario</th>
+                  <th style={{ paddingLeft: "80px" }}>Subtotal</th>
                   <th>Acciones</th>
                 </tr>
               </thead>
@@ -681,9 +685,15 @@ export const AgregarProductosAlmacen = () => {
                     }}
                   >
                     <td>{item.productos[0]?.idProducto?.label || "N/A"}</td>
-                    <td>{item.productos[0]?.cantidad}</td>
-                    <td>{item.productos[0]?.costo_unitario}</td>
                     <td>
+                      {item.productos[0]?.cantidad}
+                    </td>{" "}
+                    {/* Aumenté paddingLeft */}
+                    <td style={{ paddingLeft: "100px" }}>
+                      {item.productos[0]?.costo_unitario}
+                    </td>{" "}
+                    {/* Aumenté paddingLeft */}
+                    <td style={{ paddingLeft: "100px" }} >
                       {formatearDinero(
                         item.productos[0]?.cantidad *
                           item.productos[0]?.costo_unitario
@@ -703,6 +713,7 @@ export const AgregarProductosAlmacen = () => {
                   </tr>
                 ))}
               </tbody>
+
               <tfoot>
                 <tr>
                   <td colSpan="4" className="text-end fw-bold ">
