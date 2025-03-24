@@ -36,6 +36,7 @@ export const ProductoAlmacenTable = () => {
     codigo: "",
     fecha: "",
     unidadMedida: "",
+    nombreProducto: "",
   });
 
   // * funcion para el modal de el icono de detalles del movimiento en el inventario
@@ -48,7 +49,6 @@ export const ProductoAlmacenTable = () => {
   //   setOpenModal(false);
   //   setSelectedMovimiento(null);
   // }
-
 
   // * peticion
   useEffect(() => {
@@ -90,13 +90,19 @@ export const ProductoAlmacenTable = () => {
   };
 
   const filteredInventario = inventario.filter((m) => {
-    // Comparación de código, asegurándote de que m.codigo no sea null o undefined
+    // Comparar por nombre del producto
+    const nombreProductoMatch =
+      filtro.nombreProducto === "" ||
+      (m.nombreProducto &&
+        m.nombreProducto
+          .toLowerCase()
+          .includes(filtro.nombreProducto.toLowerCase().trim()));
+
     const codigoMatch =
       filtro.codigo === "" ||
       (m.codigo &&
         m.codigo.toLowerCase().includes(filtro.codigo.toLowerCase().trim()));
 
-    // Comparación de unidad de medida sin importar mauscula o minuscula
     const unidadMedidaMatch =
       filtro.unidadMedida === "" ||
       (m.unidadMedida &&
@@ -104,12 +110,13 @@ export const ProductoAlmacenTable = () => {
           .toLowerCase()
           .includes(filtro.unidadMedida.toLowerCase()));
 
-    // Comparación de fecha
     const fechaMatch =
       filtro.fecha === "" ||
-      (m.fecha_movimiento && m.fecha_movimiento.includes(filtro.fecha)); // Asegúrate que m.fecha_movimiento esté en formato adecuado
+      (m.fecha_movimiento && m.fecha_movimiento.includes(filtro.fecha));
 
-    return codigoMatch && unidadMedidaMatch && fechaMatch;
+    return (
+      nombreProductoMatch && codigoMatch && unidadMedidaMatch && fechaMatch
+    );
   });
 
   // *  funcion para ordenar alfabeticamente
@@ -123,21 +130,17 @@ export const ProductoAlmacenTable = () => {
 
       <Box display="flex" justifyContent="center" gap={1} my={2} mt={5}>
         <TextField
-          label="Codigo"
+          label="Código"
           name="codigo"
           value={filtro.codigo}
           onChange={handleFiltroChange}
         />
-        {/* <TextField
-          label="Filtrar por"
-          name="fecha"
-          type="date"
-          value={filtro.fecha}
+        <TextField
+          label="Nombre del Producto"
+          name="nombreProducto" // Nombre del campo
+          value={filtro.nombreProducto} // Valor del filtro
           onChange={handleFiltroChange}
-          onFocus={(e) => (e.target.showPicker ? e.target.showPicker() : null)} // Agregar verificación para `showPicker`
-          InputLabelProps={{ shrink: true }}
-        /> */}
-
+        />
         <TextField
           label="Unidad de medida"
           name="unidadMedida"
@@ -146,7 +149,7 @@ export const ProductoAlmacenTable = () => {
         />
       </Box>
 
-      <Box width="90%" maxWidth={2000} margin="0 auto" mt={2}>
+      <Box width="90%" maxWidth={1500} margin="0 auto" mt={2}>
         <Box
           sx={{
             backgroundColor: "#1f618d",
@@ -170,7 +173,7 @@ export const ProductoAlmacenTable = () => {
                     "Producto",
                     "Cantidad",
                     "Unidad de medida",
-                    "Detalles",
+                    // "Detalles",
                   ].map((header) => (
                     <TableCell
                       key={header}
@@ -200,7 +203,7 @@ export const ProductoAlmacenTable = () => {
                     <TableCell align="center">
                       {producto.unidadMedida}
                     </TableCell>
-                    <TableCell align="center">
+                    {/* <TableCell align="center">
                       <IconButton
                         sx={{ color: "black" }}
                         onClick={() =>
@@ -209,7 +212,7 @@ export const ProductoAlmacenTable = () => {
                       >
                         <FeedIcon sx={{ fontSize: 24 }} />
                       </IconButton>
-                    </TableCell>
+                    </TableCell> */}
                   </TableRow>
                 ))}
               </TableBody>

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import {
   Box,
@@ -19,9 +18,13 @@ import SearchIcon from "@mui/icons-material/Search";
 import FeedIcon from "@mui/icons-material/Feed";
 import { useNavigate } from "react-router";
 import { NavBar } from "../NavBar";
-import { buscarProducto, cargarListasMovimientosXProductosDetalles, buscarProductoPorNombre } from "../../api/almacenProductosApi";
+import {
+  buscarProducto,
+  cargarListasMovimientosXProductosDetalles,
+  buscarProductoPorNombre,
+} from "../../api/almacenProductosApi";
 import { ModalMovProductoDetalle } from "./ModalMovProductoDetalle"; // Importar el modal
-import CleaningServicesIcon from '@mui/icons-material/CleaningServices';
+import CleaningServicesIcon from "@mui/icons-material/CleaningServices";
 
 export const MovXProductosTable = () => {
   const navigate = useNavigate();
@@ -62,8 +65,8 @@ export const MovXProductosTable = () => {
     }
   };
 
-   // * Selección de producto desde el modal
-   const handleSelectProducto = (idProducto) => {
+  // * Selección de producto desde el modal
+  const handleSelectProducto = (idProducto) => {
     setFiltro({ ...filtro, idProducto });
     setOpenSearchModal(false);
   };
@@ -74,18 +77,22 @@ export const MovXProductosTable = () => {
     setOpenDetailModal(true);
   };
 
-    // * Búsqueda de productos por nombre
-    const handleSearchProductos = async () => {
-      try {
-        if (!busqueda.trim()) {
-          return Swal.fire("Atención", "Ingresa un nombre para buscar.", "warning");
-        }
-        const data = await buscarProductoPorNombre(busqueda);
-        setProductos(data || []); 
-      } catch (error) {
-        console.error("Error al buscar productos:", error);
+  // * Búsqueda de productos por nombre
+  const handleSearchProductos = async () => {
+    try {
+      if (!busqueda.trim()) {
+        return Swal.fire(
+          "Atención",
+          "Ingresa un nombre para buscar.",
+          "warning"
+        );
       }
-    };
+      const data = await buscarProductoPorNombre(busqueda);
+      setProductos(data || []);
+    } catch (error) {
+      console.error("Error al buscar productos:", error);
+    }
+  };
 
   const handleFiltroChange = (e) => {
     setFiltro({ ...filtro, [e.target.name]: e.target.value });
@@ -152,14 +159,17 @@ export const MovXProductosTable = () => {
           InputLabelProps={{ shrink: true }}
           onFocus={(e) => e.target.showPicker()}
         />
-          <TextField
-          label="ID Producto"
+        <TextField
+          label="No. Producto"
           name="idProducto"
           value={filtro.idProducto}
           onChange={handleFiltroChange}
           InputProps={{
             endAdornment: (
-              <IconButton color="primary" onClick={() => setOpenSearchModal(true)}>
+              <IconButton
+                color="primary"
+                onClick={() => setOpenSearchModal(true)}
+              >
                 <SearchIcon />
               </IconButton>
             ),
@@ -170,7 +180,7 @@ export const MovXProductosTable = () => {
         </Button>
       </Box>
 
-      <Box width="90%" maxWidth={2000} margin="0 auto" mt={2}>
+      <Box width="90%" maxWidth={1300} margin="0 auto" mt={2}>
         <Paper sx={{ width: "100%" }}>
           <TableContainer sx={{ maxHeight: 600, backgroundColor: "#eaeded" }}>
             <Table stickyHeader>
@@ -230,17 +240,37 @@ export const MovXProductosTable = () => {
         </Paper>
       </Box>
 
-        {/* Modal de búsqueda de productos */}
-        <Modal open={openSearchModal} onClose={() => setOpenSearchModal(false)}>
-        <Box p={2} bgcolor="white" margin="auto" mt="10%" width={400} borderRadius={2}>
-          <Typography variant="h6" mb={2}>Buscar Producto</Typography>
+      
+      {/* Modal de búsqueda de productos */}
+      <Modal open={openSearchModal} onClose={() => setOpenSearchModal(false)}>
+        <Box
+          p={2}
+          bgcolor="white"
+          margin="auto"
+          mt="10%"
+          width={400}
+          borderRadius={2}
+        >
+          <Typography variant="h6" mb={2}>
+            Buscar Producto
+          </Typography>
           <TextField
             label="Nombre del producto"
             fullWidth
             value={busqueda}
             onChange={(e) => setBusqueda(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                handleSearchProductos();
+              }
+            }}
           />
-          <Button variant="contained" fullWidth onClick={handleSearchProductos} sx={{ mt: 2 }}>
+          <Button
+            variant="contained"
+            fullWidth
+            onClick={handleSearchProductos}
+            sx={{ mt: 2 }}
+          >
             Buscar
           </Button>
           {productos.map((prod) => (

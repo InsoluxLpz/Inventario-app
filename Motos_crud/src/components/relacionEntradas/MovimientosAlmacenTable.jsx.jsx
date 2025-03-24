@@ -15,6 +15,7 @@ import WarehouseIcon from "@mui/icons-material/Warehouse";
 import FeedIcon from "@mui/icons-material/Feed";
 import { EditarProductoAlmacenModal } from "./EditarProductoAlmacenModal";
 import { useNavigate } from "react-router";
+import CleaningServicesIcon from "@mui/icons-material/CleaningServices";
 
 export const MovimientosAlmacenTable = () => {
   const navigate = useNavigate();
@@ -30,11 +31,17 @@ export const MovimientosAlmacenTable = () => {
   const [openModal, setOpenModal] = useState(false);
   const [selectedMovimiento, setSelectedMovimiento] = useState(null);
 
+  // * filtros por paginacion
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10); // Límite por página (puedes cambiarlo dinámicamente si es necesario)
+  const [totalPages, setTotalPages] = useState(1); // Total de páginas (calculado desde el backend)
+
   // * filtro por idMovimiento, Fecha y quien realizo el movimiento
   const [filtro, setFiltro] = useState({
     idMovimiento: "",
-    fecha: "",
     nombreUsuario: "",
+    fechaInicio: "",
+    fechaFin: "",
   });
 
   const handleOpenModal = (id) => {
@@ -47,21 +54,58 @@ export const MovimientosAlmacenTable = () => {
     setSelectedMovimiento(null);
   };
 
-  useEffect(() => {
-    fetchInventario();
-  }, []);
-
-  const fetchInventario = async () => {
-    try {
-      const data = await cargarListasMovimientos();
-      console.log("datos de la peticion inventario", data);
-      if (data) {
-        setInventario(data);
-      }
-    } catch (error) {
-      console.error("Error en la petición al obtener Inventario");
+  // * manejo del cambio de pagina
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      setCurrentPage(newPage);
+      fetchInventario(filtro.fechaInicio, filtro.fechaFin, newPage); // Asegúrate de pasar los valores correctos
     }
   };
+  
+
+  // * cargar los movimientos de la semana
+  useEffect(() => {
+    const today = new Date();
+    const firstDayOfWeek = new Date(today.setDate(today.getDate() - today.getDay() + 1)); // Lunes
+    const lastDayOfWeek = new Date(today.setDate(today.getDate() - today.getDay() + 7)); // Domingo
+  
+    const fechaInicio = firstDayOfWeek.toISOString().split("T")[0];
+    const fechaFin = lastDayOfWeek.toISOString().split("T")[0];
+  
+    setFiltro({ ...filtro, fechaInicio, fechaFin });
+    fetchInventario(fechaInicio, fechaFin);  // Llama a la función para cargar los movimientos inicialmente
+  }, []); // Esto solo se ejecutará una vez al cargar el componente.
+  
+// * peticion al backend
+const fetchInventario = async (fechaInicio, fechaFin, page = 1, limit = 10, idMovimiento = "") => {
+  console.log('idMovimiento', idMovimiento); // Verifica estos valores en la consola
+  console.log("Página:", page, "Límite:", limit, "Fecha Inicio:", fechaInicio, "Fecha Fin:", fechaFin); // Verifica estos valores en la consola
+  
+  try {
+      // Si existe idMovimiento, ignoramos el rango de fechas
+      if (!idMovimiento && (!fechaInicio || !fechaFin)) {
+          console.error("Las fechas proporcionadas no son válidas:", fechaInicio, fechaFin);
+          return;
+      }
+
+      // Llamada a la función que carga los movimientos, pasando idMovimiento como un argumento
+      const data = await cargarListasMovimientos(fechaInicio, fechaFin, page, idMovimiento); // Aquí pasas idMovimiento
+
+      console.log("Datos cargados:", data);
+
+      if (data && data.data) {
+          setInventario(data.data); // Actualiza el inventario con los datos de la página actual
+          const totalRecords = data.meta.total || 0; // Asegúrate de que 'total' esté disponible
+          setTotalPages(Math.ceil(totalRecords / limit)); // Calcula el total de páginas
+      }
+  } catch (error) {
+      console.error("Error en la petición al obtener Inventario", error);
+  }
+};
+
+
+  
+
 
   const actualizarLista = (productoActualizado) => {
     setInventario((prevInventario) =>
@@ -76,30 +120,83 @@ export const MovimientosAlmacenTable = () => {
     setFiltro({ ...filtro, [e.target.name]: e.target.value });
   };
 
+  const handleFiltroSearch = () => {
+    // Si hay un idMovimiento, lo usamos en lugar de las fechas
+    if (filtro.idMovimiento) {
+      fetchInventario(null, null, 1, 10, filtro.idMovimiento); // No pasamos fechas si hay idMovimiento
+    } else {
+      fetchInventario(filtro.fechaInicio, filtro.fechaFin, 1); // Usamos fechas si no hay idMovimiento
+    }
+  };
+  
+  
+
   const movimientosFiltrados = inventario.filter((m) => {
     const nombreUsuarioMatch =
-      filtro.nombreUsuario === "" ||
-      (m.nombreUsuario &&
-        m.nombreUsuario
-          .toLowerCase()
-          .includes(filtro.nombreUsuario.toLowerCase().trim()));
-    // console.log("filtro", filtro);
-
+      !filtro.nombreUsuario ||
+      m.nombreUsuario
+        ?.toLowerCase()
+        .includes(filtro.nombreUsuario.toLowerCase().trim());
+  
     const idMovimientoMatch =
-      filtro.idMovimiento === "" ||
-      m.idMovimiento?.toString().includes(filtro.idMovimiento.toString());
-
-    const fechaMatch =
-      filtro.fecha === "" || m.fecha_movimiento?.includes(filtro.fecha);
-
-    return nombreUsuarioMatch && idMovimientoMatch && fechaMatch;
+      !filtro.idMovimiento ||
+      m.idMovimiento?.toString() === filtro.idMovimiento.toString(); // Asegúrate de que se haga una comparación exacta
+  
+    const fechaInicioMatch =
+      !filtro.fechaInicio || m.fecha_movimiento >= filtro.fechaInicio;
+  
+    const fechaFinMatch =
+      !filtro.fechaFin || m.fecha_movimiento <= filtro.fechaFin;
+  
+    return (
+      nombreUsuarioMatch &&
+      idMovimientoMatch &&
+      fechaInicioMatch &&
+      fechaFinMatch
+    );
   });
+  
+
+  // console.log("movimientosFiltrados", movimientosFiltrados);
+
+  // * limpiar los filtros
+  // const limpiarFiltros = () => {
+  //   setFiltro({
+  //     idMovimiento: "",
+  //     nombreUsuario: "",
+  //     fechaInicio: "",
+  //     fechaFin: "",
+  //   });
+  //   setInventario([]);
+  // };
+  const limpiarFiltros = () => {
+    window.location.reload(); 
+  };
+
+
 
   return (
     <>
       <NavBar onSearch={setSearchTerm} />
 
       <Box display="flex" justifyContent="center" gap={1} my={2} mt={3}>
+        <Button
+          variant="contained"
+          sx={{
+            backgroundColor: "#566573",
+            color: "white",
+            ":hover": { opacity: 0.7 },
+            borderRadius: "8px",
+            padding: "5px 10px",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+          }}
+          onClick={limpiarFiltros}
+        >
+          <CleaningServicesIcon sx={{ fontSize: 24 }} />
+        </Button>
+
         <TextField
           label="No.Movimiento"
           name="idMovimiento"
@@ -107,23 +204,29 @@ export const MovimientosAlmacenTable = () => {
           onChange={handleFiltroChange}
         />
         <TextField
-          label="Filtrar por"
-          name="fecha"
+          label="Fecha Inicio"
+          name="fechaInicio"
           type="date"
-          value={filtro.fecha}
+          value={filtro.fechaInicio}
           onChange={handleFiltroChange}
-          onFocus={(e) => (e.target.showPicker ? e.target.showPicker() : null)} 
           InputLabelProps={{ shrink: true }}
+          onFocus={(e) => e.target.showPicker()}
         />
         <TextField
-          label="Usuario"
-          name="nombreUsuario"
-          value={filtro.nombreUsuario}
+          label="Fecha Fin"
+          name="fechaFin"
+          type="date"
+          value={filtro.fechaFin}
           onChange={handleFiltroChange}
+          InputLabelProps={{ shrink: true }}
+          onFocus={(e) => e.target.showPicker()}
         />
+        <Button variant="contained" color="primary" onClick={handleFiltroSearch}>
+          Buscar
+        </Button>
       </Box>
 
-      <Box width="90%" maxWidth={2000} margin="0 auto" mt={2}>
+      <Box width="90%" maxWidth={1500} margin="0 auto" mt={2}>
         <Box
           sx={{
             backgroundColor: "#1f618d",
@@ -147,7 +250,6 @@ export const MovimientosAlmacenTable = () => {
                     "Realizo Mov.",
                     "Autorizo",
                     "Detalles",
-                    // "Acciones",
                   ].map((header) => (
                     <TableCell
                       key={header}
@@ -163,9 +265,8 @@ export const MovimientosAlmacenTable = () => {
                   ))}
                 </TableRow>
               </TableHead>
-
               <TableBody>
-                {movimientosFiltrados.map((producto) => (
+                {inventario.map((producto) => (
                   <TableRow key={producto.idMovimiento}>
                     <TableCell align="center">
                       {producto.idMovimiento}
@@ -197,6 +298,32 @@ export const MovimientosAlmacenTable = () => {
             </Table>
           </TableContainer>
         </Paper>
+
+        {/* Controles de paginación */}
+        <Box display="flex" justifyContent="center" mt={2}>
+          <Button
+            variant="contained"
+            disabled={currentPage === 1}
+            onClick={() => handlePageChange(currentPage - 1)}
+            sx={{ marginRight: 2 }}
+          >
+            Anterior
+          </Button>
+          <Typography
+            variant="body1"
+            sx={{ marginTop: "auto", marginBottom: "auto" }}
+          >
+            Página {currentPage} de {totalPages}
+          </Typography>
+          <Button
+            variant="contained"
+            disabled={currentPage === totalPages}
+            onClick={() => handlePageChange(currentPage + 1)}
+            sx={{ marginLeft: 2 }}
+          >
+            Siguiente
+          </Button>
+        </Box>
       </Box>
 
       <EditarProductoAlmacenModal

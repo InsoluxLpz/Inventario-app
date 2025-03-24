@@ -169,24 +169,56 @@ export const cargarListasCampos = async () => {
 };
 
 // * funcion para la tabla de movimientos en el almacen
-export const cargarListasMovimientos = async () => {
+export const cargarListasMovimientos = async (fechaInicio, fechaFin, page = 1, idMovimiento = "") => {
     try {
-        const response = await fetch(`${API_URL}/entrada/obtener_movimientos`, {
+        // Construir la URL con los parámetros
+        let url = `${API_URL}/entrada/obtener_movimientos?fechaInicio=${fechaInicio}&fechaFin=${fechaFin}&page=${page}`;
+        
+        if (idMovimiento) {
+            url += `&idMovimiento=${idMovimiento}`; // Agregar el parámetro si existe
+        }
+
+        // Depuración: Verificar la URL construida
+        console.log("URL solicitada:", url);
+
+        const response = await fetch(url, {
             method: "GET",
             headers: {
                 'Content-Type': 'application/json'
             },
         });
+
         if (response.ok) {
             const data = await response.json();
+
+            // Producto existe pero no hay movimientos
+            if (data.data?.length === 0) {
+                Swal.fire("Sin movimientos", data.message || "No se encontraron movimientos en el rango especificado", "info");
+                return [];
+            }
+
             return data;
+        } 
+        // Producto no encontrado (404)
+        else if (response.status === 404) {
+            const errorData = await response.json();
+            Swal.fire("Movimiento no encontrado", errorData.message, "warning");
+            return [];
+        } 
+        // Otros errores del servidor
+        else {
+            const errorData = await response.json();
+            Swal.fire("Error", errorData.message || "Hubo un problema con la respuesta del servidor.", "error");
+            return [];
         }
     } catch (error) {
-        console.error('Error al realizar la solicitud', error);
-        Swal.fire('Error', 'Hubo un problema al conectar con el servidor.', 'error');
-        return null;
+        console.error("Error al realizar la solicitud", error);
+        Swal.fire("Error", "Hubo un problema al conectar con el servidor.", "error");
+        return [];
     }
 };
+
+
 
 //  * consulta para tener los movimientos_almacen_detalle
 export const cargarListasMovimientosDetalles = async (idMovimiento) => {
@@ -269,10 +301,10 @@ export const buscarProducto = async (codigo) => {
 // * consulta para buscar productos por nombre del producto
 export const buscarProductoPorNombre = async (busqueda) => {
     try {
-        const response = await fetch(`${API_URL}/entrada/buscar_productos_nombre/${busqueda}`, {
-            method: "GET",
-            headers: { 'Content-Type': 'application/json' }
-        });
+            const response = await fetch(`${API_URL}/entrada/buscar_productos_nombre/${busqueda}`, {
+                method: "GET",
+                headers: { 'Content-Type': 'application/json' }
+            });        
 
         if (response.ok) {
             const data = await response.json();
@@ -284,4 +316,3 @@ export const buscarProductoPorNombre = async (busqueda) => {
         return null;
     }
 };
-
