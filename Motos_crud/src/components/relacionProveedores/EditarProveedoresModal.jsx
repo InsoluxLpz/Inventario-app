@@ -123,7 +123,7 @@ export const EditarProveedoresModal = ({ onClose, modalOpen, proveedor, actualiz
       <div className="modal fade show" style={{ display: "block" }} aria-labelledby="exampleModalLabel" tabIndex="-1" role="dialog">
         <div className="modal-dialog" role="document" style={{ maxWidth: "50vw", marginTop: 90 }}>
           <div className="modal-content w-100" style={{ maxWidth: "50vw" }}>
-            <div className="modal-header" style={{ backgroundColor: '#1f618d' }}>
+            <div className="modal-header" style={{ backgroundColor: '#f1c40f' }}>
               <h5 className="modal-title" style={{ color: 'white' }}>Editar Proveedor</h5>
             </div>
             <form onSubmit={handleSubmit}>

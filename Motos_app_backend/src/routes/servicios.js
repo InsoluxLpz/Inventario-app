@@ -116,8 +116,7 @@ router.post('/agregar_mantenimiento', async (req, res) => {
         return res.status(400).json({ error: "Faltan datos obligatorios" });
     }
 
-    // Convierte la fecha_inicio a la hora local
-    const fechaInicioLocal = moment(fecha_inicio).local().format('YYYY-MM-DD HH:mm:ss'); // Se usa el formato adecuado para MySQL
+    const fechaInicioLocal = moment(fecha_inicio).local().format('YYYY-MM-DD HH:mm:ss');
 
     const connection = await db.getConnection();
     try {
@@ -218,7 +217,7 @@ router.get('/obtener_mantenimientos', async (req, res) => {
                 md.subtotal
             FROM mantenimientos m
             LEFT JOIN cat_motocicletas_prueba mt ON m.idMoto = mt.id
-            LEFT JOIN mantenimientos_servicios sm ON m.id = sm.idMantenimiento
+            LEFT JOIN mantenimientos_servicios sm ON m.id = sm.idMantenimiento AND sm.STATUS = 1
             LEFT JOIN cat_servicios cs ON sm.idServicio = cs.id
             LEFT JOIN usuarios u ON m.idCancelo = u.idUsuario
             LEFT JOIN mantenimientos_detalles md ON m.id = md.idMantenimiento
@@ -321,7 +320,6 @@ router.put('/actualizar_mantenimiento/:id', async (req, res) => {
     try {
         await connection.beginTransaction();
 
-        // Verificar si el mantenimiento existe
         const [mantenimiento] = await connection.query(
             "SELECT id FROM mantenimientos WHERE id = ?",
             [id]
@@ -332,17 +330,49 @@ router.put('/actualizar_mantenimiento/:id', async (req, res) => {
             return res.status(404).json({ error: "El mantenimiento no existe" });
         }
 
-        // Eliminar servicios anteriores del mantenimiento
-        await connection.query(
-            "DELETE FROM mantenimientos_servicios WHERE idMantenimiento = ?",
+        // Obtener los servicios actuales del mantenimiento (activos e inactivos)
+        const [serviciosActuales] = await connection.query(
+            "SELECT idServicio, STATUS FROM mantenimientos_servicios WHERE idMantenimiento = ?",
             [id]
         );
 
-        // Insertar los nuevos servicios seleccionados
-        if (servicios.length > 0) {
-            const servicioValues = servicios.map(servicio => [id, servicio]);
+        const serviciosActivos = serviciosActuales
+            .filter(s => s.STATUS === 1)
+            .map(s => s.idServicio);
+
+        const serviciosInactivos = serviciosActuales
+            .filter(s => s.STATUS === 0)
+            .map(s => s.idServicio);
+
+        // Determinar los servicios que deben desactivarse (están activos pero no en la nueva lista)
+        const serviciosAEliminar = serviciosActivos.filter(s => !servicios.includes(s));
+
+        if (serviciosAEliminar.length > 0) {
             await connection.query(
-                "INSERT INTO mantenimientos_servicios (idMantenimiento, idServicio) VALUES ?",
+                "UPDATE mantenimientos_servicios SET STATUS = 0 WHERE idMantenimiento = ? AND idServicio IN (?)",
+                [id, serviciosAEliminar]
+            );
+        }
+
+        // Determinar los servicios que ya existen como inactivos y deben reactivarse
+        const serviciosAReactivar = serviciosInactivos.filter(s => servicios.includes(s));
+
+        if (serviciosAReactivar.length > 0) {
+            await connection.query(
+                "UPDATE mantenimientos_servicios SET STATUS = 1 WHERE idMantenimiento = ? AND idServicio IN (?)",
+                [id, serviciosAReactivar]
+            );
+        }
+
+        // Determinar los servicios completamente nuevos (no están en la BD ni como activos ni inactivos)
+        const serviciosNuevos = servicios.filter(s =>
+            !serviciosActivos.includes(s) && !serviciosInactivos.includes(s)
+        );
+
+        if (serviciosNuevos.length > 0) {
+            const servicioValues = serviciosNuevos.map(servicio => [id, servicio, 1]);
+            await connection.query(
+                "INSERT INTO mantenimientos_servicios (idMantenimiento, idServicio, STATUS) VALUES ?",
                 [servicioValues]
             );
         }
@@ -358,6 +388,7 @@ router.put('/actualizar_mantenimiento/:id', async (req, res) => {
         connection.release();
     }
 });
+
 
 router.delete('/cancelar_mantenimiento/:id', async (req, res) => {
     const { id } = req.params;

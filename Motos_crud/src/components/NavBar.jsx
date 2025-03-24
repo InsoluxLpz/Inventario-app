@@ -26,6 +26,8 @@ import InventoryTwoToneIcon from "@mui/icons-material/InventoryTwoTone";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import CategoryIcon from "@mui/icons-material/Category";
 import WarehouseIcon from "@mui/icons-material/Warehouse";
+import HomeRepairServiceIcon from '@mui/icons-material/HomeRepairService';
+import StorageIcon from '@mui/icons-material/Storage';
 import LogoutIcon from "@mui/icons-material/Logout";
 import Swal from 'sweetalert2';
 // import { ExpandMoreIcon } from "@material-ui/icons";
@@ -241,6 +243,8 @@ export const NavBar = () => {
             />
           </ListItem>
 
+          <Divider sx={{ borderColor: "rgba(0, 0, 0, 0.7)", borderWidth: 1 }} />
+
           <ListItem button onClick={handleProductsClick}>
             <ListItemIcon sx={{ minWidth: 32 }}>
               <NewspaperIcon />
@@ -396,7 +400,7 @@ export const NavBar = () => {
                 }}
               >
                 <ListItemIcon sx={{ minWidth: 32 }}>
-                  <CategoryIcon sx={{ fontSize: 18 }} />
+                  <HomeRepairServiceIcon sx={{ fontSize: 18 }} />
                 </ListItemIcon>
                 <ListItemText
                   primary="Agregar Mantenimiento"
@@ -514,14 +518,14 @@ export const NavBar = () => {
                 }}
               >
                 <ListItemIcon sx={{ minWidth: 32 }}>
-                  <CategoryIcon sx={{ fontSize: 18 }} />
+                  <StorageIcon sx={{ fontSize: 18 }} />
                 </ListItemIcon>
                 <ListItemText
                   primary="Inventario"
                   sx={{ display: open ? "block" : "none" }}
                 />
               </ListItem>
-              {/* movimientos por productos */}
+
               <ListItem
                 button
                 selected={selectedItem === "/almacen/MovXProductosTable"}

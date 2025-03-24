@@ -1,13 +1,12 @@
 import React, { useEffect, useState, useRef } from 'react'
 import { Button } from '@mui/material';
-import { NavBar } from '../NavBar'
+import { NavBar } from '../NavBar';
 import Select from "react-select";
 import { obtenerMotos } from '../../api/motosApi';
 import { AgregarMantenimiento, ObtenerMantenimientos, ObtenerServicios } from '../../api/ServiciosApi';
 import { AgregarRefaccionesModal } from './agregarRefaccionesModal';
 import { cargarListasEntradas } from '../../api/almacenProductosApi';
 import { useNavigate } from "react-router";
-import VisibilityIcon from '@mui/icons-material/Visibility';
 
 export const RealizarMantenimiento = () => {
 
@@ -52,13 +51,10 @@ export const RealizarMantenimiento = () => {
             } else {
                 nuevosProductos = [...prevProductos, productoData];
             }
-
             // Calcular el total
             const total = nuevosProductos.reduce((acc, prod) => acc + prod.subtotal, 0);
-
             // Formatear el total con dos decimales y agregarlo al estado
-            const totalFormateado = total.toFixed(2); // Esto asegura que tenga .00
-
+            const totalFormateado = total.toFixed(2);
             // Guardar en estado como número
             setFormData((prev) => ({ ...prev, costo_total: parseFloat(totalFormateado) }));
 
@@ -118,7 +114,7 @@ export const RealizarMantenimiento = () => {
 
             if (data) {
                 const serviciosFiltrados = data
-                    .filter((serv) => serv.status !== 0) // Filtrar solo los servicios con status === 1
+                    .filter((serv) => serv.status !== 0)
                     .map((serv) => ({ value: serv.id, label: serv.nombre }));
 
                 setServicio(serviciosFiltrados);
@@ -153,13 +149,6 @@ export const RealizarMantenimiento = () => {
 
     const formatCurrency = (value) => {
         return value.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' });
-    };
-
-    const handleSelectChange = (selectedOptions) => {
-        setFormData((prev) => ({
-            ...prev,
-            servicio: selectedOptions ? selectedOptions.map(option => option.value) : [],
-        }));
     };
 
     const validateForm = () => {
@@ -214,17 +203,12 @@ export const RealizarMantenimiento = () => {
         if (respuesta && !respuesta.error) {
             console.log("Mantenimiento agregado correctamente:", respuesta);
 
-            setFormData({
-                fecha_inicio: "",
-                vehiculo: "",
-                odometro: "",
-                servicio: [],
-                costo_total: "",
-                comentario: "",
-            });
             setProductosSeleccionados([]);
             ObtenerMantenimientos();
             setErrors({});
+            setTimeout(() => {
+                window.location.reload();
+            }, 700);
         } else {
             console.error("Error al agregar mantenimiento:", respuesta.error);
         }
@@ -260,7 +244,7 @@ export const RealizarMantenimiento = () => {
     return (
         <>
             <NavBar />
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", minHeight: "100vh", backgroundColor: "#f2f3f4", paddingTop: "2vh", }}>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", minHeight: "100vh", backgroundColor: "#f2f3f4", paddingTop: "2vh", marginTop: 10 }}>
 
                 {/* Botón agregado aquí */}
                 {/* <div style={{ width: "63vw", display: "flex", justifyContent: "flex-end", marginBottom: "10px" }}>
@@ -276,9 +260,7 @@ export const RealizarMantenimiento = () => {
                     <div style={{ backgroundColor: "#1f618d", padding: "10px", borderRadius: "5px" }}>
                         <h5 style={{ color: "white", textAlign: "center", margin: 0 }}>Realizar Mantenimiento</h5>
                     </div>
-
-
-                    <form onSubmit={handleSubmit} style={{ marginTop: 10 }}>
+                    <form onSubmit={handleSubmit} style={{ marginTop: 16 }}>
                         <div className="row">
                             <div className="col-md-3 mb-2">
                                 <label className="form-label">Fecha de inicio</label>
@@ -335,7 +317,7 @@ export const RealizarMantenimiento = () => {
                                     type="text"
                                     name="odometro"
                                     className={`form-control form-control-sm ${errors.odometro ? "is-invalid" : ""}`}
-                                    value={new Intl.NumberFormat('es-MX').format(formData.odometro)} // Formatea el valor mostrado
+                                    value={new Intl.NumberFormat('es-MX').format(formData.odometro)}
                                     onChange={handleChange}
                                     onKeyDown={(e) => handleKeyDown(e, servicioRef, true)}
                                 />

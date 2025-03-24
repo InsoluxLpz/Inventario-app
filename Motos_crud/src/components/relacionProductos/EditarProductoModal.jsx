@@ -192,7 +192,7 @@ export const EditarProductoModal = ({ onClose, modalOpen, producto, actualizarLi
         <div className="modal fade show" style={{ display: "block" }} aria-labelledby="exampleModalLabel" tabIndex="-1" role="dialog">
           <div className="modal-dialog" role="document" style={{ maxWidth: "60vw", marginTop: 90 }}>
             <div className="modal-content w-100" style={{ maxWidth: "60vw" }}>
-              <div className="modal-header" style={{ backgroundColor: '#1f618d' }}>
+              <div className="modal-header" style={{ backgroundColor: '#f1c40f' }}>
                 <h5 className="modal-title" style={{ color: 'white' }}>Editar Producto</h5>
               </div>
 

@@ -31,6 +31,7 @@ export const EditarMantenimiento = ({ modalOpen, onClose, mantenimiento, listaMo
     const motoRef = useRef(null);
     const servicioRef = useRef(null);
     const autorizoRef = useRef(null)
+    const [errors, setErrors] = useState({});
 
     useEffect(() => {
         if (mantenimiento) {
@@ -43,8 +44,8 @@ export const EditarMantenimiento = ({ modalOpen, onClose, mantenimiento, listaMo
                 productos: mantenimiento.productos || [],
                 comentario: mantenimiento.comentario || "",
                 costo_total: mantenimiento.costo_total
-                    ? parseFloat(mantenimiento.costo_total) // ✅ Convertir a número correctamente
-                    : 0.00, // ✅ Si está vacío, ponerlo en 0.00toFixed(2) : "0.00",
+                    ? parseFloat(mantenimiento.costo_total)
+                    : 0.00,
             });
         }
     }, [mantenimiento]);
@@ -64,18 +65,6 @@ export const EditarMantenimiento = ({ modalOpen, onClose, mantenimiento, listaMo
         fetchAutorizo();
     }, []);
 
-    const validateForm = () => {
-        const newErrors = {};
-
-        Object.keys(formData).forEach((key) => {
-            if (key !== "nota" && (formData[key] === "" || formData[key] === null || formData[key] === undefined)) {
-                newErrors[key] = "Este campo es obligatorio";
-            }
-        });
-
-        setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
-    };
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -90,6 +79,12 @@ export const EditarMantenimiento = ({ modalOpen, onClose, mantenimiento, listaMo
     const handleSubmit = async (e) => {
         e.preventDefault();
 
+        // Validación: Si no hay servicios seleccionados, mostrar error y no actualizar
+        if (formData.servicio.length === 0) {
+            setErrors((prev) => ({ ...prev, servicio: "Debe seleccionar al menos un servicio." }));
+            return; // Evitar la actualización si no hay servicios seleccionados
+        }
+
         const MantenimientoData = {
             servicios: formData.servicio,
         };
@@ -103,6 +98,7 @@ export const EditarMantenimiento = ({ modalOpen, onClose, mantenimiento, listaMo
             }, 700);
         }
     };
+
 
     const formatNumber = (value) => {
         return parseFloat(value).toLocaleString('es-MX');
@@ -201,6 +197,7 @@ export const EditarMantenimiento = ({ modalOpen, onClose, mantenimiento, listaMo
                                             }}
                                             onKeyDown={(e) => handleKeyDown(e, autorizoRef, true)}
                                         />
+                                        {errors.servicio && <div className="text-danger">{errors.servicio}</div>}
 
                                     </div>
                                 </div>

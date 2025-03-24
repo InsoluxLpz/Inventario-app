@@ -1,4 +1,12 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import { Box, Button, FormControlLabel, Grid2, IconButton, Switch, TextField, Typography } from "@mui/material";
+import { NavBar } from "../NavBar";
+import { EliminarMantenimiento, ObtenerMantenimientos, ObtenerServicios, } from "../../api/ServiciosApi";
+import { EditarMantenimiento } from "./EditarMantenimiento";
+import { obtenerProductos } from "../../api/productosApi";
+import { obtenerMotos } from "../../api/motosApi";
+import { VerMantenimientoCancelado } from "./VerMantenimientoCancelado";
+import { useNavigate } from "react-router";
 import AddchartIcon from "@mui/icons-material/Addchart";
 import EditIcon from "@mui/icons-material/Edit";
 import Paper from "@mui/material/Paper";
@@ -8,19 +16,11 @@ import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
-import { Box, Button, FormControlLabel, Grid2, IconButton, Switch, TextField, Typography } from "@mui/material";
-import { NavBar } from "../NavBar";
-import { EliminarMantenimiento, ObtenerMantenimientos, ObtenerServicios, } from "../../api/ServiciosApi";
 import DeleteIcon from "@mui/icons-material/Delete";
 import CleaningServicesIcon from '@mui/icons-material/CleaningServices';
-import { EditarMantenimiento } from "./EditarMantenimiento";
-import { obtenerProductos } from "../../api/productosApi";
-import { obtenerMotos } from "../../api/motosApi";
 import InfoIcon from "@mui/icons-material/Info";
-import { VerMantenimientoCancelado } from "./VerMantenimientoCancelado";
 import SearchIcon from '@mui/icons-material/Search';
 import Select from "react-select";
-import { useNavigate } from "react-router";
 
 export const ListaMantenimientos = () => {
   const [mantenimientos, setMantenimientos] = useState([]);
@@ -53,12 +53,20 @@ export const ListaMantenimientos = () => {
 
   const fetchMotos = async () => {
     const data = await obtenerMotos();
-    if (data) setMotos(data);
+    if (data) {
+      const motosOrdenadas = data.sort((a, b) => a.inciso - b.inciso);
+      setMotos(motosOrdenadas);
+    }
   };
+
 
   const fetchServicios = async () => {
     const data = await ObtenerServicios();
-    if (data) setServicios(data);
+    if (data) {
+      const serviciosFiltrados = data
+        .filter((serv) => serv.status !== 0)
+      setServicios(serviciosFiltrados);
+    }
   };
 
   const fetchProducto = async () => {
@@ -112,7 +120,8 @@ export const ListaMantenimientos = () => {
         status: servicio.status,
         nombre: servicio.nombre,
       }));
-      const mantenimientosOrdenados = mantenimientosAdaptados.sort((a, b) => new Date(b.fecha_inicio).toISOString() - new Date(a.fecha_inicio).toISOString());
+      const mantenimientosOrdenados = mantenimientosAdaptados.sort((a, b) => new Date(a.fecha_inicio) - new Date(b.fecha_inicio));
+
       setMantenimientos(mantenimientosOrdenados);
     }
   };

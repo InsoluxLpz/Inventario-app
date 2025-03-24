@@ -225,7 +225,7 @@ export const VerMantenimientoCancelado = ({ modalOpen, onClose, mantenimiento, l
 
                                     <Button
                                         type="button"
-                                        style={{ backgroundColor: "#7f8c8d", color: "white", marginLeft: 7 }}
+                                        style={{ backgroundColor: "#c0392b", color: "white", marginLeft: 7 }}
                                         onClick={onClose}
                                     >
                                         Cerrar

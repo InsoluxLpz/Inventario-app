@@ -223,7 +223,7 @@ export const ProductoTable = () => {
                 <TableHead>
                   <TableRow>
                     {["Código", "Nombre", "Descripción", "Unidad de medida", "Grupo", "Precio", "Acciones"].map((header) => (
-                      <TableCell key={header} align="center" sx={{ backgroundColor: "#f4f6f7", color: "black", textAlign: "left", width: "16.66%", fontWeight: "bold" }}>
+                      <TableCell key={header} align="center" sx={{ backgroundColor: "#f4f6f7", color: "black", textAlign: "left", width: "6.66%", fontWeight: "bold" }}>
                         {header}
                       </TableCell>
                     ))}
@@ -237,25 +237,25 @@ export const ProductoTable = () => {
                       }
                     }}
                     >
-                      <TableCell align="center" sx={{ textAlign: "left", width: "16.66%", }}>
+                      <TableCell align="center" sx={{ textAlign: "left", width: "10%", }}>
                         {producto.codigo}
                       </TableCell>
-                      <TableCell align="center" sx={{ textAlign: "left", width: "16.66%", }}>
+                      <TableCell align="center" sx={{ textAlign: "left", width: "15%", }}>
                         {producto.nombre}
                       </TableCell>
-                      <TableCell align="center" sx={{ textAlign: "left", width: "16.66%", }}>
+                      <TableCell align="center" sx={{ textAlign: "left", width: "15%", }}>
                         {producto.descripcion}
                       </TableCell>
-                      <TableCell align="center" sx={{ textAlign: "left", width: "16.66%", }}>
+                      <TableCell align="center" sx={{ textAlign: "left", width: "10%", }}>
                         {producto.unidad_medida}
                       </TableCell>
-                      <TableCell align="center" sx={{ textAlign: "left", width: "16.66%", }}>
+                      <TableCell align="center" sx={{ textAlign: "left", width: "10%", }}>
                         {producto.grupo}
                       </TableCell>
-                      <TableCell align="center" sx={{ textAlign: "left", width: "16.66%", }}>
+                      <TableCell align="center" sx={{ textAlign: "center", width: "5%", }}>
                         {formatearDinero(producto.precio)}
                       </TableCell>
-                      <TableCell align="center" sx={{ textAlign: "left", width: "16.66%", }}>
+                      <TableCell align="center" sx={{ textAlign: "left", width: "5%" }}>
                         <IconButton
                           sx={{ color: 'black' }}
                           onClick={() => {
