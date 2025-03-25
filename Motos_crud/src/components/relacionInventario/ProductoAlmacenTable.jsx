@@ -124,6 +124,14 @@ export const ProductoAlmacenTable = () => {
     a.nombreProducto.localeCompare(b.nombreProducto)
   );
 
+  //   * formato de numeros
+  const formatearNumero = (valor) => {
+    return new Intl.NumberFormat("es-MX", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(valor);
+  };
+
   return (
     <>
       <NavBar onSearch={setSearchTerm} />
@@ -195,7 +203,7 @@ export const ProductoAlmacenTable = () => {
                     <TableRow key={producto.id}>
                       <TableCell align="left">{producto.codigo}</TableCell>
                       <TableCell align="left">{producto.nombreProducto}</TableCell>
-                      <TableCell align="left">{Math.round(producto.cantidad)}</TableCell>
+                      <TableCell align="left">{formatearNumero(producto.cantidad)}</TableCell>
                       <TableCell align="left">{producto.unidadMedida}</TableCell>
                     </TableRow>
                   ))}
