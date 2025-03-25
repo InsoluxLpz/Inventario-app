@@ -201,7 +201,6 @@ export const MotosTable = () => {
                   <Switch
                     checked={showInactive}
                     onChange={(e) => setShowInactive(e.target.checked)}
-                    color="default"
                   />
                 }
                 label="Mostrar inactivas"
