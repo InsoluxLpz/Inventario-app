@@ -127,7 +127,7 @@ export const ProductoAlmacenTable = () => {
   return (
     <>
       <NavBar onSearch={setSearchTerm} />
-
+  
       <Box display="flex" justifyContent="center" gap={1} my={2} mt={5}>
         <TextField
           label="Código"
@@ -148,8 +148,8 @@ export const ProductoAlmacenTable = () => {
           onChange={handleFiltroChange}
         />
       </Box>
-
-      <Box width="100%" maxWidth={1300} margin="0 auto" mt={2}>
+  
+      <Box width="85%" maxWidth={1300} margin="0 auto" mt={2}>
         <Box
           sx={{
             backgroundColor: "#1f618d",
@@ -161,52 +161,50 @@ export const ProductoAlmacenTable = () => {
             Inventario
           </Typography>
         </Box>
-
+  
         <Paper sx={{ width: "100%", margin: "0 auto" }}>
-          <TableContainer sx={{  maxHeight: "600", backgroundColor: "#eaeded" }}>
-            <Table stickyHeader>
-              <TableHead>
-                <TableRow>
-                  {[
-                    // "id",
-                    "Codigo",
-                    "Producto",
-                    "Cantidad",
-                    "Unidad de medida",
-                  ].map((header) => (
-                    <TableCell
-                      key={header}
-                      align="left" // Cambia a "left" para alinear todo a la izquierda
-                      sx={{
-                        fontWeight: "bold",
-                        backgroundColor: "#f4f6f7",
-                        color: "black",
-                      }}
-                    >
-                      {header}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              </TableHead>
-
-              <TableBody>
-                {sortedInventario.map((producto) => (
-                  <TableRow key={producto.id}>
-                    <TableCell align="left">{producto.codigo}</TableCell>
-                    <TableCell align="left">
-                      {producto.nombreProducto}
-                    </TableCell>
-                    <TableCell align="left">
-                      {Math.round(producto.cantidad)}
-                    </TableCell>
-                    <TableCell align="left">{producto.unidadMedida}</TableCell>
+          <TableContainer sx={{ maxHeight: "600px", backgroundColor: "#eaeded" }}>
+            <Box sx={{ overflowX: "auto" }}>
+              <Table stickyHeader>
+                <TableHead>
+                  <TableRow>
+                    {[
+                      "Codigo",
+                      "Producto",
+                      "Cantidad",
+                      "Unidad de medida",
+                    ].map((header) => (
+                      <TableCell
+                        key={header}
+                        align="left" // Cambia a "left" para alinear todo a la izquierda
+                        sx={{
+                          fontWeight: "bold",
+                          backgroundColor: "#f4f6f7",
+                          color: "black",
+                          minWidth: 250,
+                        }}
+                      >
+                        {header}
+                      </TableCell>
+                    ))}
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHead>
+  
+                <TableBody>
+                  {sortedInventario.map((producto) => (
+                    <TableRow key={producto.id}>
+                      <TableCell align="left">{producto.codigo}</TableCell>
+                      <TableCell align="left">{producto.nombreProducto}</TableCell>
+                      <TableCell align="left">{Math.round(producto.cantidad)}</TableCell>
+                      <TableCell align="left">{producto.unidadMedida}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </Box>
           </TableContainer>
         </Paper>
       </Box>
     </>
   );
-};
+}

@@ -180,7 +180,7 @@ export const MovXProductosTable = () => {
         </Button>
       </Box>
 
-      <Box width="90%" maxWidth={1300} margin="0 auto" mt={2}>
+      <Box width="85%" maxWidth={1300} margin="0 auto" mt={2}>
         <Paper sx={{ width: "100%" }}>
           <TableContainer sx={{ maxHeight: 600, backgroundColor: "#eaeded" }}>
             <Table stickyHeader>
