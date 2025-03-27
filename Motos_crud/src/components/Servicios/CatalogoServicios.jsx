@@ -161,7 +161,6 @@ export const CatalogoServicios = () => {
                                     <Switch
                                         checked={showInactive}
                                         onChange={(e) => setShowInactive(e.target.checked)}
-                                        color="default"
                                     />
                                 }
                                 label="Mostrar inactivas"

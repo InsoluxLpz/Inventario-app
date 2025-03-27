@@ -67,11 +67,11 @@ export const MovimientosAlmacenTable = () => {
   useEffect(() => {
     const today = new Date();
     const firstDayOfWeek = new Date(
-      today.setDate(today.getDate() - today.getDay() + 1)
-    ); // Lunes
+      today.setDate(today.getDate() - today.getDay())
+    );
     const lastDayOfWeek = new Date(
-      today.setDate(today.getDate() - today.getDay() + 7)
-    ); // Domingo
+      today.setDate(today.getDate() - today.getDay() + 6)
+    );
 
     const fechaInicio = firstDayOfWeek.toISOString().split("T")[0];
     const fechaFin = lastDayOfWeek.toISOString().split("T")[0];
@@ -293,8 +293,8 @@ export const MovimientosAlmacenTable = () => {
                     <TableCell align="left">
                       {producto.fecha_movimiento
                         ? new Date(
-                            producto.fecha_movimiento
-                          ).toLocaleDateString("es-MX")
+                          producto.fecha_movimiento
+                        ).toLocaleDateString("es-MX")
                         : "Fecha no disponible"}
                     </TableCell>
                     <TableCell align="left">

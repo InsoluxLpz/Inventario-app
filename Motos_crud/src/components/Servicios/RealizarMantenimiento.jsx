@@ -256,7 +256,7 @@ export const RealizarMantenimiento = () => {
                     </Button>
                 </div> */}
 
-                <div style={{ backgroundColor: "#ffffff", padding: "15px", borderRadius: "10px", boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)", maxWidth: "60vw", width: "100%" }}>
+                <div style={{ backgroundColor: "#ffffff", padding: "15px", borderRadius: "10px", boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)", maxWidth: "70vw", width: "100%" }}>
                     <div style={{ backgroundColor: "#1f618d", padding: "10px", borderRadius: "5px" }}>
                         <h5 style={{ color: "white", textAlign: "center", margin: 0 }}>Realizar Mantenimiento</h5>
                     </div>
