@@ -11,6 +11,7 @@ import { Box, Button, Typography, IconButton, TextField } from "@mui/material";
 import { NavBar } from "../NavBar";
 import { cargarListasMovimientos } from "../../api/almacenProductosApi";
 import { ModalMovimientosDetalles } from "./ModalMovimientosDetalles";
+import { useSpring, animated } from "@react-spring/web";
 import WarehouseIcon from "@mui/icons-material/Warehouse";
 import FeedIcon from "@mui/icons-material/Feed";
 import { EditarProductoAlmacenModal } from "./EditarProductoAlmacenModal";
@@ -87,7 +88,7 @@ export const MovimientosAlmacenTable = () => {
     limit = 10,
     idMovimiento = ""
   ) => {
-    console.log("idMovimiento", idMovimiento); // Verifica estos valores en la consola
+    console.log("idMovimiento", idMovimiento); 
     console.log(
       "Página:",
       page,
@@ -97,7 +98,7 @@ export const MovimientosAlmacenTable = () => {
       fechaInicio,
       "Fecha Fin:",
       fechaFin
-    ); // Verifica estos valores en la consola
+    );
 
     try {
       // Si existe idMovimiento, ignoramos el rango de fechas
@@ -181,9 +182,17 @@ export const MovimientosAlmacenTable = () => {
     window.location.reload();
   };
 
+  // * estilo de navegacion al componente
+    const styles = useSpring({
+      from: { opacity: 0, transform: "translateY(50px)", filter: "blur(10px)" },
+      to: { opacity: 1, transform: "translateY(0)", filter: "blur(0px)" },
+      config: { tension: 500, friction: 30 },
+    });
+
   return (
     <>
       <NavBar onSearch={setSearchTerm} />
+      <animated.div style={styles}>
 
       <Box display="flex" justifyContent="center" gap={1} my={2} mt={3}>
         <Button
@@ -348,6 +357,7 @@ export const MovimientosAlmacenTable = () => {
         onClose={handleCloseModal}
         idMovimiento={selectedMovimiento}
       />
+    </animated.div>
     </>
   );
 };
