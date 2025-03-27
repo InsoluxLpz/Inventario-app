@@ -21,6 +21,7 @@ import CleaningServicesIcon from '@mui/icons-material/CleaningServices';
 import InfoIcon from "@mui/icons-material/Info";
 import SearchIcon from '@mui/icons-material/Search';
 import Select from "react-select";
+import { useSpring, animated } from "@react-spring/web";
 
 export const ListaMantenimientos = () => {
   const [mantenimientos, setMantenimientos] = useState([]);
@@ -193,12 +194,19 @@ export const ListaMantenimientos = () => {
 
   const miniDrawerWidth = 50;
 
+  const styles = useSpring({
+      from: { opacity: 0, transform: "translateY(50px)", filter: "blur(10px)" },
+      to: { opacity: 1, transform: "translateY(0)", filter: "blur(0px)" },
+      config: { tension: 500, friction: 30 },
+    });
+
   return (
     <>
       <Box
         sx={{ backgroundColor: "#f2f3f4", minHeight: "100vh", paddingBottom: 4, transition: "margin 0.3s ease-in-out", marginLeft: `${miniDrawerWidth}px`, }}
       >
         <NavBar />
+        <animated.div style={styles}>
         <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", marginTop: 3, marginLeft: 12 }}>
           <Box sx={{ flexGrow: 1 }}>
             <Grid2 container spacing={2} justifyContent="center" alignItems="center">
@@ -451,6 +459,7 @@ export const ListaMantenimientos = () => {
             />
           </Paper>
         </Box>
+      </animated.div>
       </Box>
     </>
   );

@@ -16,7 +16,6 @@ import {
   styled,
   CircularProgress 
 } from "@mui/material";
-import { useSpring, animated } from "@react-spring/web";
 import SearchIcon from "@mui/icons-material/Search";
 import FeedIcon from "@mui/icons-material/Feed";
 import { useNavigate } from "react-router";
@@ -29,6 +28,7 @@ import { ModalMovProductoDetalle } from "./ModalMovProductoDetalle"; // Importar
 import CleaningServicesIcon from "@mui/icons-material/CleaningServices";
 // * componente para el indicador de carga
 import IndicadorCarga from "../IndicadorCarga";
+import { useSpring, animated } from "@react-spring/web";
 
 export const MovXProductosTable = () => {
   const navigate = useNavigate();
@@ -132,7 +132,7 @@ export const MovXProductosTable = () => {
     setInventario([]); // Opcional: limpiar la tabla también
   };
 
-  // * diseño de carga
+  // * diseño de carga en las tablas
   const styles = useSpring({
     from: { opacity: 0, transform: "translateY(50px)", filter: "blur(10px)" },
     to: { opacity: 1, transform: "translateY(0)", filter: "blur(0px)" },

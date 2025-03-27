@@ -15,6 +15,7 @@ import { EditarProductoModal } from "../relacionProductos/EditarProductoModal";
 import { AgregarProductoModal } from "./AgregarProductoModal";
 import AddchartIcon from '@mui/icons-material/Addchart';
 import { obtenerProveedores } from "../../api/proveedoresApi";
+import { useSpring, animated } from "@react-spring/web";
 
 export const ProductoTable = () => {
   const [openModalEditar, setOpenModalEditar] = useState(false);
@@ -150,12 +151,21 @@ export const ProductoTable = () => {
     }
   };
 
+  
+    // * diseño de carga en las tablas
+    const styles = useSpring({
+      from: { opacity: 0, transform: "translateY(50px)", filter: "blur(10px)" },
+      to: { opacity: 1, transform: "translateY(0)", filter: "blur(0px)" },
+      config: { tension: 500, friction: 30 },
+    });
+
   return (
     <>
       <Box
         sx={{ backgroundColor: "#f2f3f4", minHeight: "100vh", paddingBottom: 4, transition: "margin 0.3s ease-in-out", marginLeft: `${miniDrawerWidth}px` }}
       >
         <NavBar onSearch={setSearchTerm} />
+        <animated.div style={styles}>
         <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", marginTop: 3, marginLeft: 12 }}>
           <Box sx={{ flexGrow: 1 }}>
             <Grid2 container spacing={2} justifyContent="center" alignItems="center">
@@ -294,6 +304,7 @@ export const ProductoTable = () => {
           unidadMedida={unidadMedida}
           agregarProducto={agregarProducto}
         />
+      </animated.div>
       </Box >
     </>
   );

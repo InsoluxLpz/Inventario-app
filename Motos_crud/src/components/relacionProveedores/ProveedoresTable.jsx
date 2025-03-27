@@ -7,6 +7,7 @@ import { obtenerProveedores, ActualizarStatus } from "../../api/proovedoresApi";
 import { NavBar } from "../NavBar";
 import { AgregarProveedoresModal } from "./AgregarProveedoresModal";
 import { EditarProveedoresModal } from "./EditarProveedoresModal";
+import { useSpring, animated } from "@react-spring/web";
 
 export const ProveedoresTable = () => {
   const [proveedores, setProveedores] = useState([]);
@@ -123,12 +124,20 @@ export const ProveedoresTable = () => {
 
   const miniDrawerWidth = 50;
 
+    // * diseño de carga en las tablas
+    const styles = useSpring({
+      from: { opacity: 0, transform: "translateY(50px)", filter: "blur(10px)" },
+      to: { opacity: 1, transform: "translateY(0)", filter: "blur(0px)" },
+      config: { tension: 500, friction: 30 },
+    });
+
   return (
     <>
       <Box
         sx={{ backgroundColor: "#f2f3f4", minHeight: "100vh", paddingBottom: 4, transition: "margin 0.3s ease-in-out", marginLeft: `${miniDrawerWidth}px`, }}
       >
         <NavBar />
+        <animated.div style={styles}>
         <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", marginTop: 3, marginLeft: 12 }}>
           <Box sx={{ flexGrow: 1 }}>
             <Grid2 container spacing={2} justifyContent="center" alignItems="center">
@@ -264,6 +273,7 @@ export const ProveedoresTable = () => {
           actualizarLista={actualizarLista}
           ListaProveedor={proveedores}
         />
+      </animated.div>
       </Box>
     </>
   );

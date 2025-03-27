@@ -13,6 +13,7 @@ import {
 import { useNavigate } from "react-router";
 import { ModalBuscarProductos } from "./ModalBuscarProductos";
 import { useRef } from "react";
+import { useSpring, animated } from "@react-spring/web";
 
 export const AgregarProductosAlmacen = () => {
   const navigate = useNavigate();
@@ -450,9 +451,18 @@ export const AgregarProductosAlmacen = () => {
     }).format(valor);
   };
 
+  
+    // * diseño de carga en las tablas
+    const styles = useSpring({
+      from: { opacity: 0, transform: "translateY(50px)", filter: "blur(10px)" },
+      to: { opacity: 1, transform: "translateY(0)", filter: "blur(0px)" },
+      config: { tension: 500, friction: 30 },
+    });
+
   return (
     <>
       <NavBar />
+      <animated.div style={styles}>
       {/*  <<<<<<<<<<<<<------------------------ PRIMERA TABLA ------------------------>>>>>>>>>>>>>>> */}
       <div className="container mt-4">
         <Box
@@ -775,6 +785,7 @@ export const AgregarProductosAlmacen = () => {
         onSelect={handleProductoSeleccionado}
         productos={listaProductos}
       />
+    </animated.div>
     </>
   );
 };
