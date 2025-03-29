@@ -14,7 +14,11 @@ import {
   TableRow,
   Modal,
   styled,
-  CircularProgress 
+  CircularProgress,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import FeedIcon from "@mui/icons-material/Feed";
@@ -22,7 +26,7 @@ import { useNavigate } from "react-router";
 import { NavBar } from "../NavBar";
 import {
   cargarListasMovimientosXProductosDetalles,
-  buscarProductoPorNombre,
+  obtenerTodosLosProductos,
 } from "../../api/almacenProductosApi";
 import { ModalMovProductoDetalle } from "./ModalMovProductoDetalle"; // Importar el modal
 import CleaningServicesIcon from "@mui/icons-material/CleaningServices";
@@ -51,6 +55,26 @@ export const MovXProductosTable = () => {
   const [progreso, setProgreso] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
 
+  // * cargamos la lista de productos al montar el componente
+  useEffect(() => {
+    fetchProductos();
+  }, []);
+
+  // * Función para obtener productos
+    const fetchProductos = async () => {
+      try {
+        const data = await obtenerTodosLosProductos();
+        if (data && data.length > 0) {
+          setProductos(data);
+        } else {
+          Swal.fire("Atención", "No hay productos disponibles.", "warning");
+        }
+      } catch (error) {
+        console.error("Error al obtener productos:", error);
+        Swal.fire("Error", "No se pudieron cargar los productos.", "error");
+      }
+    };
+
   // * peticion con el indicador de car4ga
   const fetchInventario = async () => {
     try {
@@ -64,9 +88,11 @@ export const MovXProductosTable = () => {
         filtro.fechaInicio,
         filtro.fechaFin
       );
-  
+
       if (data) {
-        setInventario(data);
+        // setInventario(data);
+        const sortedData = data.sort((a, b) => a.idMovimiento - b.idMovimiento);
+        setInventario(sortedData);
       }
     } catch (error) {
       console.error("Error en la petición al obtener Inventario:", error);
@@ -76,7 +102,7 @@ export const MovXProductosTable = () => {
       setTimeout(() => setProgreso(0), 500); // Oculta el indicador después de un pequeño retraso
     }
   };
-  
+
   // * Selección de producto desde el modal
   const handleSelectProducto = (idProducto) => {
     setFiltro({ ...filtro, idProducto });
@@ -89,22 +115,6 @@ export const MovXProductosTable = () => {
     setOpenDetailModal(true);
   };
 
-  // * Búsqueda de productos por nombre
-  const handleSearchProductos = async () => {
-    try {
-      if (!busqueda.trim()) {
-        return Swal.fire(
-          "Atención",
-          "Ingresa un nombre para buscar.",
-          "warning"
-        );
-      }
-      const data = await buscarProductoPorNombre(busqueda);
-      setProductos(data || []);
-    } catch (error) {
-      console.error("Error al buscar productos:", error);
-    }
-  };
 
   const handleFiltroChange = (e) => {
     setFiltro({ ...filtro, [e.target.name]: e.target.value });
@@ -179,28 +189,27 @@ export const MovXProductosTable = () => {
             InputLabelProps={{ shrink: true }}
             onFocus={(e) => e.target.showPicker()}
           />
-          <TextField
-            label="No. Producto"
+
+          <Select
+            labelId="producto-label"
             name="idProducto"
-            value={filtro.idProducto}
+            value={filtro.idProducto || ""}
             onChange={handleFiltroChange}
-            InputProps={{
-              endAdornment: (
-                <IconButton
-                  color="primary"
-                  onClick={() => setOpenSearchModal(true)}
-                >
-                  <SearchIcon />
-                </IconButton>
-              ),
-            }}
-          />
+            label="Selecciona Producto"
+          >
+            {productos.map((producto) => (
+              <MenuItem key={producto.idProducto} value={producto.idProducto}>
+                {producto.nombre}
+              </MenuItem>
+            ))}
+          </Select>
+
           <Button variant="contained" color="primary" onClick={fetchInventario}>
             Buscar
           </Button>
         </Box>
 
-        <Box width="85%" maxWidth={1300} margin="0 auto" mt={2}>
+        <Box width="85%" maxWidth={1500} margin="0 auto" mt={2}>
           <Box
             sx={{
               backgroundColor: "#1f618d",
@@ -218,11 +227,16 @@ export const MovXProductosTable = () => {
                 <TableHead>
                   <TableRow>
                     {[
-                      "Movimiento número",
+                      "No. movimiento",
                       "Fecha",
-                      "Realizó Movimiento",
+                      "Producto",
                       "Tipo de movimiento",
-                      "Informe",
+                      "Subtipo",
+                      "Existencia anterior",
+                      "Cantidad",
+                      "Existencia posterior",
+                      "Realizó Movimiento",
+                      "Detalles",
                     ].map((header) => (
                       <TableCell
                         key={header}
@@ -231,6 +245,7 @@ export const MovXProductosTable = () => {
                           fontWeight: "bold",
                           backgroundColor: "#f4f6f7",
                           color: "black",
+                          minWidth: 1,
                         }}
                       >
                         {header}
@@ -250,10 +265,23 @@ export const MovXProductosTable = () => {
                         )}
                       </TableCell>
                       <TableCell align="left">
-                        {producto.nombreUsuario}
+                        {producto.nombreProducto}
                       </TableCell>
                       <TableCell align="left">
                         {producto.tipoMovimiento}
+                      </TableCell>
+                      <TableCell align="left">
+                        {producto.tipoSubMovimiento}
+                      </TableCell>
+                      <TableCell align="left">
+                        {producto.existencia_anterior}
+                      </TableCell>
+                      <TableCell align="left">{producto.cantidad}</TableCell>
+                      <TableCell align="left">
+                        {producto.existencia_nueva}
+                      </TableCell>
+                      <TableCell align="left">
+                        {producto.nombreUsuario}
                       </TableCell>
                       <TableCell align="left">
                         <IconButton
@@ -271,52 +299,6 @@ export const MovXProductosTable = () => {
             <IndicadorCarga progreso={progreso} cargando={isLoading} />
           </Paper>
         </Box>
-
-        {/* Modal de búsqueda de productos */}
-        <Modal open={openSearchModal} onClose={() => setOpenSearchModal(false)}>
-          <Box
-            p={2}
-            bgcolor="white"
-            margin="auto"
-            mt="10%"
-            width={400}
-            borderRadius={2}
-          >
-            <Typography variant="h6" mb={2} textAlign="center">
-              BUSCAR PRODUCTO POR NOMBRE
-            </Typography>
-            <TextField
-              label="Nombre del producto"
-              fullWidth
-              value={busqueda}
-              onChange={(e) => setBusqueda(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  handleSearchProductos();
-                }
-              }}
-            />
-            <Button
-              variant="contained"
-              fullWidth
-              onClick={handleSearchProductos}
-              sx={{ mt: 2 }}
-            >
-              Buscar
-            </Button>
-            {productos.map((prod) => (
-              <Button
-                key={prod.idProducto}
-                variant="outlined"
-                fullWidth
-                onClick={() => handleSelectProducto(prod.idProducto)}
-                sx={{ mt: 1 }}
-              >
-                {prod.nombre}
-              </Button>
-            ))}
-          </Box>
-        </Modal>
 
         {/* Modal */}
         <ModalMovProductoDetalle

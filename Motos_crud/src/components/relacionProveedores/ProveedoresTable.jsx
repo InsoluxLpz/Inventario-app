@@ -261,6 +261,7 @@ export const ProveedoresTable = () => {
           </Paper>
 
         </Box>
+        </animated.div>
         <AgregarProveedoresModal
           modalOpen={openModalAgregar}
           onClose={handleCloseModalAgregar}
@@ -273,7 +274,6 @@ export const ProveedoresTable = () => {
           actualizarLista={actualizarLista}
           ListaProveedor={proveedores}
         />
-      </animated.div>
       </Box>
     </>
   );

@@ -152,16 +152,21 @@ router.get('/obtener_listas', async (req, res) => {
 // * consulta buena falta la autorizacion
 router.get('/obtener_inventario', async (req, res) => {
     try {
-        const [result] = await db.query(`                              
+        const [result] = await db.query(`
                 SELECT 
-                    ia.idProducto as idProducto,
-                    ia.cantidad as cantidad,
                     p.nombre as nombreProducto,
-                    p.codigo as codigo,
-                    cum.nombre as unidadMedida
-                FROM inventario_almacen ia
-                left join productos p on p.id = ia.idProducto
-                left join cat_unidad_medida cum on ia.idUnidadMedida = cum.id;
+                    p.idGrupo as idGrupo,
+                    cpp.nombre as nombreGrupo,
+                    cum.id as idUnidadMedida,
+                    cum.nombre as unidadMedida,
+                    p.precio as costoUnitario,
+                    ia.cantidad as cantidad,
+                    p.codigo
+                FROM productos p
+                LEFT JOIN inventario_almacen ia ON p.id = ia.idProducto
+                LEFT JOIN cat_productos_prueba cpp ON cpp.id = p.idGrupo
+                LEFT JOIN cat_unidad_medida cum ON p.idUnidadMedida = cum.id
+                WHERE p.status = 1;
         `);
 
         res.status(200).json(result);
@@ -173,66 +178,114 @@ router.get('/obtener_inventario', async (req, res) => {
 });
 
 // * consulta que se puede pedir mas adelante para la tabla movimientos almacen
-
 router.get('/obtener_movimientos', async (req, res) => {
-    const { fechaInicio, fechaFin, idMovimiento, page = 1, limit = 10 } = req.query; // Obtenemos idMovimiento, fechaInicio, fechaFin, page y limit desde la query params
-    const offset = (page - 1) * limit; // Calculamos el offset
-    console.log("page:", page, "limit:", limit, "offset:", offset, "idMovimiento", idMovimiento);
+    const {
+        fechaInicio,
+        fechaFin,
+        page = 1,
+        limit = 50,
+        tipoMovimiento, // Añadido tipoMovimiento
+        subMovimiento // Añadido subMovimiento
+    } = req.query; 
+    const offset = (page - 1) * limit;
+    console.log("page:", page, "limit:", limit, "offset:", offset, "tipoMovimiento", tipoMovimiento, "subMovimiento", subMovimiento);
     
     try {
         let query = `
-        SELECT 
-        ma.id AS idMovimiento,
-        ma.fecha AS fecha_movimiento,
-        u.nombre AS nombreUsuario,
-        a.nombre AS nombreAutorizo,
-        GROUP_CONCAT(
-            CONCAT(mad.idProducto, ' - ', mad.cantidad, ' - ', mad.costo_unitario, ' - ', mad.subtotal) 
-            SEPARATOR ', '
-        ) AS detalles
-        FROM movimientos_almacen ma
-        LEFT JOIN movimientos_almacen_detalle mad ON ma.id = mad.idMovimiento
-        LEFT JOIN autorizaciones a ON ma.idAutorizo = a.idAutorizo
-        LEFT JOIN usuarios u ON u.idUsuario = ma.idUsuario
+            SELECT 
+                ma.id AS idMovimiento,
+                ma.fecha AS fecha_movimiento,
+                u.nombre AS nombreUsuario,
+                a.nombre AS nombreAutorizo,
+                tm.idMovimiento AS idTipoMovimiento,
+                tm.movimiento AS tipoMovimiento,
+                sm.id AS idSubMovimiento,
+                sm.tipoSubMovimiento AS subMovimiento,
+                GROUP_CONCAT(
+                    CONCAT(mad.idProducto, ' - ', mad.cantidad, ' - ', mad.costo_unitario, ' - ', mad.subtotal) 
+                    SEPARATOR ', '
+                ) AS detalles
+            FROM movimientos_almacen ma
+            LEFT JOIN movimientos_almacen_detalle mad 
+                ON ma.id = mad.idMovimiento
+            LEFT JOIN autorizaciones a 
+                ON ma.idAutorizo = a.idAutorizo
+            LEFT JOIN usuarios u 
+                ON u.idUsuario = ma.idUsuario
+            LEFT JOIN tipo_movimiento tm 
+                ON ma.idTipoMovimiento = tm.idMovimiento
+            LEFT JOIN sub_movimientos sm 
+                ON ma.idTipoSubmovimiento = sm.id
         `;
 
         const queryParams = [];
+        let whereConditions = [];
 
-        // Si se pasa un idMovimiento, se filtra por este y eliminamos los filtros de fechas
-        if (idMovimiento) {
-            query += " WHERE ma.id = ?";
-            queryParams.push(idMovimiento);
-        } else if (fechaInicio && fechaFin) {
-            // Si las fechas están presentes, agrega el filtro por fechas
-            query += " WHERE ma.fecha BETWEEN ? AND ?";
+        // Filtro por fecha
+        if (fechaInicio && fechaFin) {
+            whereConditions.push("ma.fecha BETWEEN ? AND ?");
             queryParams.push(fechaInicio, fechaFin);
         }
 
-        // Query para obtener los datos con paginación
-        query += " GROUP BY ma.id LIMIT ? OFFSET ?"; // Agregar paginación
+        // Filtro por tipoMovimiento
+        if (tipoMovimiento) {
+            whereConditions.push("tm.idMovimiento = ?");
+            queryParams.push(tipoMovimiento);
+        }
+
+        // Filtro por subMovimiento
+        if (subMovimiento) {
+            whereConditions.push("sm.id = ?");
+            queryParams.push(subMovimiento);
+        }
+
+        // Si hay condiciones, agregarlas al query
+        if (whereConditions.length > 0) {
+            query += " WHERE " + whereConditions.join(" AND ");
+        }
+
+        // Agrupamiento y orden
+        query += " GROUP BY ma.id, tm.idMovimiento, sm.id";
+        query += " ORDER BY ma.fecha DESC"; // Ordenar por fecha más reciente
+        
+        // Paginación
+        query += " LIMIT ? OFFSET ?";
         queryParams.push(Number(limit), Number(offset));
 
         const [result] = await db.query(query, queryParams);
 
-        // Query para obtener el total de registros sin paginación
+        // Query para contar total de registros sin paginación
         let totalQuery = `
             SELECT COUNT(DISTINCT ma.id) AS total
             FROM movimientos_almacen ma
-            LEFT JOIN movimientos_almacen_detalle mad ON ma.id = mad.idMovimiento
-            LEFT JOIN autorizaciones a ON ma.idAutorizo = a.idAutorizo
-            LEFT JOIN usuarios u ON u.idUsuario = ma.idUsuario
+            LEFT JOIN tipo_movimiento tm ON ma.idTipoMovimiento = tm.idMovimiento
+            LEFT JOIN sub_movimientos sm ON ma.idTipoSubmovimiento = sm.id
         `;
 
-        // Si se pasa un idMovimiento, no se agrega filtro de fechas, solo por idMovimiento
-        if (idMovimiento) {
-            totalQuery += " WHERE ma.id = ?";
-        } else if (fechaInicio && fechaFin) {
-            totalQuery += " WHERE ma.fecha BETWEEN ? AND ?";
+        const totalQueryParams = [];
+        let totalWhereConditions = [];
+
+        // Filtros para el total
+        if (fechaInicio && fechaFin) {
+            totalWhereConditions.push("ma.fecha BETWEEN ? AND ?");
+            totalQueryParams.push(fechaInicio, fechaFin);
         }
 
-        console.log("Query params:", req.query);
+        if (tipoMovimiento) {
+            totalWhereConditions.push("tm.idMovimiento = ?");
+            totalQueryParams.push(tipoMovimiento);
+        }
 
-        const [[totalResult]] = await db.query(totalQuery, queryParams);
+        if (subMovimiento) {
+            totalWhereConditions.push("sm.id = ?");
+            totalQueryParams.push(subMovimiento);
+        }
+
+        if (totalWhereConditions.length > 0) {
+            totalQuery += " WHERE " + totalWhereConditions.join(" AND ");
+        }
+
+        const [[totalResult]] = await db.query(totalQuery, totalQueryParams);
 
         // Devolver los datos con metadatos
         res.status(200).json({
@@ -240,15 +293,18 @@ router.get('/obtener_movimientos', async (req, res) => {
             meta: {
                 page: Number(page),
                 limit: Number(limit),
-                total: totalResult.total, // Total de registros sin paginación
-                totalPages: Math.ceil(totalResult.total / limit) // Calcular el total de páginas
+                total: totalResult.total,
+                totalPages: Math.ceil(totalResult.total / limit)
             },
+            
         });
+
     } catch (error) {
         console.error("Error al obtener datos:", error);
         res.status(500).json({ message: "Error en el servidor" });
     }
 });
+
 
 
 
@@ -314,40 +370,41 @@ router.get('/obtener_movimientosXProductos_detalles/:idProducto', async (req, re
         // 2. Construir la consulta de movimientos
         let query = `
            SELECT iad.id AS idDetalle, 
-       iad.idMovimiento, 
-       iad.idProducto, 
-       p.nombre AS nombreProducto, 
-       iad.idTipoMovimiento, 
-       tm.movimiento AS tipoMovimiento, 
-       sm.tipoSubMovimiento, 
-       iad.cantidad, 
-       iad.costo_unitario, 
-       iad.existencia_anterior, 
-       iad.existencia_nueva, 
-       iad.fecha AS fecha_movimiento, 
-       iad.idUsuario, 
-       u.nombre AS nombreUsuario, 
-       ud.nombre AS nombreUnidadMedida, 
-       iad.idUnidadMedida, 
-       iad.origen_movimiento, 
-       ia.cantidad AS stock_actual
-FROM inventario_almacen_detalle iad 
-JOIN inventario_almacen ia ON iad.idProducto = ia.idProducto 
-JOIN usuarios u ON u.idUsuario = iad.idUsuario 
-JOIN tipo_movimiento tm ON tm.idMovimiento = iad.idTipoMovimiento 
-JOIN productos p ON p.id = iad.idProducto 
-JOIN sub_movimientos sm ON sm.id = iad.idTipoSubmovimiento  
-JOIN cat_unidad_medida ud ON ud.id = iad.idUnidadMedida
-WHERE iad.idProducto = ?
+                    iad.idMovimiento, 
+                    iad.idProducto, 
+                    p.nombre AS nombreProducto, 
+                    iad.idTipoMovimiento, 
+                    tm.movimiento AS tipoMovimiento, 
+                    sm.tipoSubMovimiento, 
+                    iad.cantidad, 
+                    iad.costo_unitario, 
+                    iad.existencia_anterior, 
+                    iad.existencia_nueva, 
+                    iad.fecha AS fecha_movimiento, 
+                    iad.idUsuario, 
+                    u.nombre AS nombreUsuario, 
+                    ud.nombre AS nombreUnidadMedida, 
+                    iad.idUnidadMedida, 
+                    iad.origen_movimiento, 
+                    ia.cantidad AS stock_actual
+                FROM inventario_almacen_detalle iad 
+                JOIN inventario_almacen ia ON iad.idProducto = ia.idProducto 
+                JOIN usuarios u ON u.idUsuario = iad.idUsuario 
+                JOIN tipo_movimiento tm ON tm.idMovimiento = iad.idTipoMovimiento 
+                JOIN productos p ON p.id = iad.idProducto 
+                JOIN sub_movimientos sm ON sm.id = iad.idTipoSubmovimiento  
+                JOIN cat_unidad_medida ud ON ud.id = iad.idUnidadMedida
+                WHERE iad.idProducto = ?
         `;
 
         const queryParams = [idProducto];
 
         // 3. Agregar rango de fechas si se proporciona
         if (fechaInicio && fechaFin) {
-            query += " AND iad.fecha BETWEEN ? AND ?";
+            query += " AND iad.fecha >= ? AND iad.fecha < DATE_ADD(?, INTERVAL 1 DAY)";
             queryParams.push(fechaInicio, fechaFin);
         }
+        
 
         query += " ORDER BY iad.fecha DESC";
 
@@ -367,42 +424,27 @@ WHERE iad.idProducto = ?
 });
 
 
-// * Buscar productos por nombre
-router.get('/buscar_productos_nombre/:busqueda', async (req, res) => {
-    // Decodificar el parámetro de la URL en caso de que haya espacios u otros caracteres codificados
-    const busqueda = decodeURIComponent(req.params.busqueda);
-
-    console.log('nombre recibido', busqueda); // Para verificar que lo estás recibiendo correctamente
-
-    if (!busqueda) {
-        return res.status(400).json({ message: "El nombre del producto es requerido." });
-    }
-
+// * Obtener todos los productos
+router.get('/productos', async (req, res) => {
     try {
-        // Consulta para buscar productos cuyo nombre coincida parcialmente
-        const query = `
-            SELECT id AS idProducto, nombre 
-            FROM productos
-            WHERE nombre LIKE ? 
-            ORDER BY nombre ASC
-            LIMIT 20; 
-        `;
-        
-        // Usar comodines para búsqueda flexible
-        const [result] = await db.query(query, [`%${busqueda}%`]);
-
-        if (result.length === 0) {
-            return res.status(404).json({ message: "No se encontraron productos." });
-        }
-
-        res.status(200).json(result);
-
+      const query = `
+        SELECT id AS idProducto, nombre
+        FROM productos
+        ORDER BY nombre ASC;
+      `;
+      const [result] = await db.query(query);
+  
+      if (result.length === 0) {
+        return res.status(404).json({ message: "No se encontraron productos." });
+      }
+  
+      res.status(200).json(result);
     } catch (error) {
-        console.error("Error al buscar productos:", error);
-        res.status(500).json({ message: "Error en el servidor" });
+      console.error("Error al obtener productos:", error);
+      res.status(500).json({ message: "Error en el servidor." });
     }
-});
-
+  });
+  
 
 
 

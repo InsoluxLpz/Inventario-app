@@ -452,9 +452,32 @@ export const NavBar = () => {
               />
             )}
           </ListItem>
+          
 
           <Collapse in={openServices} timeout="auto" unmountOnExit>
             <List component="div" disablePadding>
+
+            <ListItem
+                button
+                selected={selectedItem === "/almacen/ProductoAlmacenTable"}
+                onClick={() => handleNavigate("/almacen/ProductoAlmacenTable")}
+                sx={{
+                  backgroundColor:
+                    selectedItem === "/almacen/ProductoAlmacenTable"
+                      ? "#85929e  "
+                      : "transparent",
+                  pl: 3,
+                }}
+              >
+                <ListItemIcon sx={{ minWidth: 32 }}>
+                  <StorageIcon sx={{ fontSize: 18 }} />
+                </ListItemIcon>
+                <ListItemText
+                  primary="Inventario"
+                  sx={{ display: open ? "block" : "none" }}
+                />
+              </ListItem>
+              
               <ListItem
                 button
                 selected={selectedItem === "/servicios/ListaMantenimientos"}
@@ -502,27 +525,6 @@ export const NavBar = () => {
                     fontSize: "0.875rem",
                     display: open ? "block" : "none",
                   }}
-                />
-              </ListItem>
-
-              <ListItem
-                button
-                selected={selectedItem === "/almacen/ProductoAlmacenTable"}
-                onClick={() => handleNavigate("/almacen/ProductoAlmacenTable")}
-                sx={{
-                  backgroundColor:
-                    selectedItem === "/almacen/ProductoAlmacenTable"
-                      ? "#85929e  "
-                      : "transparent",
-                  pl: 3,
-                }}
-              >
-                <ListItemIcon sx={{ minWidth: 32 }}>
-                  <StorageIcon sx={{ fontSize: 18 }} />
-                </ListItemIcon>
-                <ListItemText
-                  primary="Inventario"
-                  sx={{ display: open ? "block" : "none" }}
                 />
               </ListItem>
 

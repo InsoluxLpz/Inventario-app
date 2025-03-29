@@ -169,54 +169,59 @@ export const cargarListasCampos = async () => {
 };
 
 // * funcion para la tabla de movimientos en el almacen
-export const cargarListasMovimientos = async (fechaInicio, fechaFin, page = 1, idMovimiento = "") => {
+export const cargarListasMovimientos = async (
+    fechaInicio,
+    fechaFin,
+    page = 1,
+    limit = 50,
+    tipoMovimiento = "",
+    subMovimiento = ""
+  ) => {
     try {
-        // Construir la URL con los parámetros
-        let url = `${API_URL}/entrada/obtener_movimientos?fechaInicio=${fechaInicio}&fechaFin=${fechaFin}&page=${page}`;
-        
-        if (idMovimiento) {
-            url += `&idMovimiento=${idMovimiento}`; // Agregar el parámetro si existe
+      let url = `${API_URL}/entrada/obtener_movimientos?fechaInicio=${fechaInicio}&fechaFin=${fechaFin}&page=${page}&limit=${limit}`;
+  
+      if (tipoMovimiento) {
+        url += `&tipoMovimiento=${tipoMovimiento}`;
+      }
+      if (subMovimiento) {
+        url += `&subMovimiento=${subMovimiento}`;
+      }
+  
+      console.log("URL solicitada:", url);
+  
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+  
+      if (response.ok) {
+        const data = await response.json();
+        if (Array.isArray(data.data) && data.data.length === 0) {
+          Swal.fire(
+            "Sin movimientos",
+            data.message || "No se encontraron movimientos",
+            "info"
+          );
+          return [];
         }
-
-        // Depuración: Verificar la URL construida
-        console.log("URL solicitada:", url);
-
-        const response = await fetch(url, {
-            method: "GET",
-            headers: {
-                'Content-Type': 'application/json'
-            },
-        });
-
-        if (response.ok) {
-            const data = await response.json();
-
-            // Producto existe pero no hay movimientos
-            if (data.data?.length === 0) {
-                Swal.fire("Sin movimientos", data.message || "No se encontraron movimientos en el rango especificado", "info");
-                return [];
-            }
-
-            return data;
-        } 
-        // Producto no encontrado (404)
-        else if (response.status === 404) {
-            const errorData = await response.json();
-            Swal.fire("Movimiento no encontrado", errorData.message, "warning");
-            return [];
-        } 
-        // Otros errores del servidor
-        else {
-            const errorData = await response.json();
-            Swal.fire("Error", errorData.message || "Hubo un problema con la respuesta del servidor.", "error");
-            return [];
-        }
-    } catch (error) {
-        console.error("Error al realizar la solicitud", error);
-        Swal.fire("Error", "Hubo un problema al conectar con el servidor.", "error");
+        return data;
+      } else {
+        const errorData = await response.json().catch(() => ({
+          message: "Error inesperado.",
+        }));
+        Swal.fire("Error", errorData.message, "error");
         return [];
+      }
+    } catch (error) {
+      console.error("Error al realizar la solicitud:", error);
+      Swal.fire("Error", "Problema al conectar con el servidor.", "error");
+      return [];
     }
-};
+  };
+  
+  
 
 
 
@@ -299,20 +304,23 @@ export const buscarProducto = async (codigo) => {
 
 
 // * consulta para buscar productos por nombre del producto
-export const buscarProductoPorNombre = async (busqueda) => {
+export const obtenerTodosLosProductos = async () => {
     try {
-            const response = await fetch(`${API_URL}/entrada/buscar_productos_nombre/${busqueda}`, {
-                method: "GET",
-                headers: { 'Content-Type': 'application/json' }
-            });        
-
-        if (response.ok) {
-            const data = await response.json();
-            return data;
-        }
-    } catch (error) {
-        console.error('Error al realizar la solicitud', error);
-        Swal.fire('Error', 'Hubo un problema al conectar con el servidor.', 'error');
+      const response = await fetch(`${API_URL}/entrada/productos`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        return data;
+      } else {
+        console.error("Error en la respuesta del servidor");
         return null;
+      }
+    } catch (error) {
+      console.error("Error al realizar la solicitud", error);
+      Swal.fire("Error", "Hubo un problema al conectar con el servidor.", "error");
+      return null;
     }
-};
+  };
+  
