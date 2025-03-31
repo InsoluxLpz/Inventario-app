@@ -356,18 +356,12 @@ router.get('/obtener_movimientos_detalles/:idMovimiento', async (req, res) => {
 
 
 // * buscar productos por codigo de producto
-router.get('/obtener_movimientosXProductos_detalles/:idProducto', async (req, res) => {
+router.get('/obtener_movimientosXProductos_detalles/:idProducto?', async (req, res) => {
     const { idProducto } = req.params;
     const { fechaInicio, fechaFin } = req.query;
 
     try {
-        // 1. Verificar si el producto existe
-        const [producto] = await db.query(`SELECT * FROM productos WHERE id = ?`, [idProducto]);
-        if (producto.length === 0) {
-            return res.status(404).json({ message: "El producto no existe" });
-        }
-
-        // 2. Construir la consulta de movimientos
+        // Construcción de la consulta base
         let query = `
            SELECT iad.id AS idDetalle, 
                     iad.idMovimiento, 
@@ -394,21 +388,26 @@ router.get('/obtener_movimientosXProductos_detalles/:idProducto', async (req, re
                 JOIN productos p ON p.id = iad.idProducto 
                 JOIN sub_movimientos sm ON sm.id = iad.idTipoSubmovimiento  
                 JOIN cat_unidad_medida ud ON ud.id = iad.idUnidadMedida
-                WHERE iad.idProducto = ?
+                WHERE 1 = 1
         `;
 
-        const queryParams = [idProducto];
+        const queryParams = [];
 
-        // 3. Agregar rango de fechas si se proporciona
+        // Si se especifica idProducto, se filtra por él
+        if (idProducto) {
+            query += " AND iad.idProducto = ?";
+            queryParams.push(idProducto);
+        }
+
+        // Si se proporciona el rango de fechas, se filtra por él
         if (fechaInicio && fechaFin) {
             query += " AND iad.fecha >= ? AND iad.fecha < DATE_ADD(?, INTERVAL 1 DAY)";
             queryParams.push(fechaInicio, fechaFin);
         }
-        
 
         query += " ORDER BY iad.fecha DESC";
 
-        // 4. Ejecutar la consulta de movimientos
+        // Ejecutar la consulta
         const [result] = await db.query(query, queryParams);
 
         if (result.length === 0) {
@@ -422,6 +421,7 @@ router.get('/obtener_movimientosXProductos_detalles/:idProducto', async (req, re
         res.status(500).json({ message: "Error en el servidor" });
     }
 });
+
 
 
 // * Obtener todos los productos

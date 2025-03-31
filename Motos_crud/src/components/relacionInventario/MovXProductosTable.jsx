@@ -61,36 +61,32 @@ export const MovXProductosTable = () => {
   }, []);
 
   // * Función para obtener productos
-    const fetchProductos = async () => {
-      try {
-        const data = await obtenerTodosLosProductos();
-        if (data && data.length > 0) {
-          setProductos(data);
-        } else {
-          Swal.fire("Atención", "No hay productos disponibles.", "warning");
-        }
-      } catch (error) {
-        console.error("Error al obtener productos:", error);
-        Swal.fire("Error", "No se pudieron cargar los productos.", "error");
+  const fetchProductos = async () => {
+    try {
+      const data = await obtenerTodosLosProductos();
+      if (data && data.length > 0) {
+        setProductos(data);
+      } else {
+        Swal.fire("Atención", "No hay productos disponibles.", "warning");
       }
-    };
+    } catch (error) {
+      console.error("Error al obtener productos:", error);
+      Swal.fire("Error", "No se pudieron cargar los productos.", "error");
+    }
+  };
 
   // * peticion con el indicador de car4ga
   const fetchInventario = async () => {
     try {
-      if (!filtro.idProducto) {
-        console.warn("Por favor, ingresa un ID de producto.");
-        return;
-      }
       setIsLoading(true); // Inicia el indicador de carga
+      setInventario([]); // Limpia los datos previos antes de agregar nuevos
       const data = await cargarListasMovimientosXProductosDetalles(
         filtro.idProducto,
         filtro.fechaInicio,
         filtro.fechaFin
       );
-
+  
       if (data) {
-        // setInventario(data);
         const sortedData = data.sort((a, b) => a.idMovimiento - b.idMovimiento);
         setInventario(sortedData);
       }
@@ -102,6 +98,7 @@ export const MovXProductosTable = () => {
       setTimeout(() => setProgreso(0), 500); // Oculta el indicador después de un pequeño retraso
     }
   };
+  
 
   // * Selección de producto desde el modal
   const handleSelectProducto = (idProducto) => {
@@ -114,7 +111,6 @@ export const MovXProductosTable = () => {
     setDetalleMovimiento(producto);
     setOpenDetailModal(true);
   };
-
 
   const handleFiltroChange = (e) => {
     setFiltro({ ...filtro, [e.target.name]: e.target.value });
@@ -190,19 +186,23 @@ export const MovXProductosTable = () => {
             onFocus={(e) => e.target.showPicker()}
           />
 
-          <Select
-            labelId="producto-label"
-            name="idProducto"
-            value={filtro.idProducto || ""}
-            onChange={handleFiltroChange}
-            label="Selecciona Producto"
-          >
-            {productos.map((producto) => (
-              <MenuItem key={producto.idProducto} value={producto.idProducto}>
-                {producto.nombre}
-              </MenuItem>
-            ))}
-          </Select>
+          <FormControl sx={{ minWidth: 150 }}>
+            <InputLabel id="producto-label">Producto</InputLabel>
+            <Select
+              labelId="producto-label"
+              name="idProducto"
+              value={filtro.idProducto || ""}
+              onChange={handleFiltroChange}
+              displayEmpty
+              label="Productos" // Esto asegura que la etiqueta esté vinculada correctamente
+            >
+              {productos.map((producto) => (
+                <MenuItem key={producto.idProducto} value={producto.idProducto}>
+                  {producto.nombre}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
 
           <Button variant="contained" color="primary" onClick={fetchInventario}>
             Buscar

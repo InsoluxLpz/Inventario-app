@@ -248,7 +248,16 @@ export const cargarListasMovimientosDetalles = async (idMovimiento) => {
 //  * consulta para tener los movimientos_almacen_detalle
 export const cargarListasMovimientosXProductosDetalles = async (idProducto, fechaInicio, fechaFin) => {
     try {
-        const response = await fetch(`${API_URL}/entrada/obtener_movimientosXProductos_detalles/${idProducto}?fechaInicio=${fechaInicio}&fechaFin=${fechaFin}`, {
+        // Construir la URL dinámica
+        let url = `${API_URL}/entrada/obtener_movimientosXProductos_detalles`;
+        
+        if (idProducto) {
+            url += `/${idProducto}`;
+        }
+
+        url += `?fechaInicio=${fechaInicio}&fechaFin=${fechaFin}`;
+
+        const response = await fetch(url, {
             method: "GET",
             headers: { 'Content-Type': 'application/json' }
         });
@@ -256,22 +265,17 @@ export const cargarListasMovimientosXProductosDetalles = async (idProducto, fech
         if (response.ok) {
             const data = await response.json();
 
-            // Producto existe pero no hay movimientos
             if (data.message && data.data && data.data.length === 0) {
                 Swal.fire("Sin movimientos", data.message, "info");
                 return [];
             }
 
             return data;
-        } 
-        // Producto no encontrado (404)
-        else if (response.status === 404) {
+        } else if (response.status === 404) {
             const errorData = await response.json();
             Swal.fire("Producto no encontrado", errorData.message, "warning");
             return [];
-        } 
-        // Otros errores del servidor
-        else {
+        } else {
             const errorData = await response.json();
             Swal.fire("Error", errorData.message || "Hubo un problema con la respuesta del servidor.", "error");
             return [];
@@ -282,6 +286,7 @@ export const cargarListasMovimientosXProductosDetalles = async (idProducto, fech
         return [];
     }
 };
+
 
 // * consulta para buscar productos por codigo
 export const buscarProducto = async (codigo) => {
