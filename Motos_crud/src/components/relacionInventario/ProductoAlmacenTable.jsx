@@ -1,5 +1,3 @@
-// * Aqui hay un problema en la consulta en la que si el producto se agrego con diferente costo unitario se mostrara como otro producto ya que se ocupa hacer el calculo del subtotal y total
-
 import React, { useState, useEffect } from "react";
 import { NavBar } from "../NavBar";
 import {
@@ -87,9 +85,10 @@ export const ProductoAlmacenTable = () => {
     );
   });
 
-  const sortedInventario = [...filteredInventario].sort((a, b) =>
-    a.nombreProducto.localeCompare(b.nombreProducto)
-  );
+  const sortedInventario = [...filteredInventario]
+  // .filter(producto => producto.cantidad > 0) // Filtra productos con cantidad mayor a 0
+  .sort((a, b) => a.nombreProducto.localeCompare(b.nombreProducto));
+
 
   const formatearNumero = (valor) => {
     return new Intl.NumberFormat("es-MX", {

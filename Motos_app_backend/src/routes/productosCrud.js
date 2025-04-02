@@ -70,7 +70,7 @@ SELECT
 FROM 
     productos p
 JOIN 
-    cat_grupos_prueba g ON p.idGrupo = g.id
+    cat_grupos g ON p.idGrupo = g.id
 JOIN 
     cat_unidad_medida u ON p.idUnidadMedida = u.id
 LEFT JOIN 
@@ -227,7 +227,7 @@ router.get('/obtener_entradas', async (req, res) => {
 
 router.get('/obtener_grupos', async (req, res) => {
 
-    const query = `SELECT * FROM cat_grupos_prueba`
+    const query = `SELECT * FROM cat_grupos`
 
     try {
 
@@ -311,7 +311,7 @@ router.get('/obtener_entradas', async (req, res) => {
 
 router.get('/obtener_grupos', async (req, res) => {
 
-    const query = `SELECT * FROM cat_grupos_prueba`
+    const query = `SELECT * FROM cat_grupos`
 
     try {
 

@@ -164,7 +164,7 @@ router.get('/obtener_inventario', async (req, res) => {
                     p.codigo
                 FROM productos p
                 LEFT JOIN inventario_almacen ia ON p.id = ia.idProducto
-                LEFT JOIN cat_productos_prueba cpp ON cpp.id = p.idGrupo
+                LEFT JOIN productos cpp ON cpp.id = p.idGrupo
                 LEFT JOIN cat_unidad_medida cum ON p.idUnidadMedida = cum.id
                 WHERE p.status = 1;
         `);
@@ -360,6 +360,9 @@ router.get('/obtener_movimientosXProductos_detalles/:idProducto?', async (req, r
     const { idProducto } = req.params;
     const { fechaInicio, fechaFin } = req.query;
 
+    console.log('idProducto',idProducto);
+    console.log('fechaInicio',fechaInicio);
+    console.log('idProducto',fechaFin);
     try {
         // Construcción de la consulta base
         let query = `
