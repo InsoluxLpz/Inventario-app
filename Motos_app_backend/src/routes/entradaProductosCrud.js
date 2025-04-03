@@ -76,7 +76,7 @@ router.post('/agregar_inventario', async (req, res) => {
     } catch (error) {
         if (connection) await connection.rollback(); // Revertir cambios en caso de error
         console.error("Error al insertar el movimiento:", error);
-        res.status(500).json({ message: "Error al registrar el movimiento", error });
+        res.status(500).json({ message: "Stock insuficiente", error });
     } finally {
         if (connection) connection.release(); // Liberar la conexión
     }
@@ -185,7 +185,7 @@ router.get('/obtener_movimientos', async (req, res) => {
         page = 1,
         limit = 50,
         tipoMovimiento, // Añadido tipoMovimiento
-        subMovimiento // Añadido subMovimiento
+        subMovimiento   // Añadido subMovimiento
     } = req.query; 
     const offset = (page - 1) * limit;
     console.log("page:", page, "limit:", limit, "offset:", offset, "tipoMovimiento", tipoMovimiento, "subMovimiento", subMovimiento);
@@ -221,10 +221,12 @@ router.get('/obtener_movimientos', async (req, res) => {
         const queryParams = [];
         let whereConditions = [];
 
-        // Filtro por fecha
+        // Filtro por fecha (ajustando para incluir el día completo)
         if (fechaInicio && fechaFin) {
+            const fechaInicioCompleta = `${fechaInicio} 00:00:00`;
+            const fechaFinCompleta = `${fechaFin} 23:59:59`;
             whereConditions.push("ma.fecha BETWEEN ? AND ?");
-            queryParams.push(fechaInicio, fechaFin);
+            queryParams.push(fechaInicioCompleta, fechaFinCompleta);
         }
 
         // Filtro por tipoMovimiento
@@ -265,10 +267,12 @@ router.get('/obtener_movimientos', async (req, res) => {
         const totalQueryParams = [];
         let totalWhereConditions = [];
 
-        // Filtros para el total
+        // Filtros para el total (ajustando fechas)
         if (fechaInicio && fechaFin) {
+            const fechaInicioCompleta = `${fechaInicio} 00:00:00`;
+            const fechaFinCompleta = `${fechaFin} 23:59:59`;
             totalWhereConditions.push("ma.fecha BETWEEN ? AND ?");
-            totalQueryParams.push(fechaInicio, fechaFin);
+            totalQueryParams.push(fechaInicioCompleta, fechaFinCompleta);
         }
 
         if (tipoMovimiento) {
@@ -296,7 +300,6 @@ router.get('/obtener_movimientos', async (req, res) => {
                 total: totalResult.total,
                 totalPages: Math.ceil(totalResult.total / limit)
             },
-            
         });
 
     } catch (error) {
@@ -304,6 +307,7 @@ router.get('/obtener_movimientos', async (req, res) => {
         res.status(500).json({ message: "Error en el servidor" });
     }
 });
+
 
 
 

@@ -269,11 +269,18 @@ export const AgregarProductosAlmacen = () => {
   // * guardar los datos en el estado
   const handleSubmit = (e) => {
     e.preventDefault();
-
+  
     if (!validateForm()) return;
-
+  
+    // Obtener la hora actual en formato HH:MM:SS
+    const ahora = new Date();
+    const horaActual = ahora.toTimeString().split(" ")[0]; // Extrae solo la hora
+  
+    // Asegurar que la fecha tenga la hora antes de enviarla
+    const fechaConHora = `${fechaFijo} ${horaActual}`;
+  
     const nuevoProducto = {
-      fecha: fechaFijo,
+      fecha: fechaConHora, // Ahora incluye la hora actual
       idTipoMovimiento: tipoMovimientoFijo.value,
       idTipoSubmovimiento: tipoEntradaFijo.value,
       idAutorizo: autorizoFijo.value,
@@ -294,7 +301,7 @@ export const AgregarProductosAlmacen = () => {
       ],
     };
     console.log("Nuevo Producto", nuevoProducto);
-
+  
     setProductosAgregados((prevProductos) => {
       const nuevosProductos = [...prevProductos, nuevoProducto];
       if (nuevosProductos.length > 0) {
@@ -306,7 +313,7 @@ export const AgregarProductosAlmacen = () => {
       }
       return nuevosProductos;
     });
-
+  
     setFormData({
       proveedor: proveedorFijo,
       fecha: fechaFijo,
@@ -317,10 +324,11 @@ export const AgregarProductosAlmacen = () => {
       autorizo: autorizoFijo,
       tipoMovimiento: tipoMovimientoFijo,
     });
-
+  
     setErrors({});
   };
 
+  
   // * mandar datos a insertar
   const handleGuardarTodo = async () => {
     if (productosAgregados.length === 0) {
