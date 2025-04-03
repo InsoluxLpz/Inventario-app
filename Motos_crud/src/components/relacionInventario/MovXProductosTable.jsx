@@ -87,7 +87,7 @@ export const MovXProductosTable = () => {
       );
   
       if (data) {
-        const sortedData = data.sort((a, b) => a.idMovimiento - b.idMovimiento);
+        const sortedData = data.sort((a, b) => a.idDetalle - b.idDetalle);
         setInventario(sortedData);
       }
     } catch (error) {
