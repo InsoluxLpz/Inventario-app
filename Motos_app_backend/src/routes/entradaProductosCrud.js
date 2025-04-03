@@ -452,7 +452,28 @@ router.get('/productos', async (req, res) => {
     }
   });
   
-
+// * buscar productos por codigo
+router.get('/buscar_producto/:codigo', async (req, res) => {
+    const { codigo } = req.params; // Obtenemos el código desde los parámetros de la URL
+  
+    try {
+      // Consulta para buscar el producto por su código
+      const query = `SELECT * FROM productos WHERE codigo = ? LIMIT 1`;
+      const [rows] = await db.query(query, [codigo]);
+  
+      if (rows.length > 0) {
+        // Si se encontró el producto, lo retornamos
+        return res.status(200).json(rows[0]);
+      } else {
+        // Si no se encuentra, se retorna un error 404
+        return res.status(404).json({ message: 'Producto no encontrado' });
+      }
+    } catch (error) {
+      console.error('Error al buscar producto:', error);
+      return res.status(500).json({ message: 'Error en el servidor' });
+    }
+  });
+  
 
 
 
