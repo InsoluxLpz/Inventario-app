@@ -156,7 +156,7 @@ router.get('/obtener_inventario', async (req, res) => {
                 SELECT 
                     p.nombre as nombreProducto,
                     p.idGrupo as idGrupo,
-                    cpp.nombre as nombreGrupo,
+                    cp.nombre as nombreGrupo,
                     cum.id as idUnidadMedida,
                     cum.nombre as unidadMedida,
                     p.precio as costoUnitario,
@@ -164,7 +164,7 @@ router.get('/obtener_inventario', async (req, res) => {
                     p.codigo
                 FROM productos p
                 LEFT JOIN inventario_almacen ia ON p.id = ia.idProducto
-                LEFT JOIN productos cpp ON cpp.id = p.idGrupo
+                LEFT JOIN cat_grupos cp ON cp.id = p.idGrupo
                 LEFT JOIN cat_unidad_medida cum ON p.idUnidadMedida = cum.id
                 WHERE p.status = 1;
         `);

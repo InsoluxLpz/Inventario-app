@@ -86,7 +86,7 @@ export const ProductoAlmacenTable = () => {
   });
 
   const sortedInventario = [...filteredInventario]
-  // .filter(producto => producto.cantidad > 0) // Filtra productos con cantidad mayor a 0
+  .filter(producto => producto.cantidad > 0) // Filtra productos con cantidad mayor a 0
   .sort((a, b) => a.nombreProducto.localeCompare(b.nombreProducto));
 
 
