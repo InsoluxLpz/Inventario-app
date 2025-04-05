@@ -8,7 +8,7 @@ const db = dbConexion();
 router.get('/obtener_motos', async (req, res) => {
 
     const query = `
-        SELECT * from cat_motocicletas_prueba
+        SELECT * from cat_motocicletas
     `;
 
     try {
@@ -39,7 +39,7 @@ router.post('/agregar_moto', async (req, res) => {
         // 🔹 Hacer una única consulta para verificar duplicados
         const query = `
             SELECT inciso, placa, no_serie 
-            FROM cat_motocicletas_prueba 
+            FROM cat_motocicletas 
             WHERE inciso = ? OR placa = ? OR no_serie = ?
         `;
         const [existe] = await db.query(query, [inciso, placa, no_serie]);
@@ -61,7 +61,7 @@ router.post('/agregar_moto', async (req, res) => {
 
 
         const insertQuery = `
-            INSERT INTO cat_motocicletas_prueba 
+            INSERT INTO cat_motocicletas
             (inciso, idMarca, anio, modelo, color, no_serie, motor, placa, propietario, fecha_compra, status, nota) 
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `;
@@ -69,7 +69,7 @@ router.post('/agregar_moto', async (req, res) => {
 
         await db.query(insertQuery, values);
 
-        const [newMoto] = await db.query("SELECT * FROM cat_motocicletas_prueba WHERE no_serie = ?", [no_serie]);
+        const [newMoto] = await db.query("SELECT * FROM cat_motocicletas WHERE no_serie = ?", [no_serie]);
 
         return res.status(200).json(newMoto[0]);
     } catch (error) {
@@ -93,7 +93,7 @@ router.put('/actualizar_moto/:id', async (req, res) => {
     try {
         const query = `
             SELECT inciso, placa, no_serie 
-            FROM cat_motocicletas_prueba 
+            FROM cat_motocicletas 
             WHERE (inciso = ? OR placa = ? OR no_serie = ?) 
             AND id != ?
         `;
@@ -115,7 +115,7 @@ router.put('/actualizar_moto/:id', async (req, res) => {
 
         // 🔹 Si no hay duplicados, actualizar la moto
         const updateQuery = `
-            UPDATE cat_motocicletas_prueba 
+            UPDATE cat_motocicletas
             SET inciso = ?, idMarca = ?, anio = ?, modelo = ?, color = ?, no_serie = ?, motor = ?, placa = ?, propietario = ?, fecha_compra = ?, status = ?, nota = ?
             WHERE id = ?
         `;
@@ -124,7 +124,7 @@ router.put('/actualizar_moto/:id', async (req, res) => {
         await db.query(updateQuery, values);
 
         // 🔹 Obtener la moto actualizada
-        const [updatedMoto] = await db.query("SELECT * FROM cat_motocicletas_prueba WHERE id = ?", [motoId]);
+        const [updatedMoto] = await db.query("SELECT * FROM cat_motocicletas WHERE id = ?", [motoId]);
 
         return res.status(200).json(updatedMoto[0]);
     } catch (error) {
@@ -144,14 +144,14 @@ router.put('/actualizar_moto/:id', async (req, res) => {
 
 //     try {
 
-//         const [result] = await db.query('SELECT * FROM cat_motocicletas_prueba WHERE id = ?', [id]);
+//         const [result] = await db.query('SELECT * FROM cat_motocicletas WHERE id = ?', [id]);
 
 //         if (result.length === 0) {
 //             return res.status(404).json({ ok: false, msg: 'No existe ninguna moto con ese ID' });
 //         }
 
 //         // Eliminar la moto
-//         await db.query('DELETE FROM cat_motocicletas_prueba WHERE id = ?', [id]);
+//         await db.query('DELETE FROM cat_motocicletas WHERE id = ?', [id]);
 
 //         return res.status(200).json({ ok: true, msg: 'Moto eliminada correctamente' });
 
@@ -168,7 +168,7 @@ router.put('/actualizar_status/:id', async (req, res) => {
         return res.status(400).json('Faltan parametros para actualizar el campo');
     }
 
-    const query = `UPDATE cat_motocicletas_prueba SET status = 0 WHERE id = ?`
+    const query = `UPDATE cat_motocicletas SET status = 0 WHERE id = ?`
 
     try {
         const [results] = await db.query(query, [id]);
@@ -192,7 +192,7 @@ router.put('/actualizar_status_mant/:id', async (req, res) => {
         return res.status(400).json('Faltan parametros para actualizar el campo');
     }
 
-    const query = `UPDATE cat_motocicletas_prueba SET status = 2 WHERE id = ?`;
+    const query = `UPDATE cat_motocicletas SET status = 2 WHERE id = ?`;
 
     try {
         const [results] = await db.query(query, [id]);

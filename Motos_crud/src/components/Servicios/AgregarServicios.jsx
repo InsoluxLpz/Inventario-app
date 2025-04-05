@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Box, Button } from "@mui/material";
 import { AgregarServicio } from "../../api/ServiciosApi";
 
@@ -22,6 +22,7 @@ export const AgregarServicios = ({ modalOpen, onClose, agregarServicioLista }) =
         const newErrors = {};
 
         Object.keys(servicio).forEach((key) => {
+            if (key === "descripcion") return;
             if (Array.isArray(servicio[key])) {
                 if (servicio[key].length === 0) {
                     newErrors[key] = "Este campo es obligatorio";
@@ -55,6 +56,7 @@ export const AgregarServicios = ({ modalOpen, onClose, agregarServicioLista }) =
                 nombre: "",
                 descripcion: "",
             });
+
             setErrors({});
 
         }
@@ -70,7 +72,7 @@ export const AgregarServicios = ({ modalOpen, onClose, agregarServicioLista }) =
     return (
         <div className="modal-backdrop">
             <div className="modal fade show" style={{ display: "block" }} aria-labelledby="exampleModalLabel" tabIndex="-1" role="dialog">
-                <div className="modal-dialog" role="document" style={{ maxWidth: "60vw", marginTop: 90 }}>
+                <div className="modal-dialog" role="document" style={{ maxWidth: "30vw", marginTop: 90 }}>
                     <div className="modal-content w-100" style={{ maxWidth: "60vw" }}>
                         <div className="modal-header" style={{ backgroundColor: '#1f618d' }}>
                             <h5 className="modal-title" style={{ color: 'white' }}>Agregar Servicio</h5>
@@ -79,7 +81,7 @@ export const AgregarServicios = ({ modalOpen, onClose, agregarServicioLista }) =
                         <form onSubmit={handleSubmit} style={{ padding: "20px" }}>
                             <Box sx={{ maxWidth: "2000px", margin: "0 auto" }}>
                                 <div className="row">
-                                    <div className="col-md-6 mb-3">
+                                    <div className="col-md-10 mb-3">
                                         <label className="form-label">Nombre</label>
                                         <input
                                             id="nombre"
@@ -96,7 +98,7 @@ export const AgregarServicios = ({ modalOpen, onClose, agregarServicioLista }) =
                                     </div>
                                 </div>
                                 <div className="row">
-                                    <div className="col-md-6 mb-3">
+                                    <div className="col-md-10 mb-3">
                                         <label className="form-label">Descripción</label>
                                         <textarea
                                             id="descripcion"

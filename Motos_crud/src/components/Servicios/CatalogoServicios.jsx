@@ -150,194 +150,194 @@ export const CatalogoServicios = () => {
         <NavBar />
         <animated.div style={styles}>
 
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            marginTop: 3,
-            marginLeft: 12,
-          }}
-        >
-          <Box sx={{ flexGrow: 1 }}>
-            <Grid2
-              container
-              spacing={2}
-              justifyContent="center"
-              alignItems="center"
-            >
-              <Grid2 item sm={6} md={3}>
-                <TextField
-                  label="Buscar por nombre"
-                  variant="outlined"
-                  sx={{ backgroundColor: "white", width: 400, marginRight: 3 }}
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </Grid2>
-
-              <Grid2 item sm={6} md={3}>
-                <Box sx={{ display: "flex", gap: 1 }}>
-                  <Button
-                    variant="contained"
-                    sx={{
-                      backgroundColor: "#1f618d",
-                      color: "white",
-                      ":hover": { opacity: 0.7 },
-                      right: 20,
-                      borderRadius: "8px",
-                      padding: "5px 10px",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "8px",
-                      marginRight: 8,
-                    }}
-                    onClick={handleOpenModalAgregar}
-                  >
-                    <AddchartIcon sx={{ fontSize: 24 }} />
-                    Agregar Servicio
-                  </Button>
-                </Box>
-              </Grid2>
-            </Grid2>
-          </Box>
-        </Box>
-
-        <Box width="70%" maxWidth={2000} margin="0 auto" mt={2}>
-          <Box
-            sx={{
-              backgroundColor: "#1f618d",
-              padding: "10px 20px",
-              borderRadius: "8px 8px 0 0",
-            }}
-          >
-            <Typography variant="h5" color="white">
-              Lista de Servicios
-            </Typography>
-          </Box>
           <Box
             sx={{
               display: "flex",
-              justifyContent: "flex-end",
-              backgroundColor: "white",
+              justifyContent: "center",
+              alignItems: "center",
+              marginTop: 3,
+              marginLeft: 12,
             }}
           >
+            <Box sx={{ flexGrow: 1 }}>
+              <Grid2
+                container
+                spacing={2}
+                justifyContent="center"
+                alignItems="center"
+              >
+                <Grid2 item sm={6} md={3}>
+                  <TextField
+                    label="Buscar por nombre"
+                    variant="outlined"
+                    sx={{ backgroundColor: "white", width: 400, marginRight: 3 }}
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                </Grid2>
+
+                <Grid2 item sm={6} md={3}>
+                  <Box sx={{ display: "flex", gap: 1 }}>
+                    <Button
+                      variant="contained"
+                      sx={{
+                        backgroundColor: "#1f618d",
+                        color: "white",
+                        ":hover": { opacity: 0.7 },
+                        right: 20,
+                        borderRadius: "8px",
+                        padding: "5px 10px",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "8px",
+                        marginRight: 8,
+                      }}
+                      onClick={handleOpenModalAgregar}
+                    >
+                      <AddchartIcon sx={{ fontSize: 24 }} />
+                      Agregar Servicio
+                    </Button>
+                  </Box>
+                </Grid2>
+              </Grid2>
+            </Box>
+          </Box>
+
+          <Box width="70%" maxWidth={2000} margin="0 auto" mt={2}>
+            <Box
+              sx={{
+                backgroundColor: "#1f618d",
+                padding: "10px 20px",
+                borderRadius: "8px 8px 0 0",
+              }}
+            >
+              <Typography variant="h5" color="white">
+                Lista de Servicios
+              </Typography>
+            </Box>
             <Box
               sx={{
                 display: "flex",
                 justifyContent: "flex-end",
-                marginLeft: 2,
+                backgroundColor: "white",
               }}
             >
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={showInactive}
-                    onChange={(e) => setShowInactive(e.target.checked)}
-                  />
-                }
-                label="Mostrar inactivas"
-              />
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "flex-end",
+                  marginLeft: 2,
+                }}
+              >
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={showInactive}
+                      onChange={(e) => setShowInactive(e.target.checked)}
+                    />
+                  }
+                  label="Mostrar inactivas"
+                />
+              </Box>
             </Box>
           </Box>
-        </Box>
-        <Paper
-          sx={{
-            width: "70%",
-            maxWidth: "2000px",
-            margin: "0 auto",
-            backgroundColor: "white",
-            padding: 2,
-          }}
-        >
-          <TableContainer
+          <Paper
             sx={{
-              maxHeight: 800,
-              backgroundColor: "#ffff",
-              border: "1px solid #d7dbdd",
-              borderRadius: "2px",
+              width: "70%",
+              maxWidth: "2000px",
+              margin: "0 auto",
+              backgroundColor: "white",
+              padding: 2,
             }}
           >
-            <Table stickyHeader aria-label="sticky table">
-              <TableHead>
-                <TableRow>
-                  <TableCell
-                    align="left"
-                    sx={{
-                      fontWeight: "bold",
-                      width: "40%",
-                      backgroundColor: "#f4f6f7",
-                    }}
-                  >
-                    Nombre
-                  </TableCell>
-                  <TableCell
-                    align="left"
-                    sx={{
-                      fontWeight: "bold",
-                      width: "40%",
-                      backgroundColor: "#f4f6f7",
-                    }}
-                  >
-                    Descripción
-                  </TableCell>
-                  <TableCell
-                    align="center"
-                    sx={{
-                      fontWeight: "bold",
-                      width: "20%",
-                      backgroundColor: "#f4f6f7",
-                    }}
-                  >
-                    Opciones
-                  </TableCell>
-                </TableRow>
-              </TableHead>
-
-              <TableBody>
-                {serviciosFiltrados.map((servicio) => (
-                  <TableRow
-                    key={servicio.id}
-                    sx={{
-                      backgroundColor: getStatusColor(servicio.status),
-                      "&:hover": {
-                        backgroundColor: "#eaecee ",
-                      },
-                    }}
-                  >
+            <TableContainer
+              sx={{
+                maxHeight: 560,
+                backgroundColor: "#ffff",
+                border: "1px solid #d7dbdd",
+                borderRadius: "2px",
+              }}
+            >
+              <Table stickyHeader aria-label="sticky table">
+                <TableHead>
+                  <TableRow>
                     <TableCell
                       align="left"
-                      sx={{ textAlign: "left", width: "25%" }}
+                      sx={{
+                        fontWeight: "bold",
+                        width: "40%",
+                        backgroundColor: "#f4f6f7",
+                      }}
                     >
-                      {servicio.nombre}
+                      Nombre
                     </TableCell>
                     <TableCell
                       align="left"
-                      sx={{ textAlign: "left", width: "25%" }}
+                      sx={{
+                        fontWeight: "bold",
+                        width: "40%",
+                        backgroundColor: "#f4f6f7",
+                      }}
                     >
-                      {servicio.descripcion}
+                      Descripción
                     </TableCell>
-                    <TableCell align="center" sx={{ width: "20%" }}>
-                      <IconButton
-                        sx={{ color: "black" }}
-                        onClick={() => handleOpenModalEdit(servicio)}
-                      >
-                        <EditIcon sx={{ fontSize: 20 }} />
-                      </IconButton>
-                      <IconButton
-                        sx={{ marginLeft: "10px", color: "black" }}
-                        onClick={() => handleActualizarStatus(servicio.id)}
-                      >
-                        <InventoryIcon sx={{ fontSize: 20, color: "red" }} />
-                      </IconButton>
+                    <TableCell
+                      align="center"
+                      sx={{
+                        fontWeight: "bold",
+                        width: "20%",
+                        backgroundColor: "#f4f6f7",
+                      }}
+                    >
+                      Opciones
                     </TableCell>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </Paper>
-      </animated.div>
+                </TableHead>
+
+                <TableBody>
+                  {serviciosFiltrados.map((servicio) => (
+                    <TableRow
+                      key={servicio.id}
+                      sx={{
+                        backgroundColor: getStatusColor(servicio.status),
+                        "&:hover": {
+                          backgroundColor: "#eaecee ",
+                        },
+                      }}
+                    >
+                      <TableCell
+                        align="left"
+                        sx={{ textAlign: "left", width: "25%" }}
+                      >
+                        {servicio.nombre?.toUpperCase()}
+                      </TableCell>
+                      <TableCell
+                        align="left"
+                        sx={{ textAlign: "left", width: "25%" }}
+                      >
+                        {servicio.descripcion?.toUpperCase()}
+                      </TableCell>
+                      <TableCell align="center" sx={{ width: "20%" }}>
+                        <IconButton
+                          sx={{ color: "black" }}
+                          onClick={() => handleOpenModalEdit(servicio)}
+                        >
+                          <EditIcon sx={{ fontSize: 20 }} />
+                        </IconButton>
+                        <IconButton
+                          sx={{ marginLeft: "10px", color: "black" }}
+                          onClick={() => handleActualizarStatus(servicio.id)}
+                        >
+                          <InventoryIcon sx={{ fontSize: 20, color: "red" }} />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Paper>
+        </animated.div>
       </Box>
 
       <EditarServiciosModal

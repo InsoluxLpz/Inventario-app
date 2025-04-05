@@ -16,6 +16,7 @@ export const AgregarProductoModal = ({ modalOpen, onClose, grupos, unidadMedida,
         descripcion: "",
         unidad_medida: "",
         proveedores: [],
+        status: 1
     });
 
     const [errors, setErrors] = useState({});
@@ -47,11 +48,23 @@ export const AgregarProductoModal = ({ modalOpen, onClose, grupos, unidadMedida,
         const { name, value } = e.target;
 
         if (name === "precio") {
+            // Permitir solo números y un punto decimal
             let numericValue = value.replace(/[^0-9.]/g, "");
 
-            const formattedValue = new Intl.NumberFormat('es-MX').format(numericValue);
+            // Verificar si hay más de un punto decimal y corregirlo
+            const parts = numericValue.split(".");
+            if (parts.length > 2) {
+                numericValue = parts[0] + "." + parts.slice(1).join(""); // Mantener solo el primer punto
+            }
 
-            setFormData(prev => ({ ...prev, [name]: formattedValue }));
+            // Si el número tiene decimales, mantenerlo sin formato
+            if (numericValue.includes(".")) {
+                setFormData(prev => ({ ...prev, [name]: numericValue }));
+            } else {
+                // Si es número entero, formatearlo con separador de miles
+                const formattedValue = new Intl.NumberFormat("es-MX").format(parseInt(numericValue || 0, 10));
+                setFormData(prev => ({ ...prev, [name]: formattedValue }));
+            }
         } else {
             setFormData(prev => ({ ...prev, [name]: value }));
         }
@@ -82,54 +95,36 @@ export const AgregarProductoModal = ({ modalOpen, onClose, grupos, unidadMedida,
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        const codigoSinEspacios = formData.codigo.trim();
-        const nombreSinEspacios = formData.nombre.trim();
-        const formDataConEspaciosEliminados = {
-            ...formData,
-            codigo: codigoSinEspacios,
-            nombre: nombreSinEspacios,
-        };
+        // Eliminar comas y convertir a número decimal
+        let precioNumerico = parseFloat(formData.precio.replace(/,/g, ''));
 
-        const precioNumerico = parseFloat(formData.precio.replace(/[^\d.-]/g, ''));
-
-        if (!validateForm()) return;
-        const idUsuario = parseInt(localStorage.getItem('idUsuario'), 10);
-
-        if (isNaN(idUsuario)) {
-            setErrors((prev) => ({ ...prev, general: "Error: Usuario no identificado" }));
+        if (isNaN(precioNumerico)) {
+            setErrors((prev) => ({ ...prev, precio: "Ingrese un precio válido" }));
             return;
         }
 
         const formDataConUsuario = {
-            ...formDataConEspaciosEliminados,
-            precio: precioNumerico,
-            idUsuario
+            ...formData,
+            precio: precioNumerico, // Guardar correctamente como número
+            idUsuario: parseInt(localStorage.getItem('idUsuario'), 10)
         };
 
         try {
             console.log("Enviando datos al backend:", formDataConUsuario);
             const response = await agregarProductos(formDataConUsuario);
-            console.log("Respuesta del backend:", response);
-
-            if (response && response.message === "Producto agregado correctamente") {
-                console.log("Producto guardado correctamente. Cerrando modal...");
+            if (response?.message === "Producto agregado correctamente") {
                 onClose();
-
-                // Recargar la página después de 1 segundo
-                setTimeout(() => {
-                    console.log("Recargando página...");
-                    window.location.reload();
-                }, 1000);
+                setTimeout(() => window.location.reload(), 1000);
             } else {
-                console.error("Error en la respuesta del backend:", response);
-                setErrors((prev) => ({ ...prev, general: "Ocurrió un error al agregar el producto. Inténtelo de nuevo." }));
+                setErrors((prev) => ({ ...prev, general: "Ocurrió un error al agregar el producto." }));
             }
-
         } catch (error) {
             console.error("Error al agregar producto:", error);
-            setErrors((prev) => ({ ...prev, general: "Ocurrió un error al agregar el producto. Inténtelo de nuevo." }));
+            setErrors((prev) => ({ ...prev, general: "Ocurrió un error al agregar el producto." }));
         }
     };
+
+
 
     const handleKeyDown = (e, nextField, isSelect = false) => {
         if (e.key === "Enter") {

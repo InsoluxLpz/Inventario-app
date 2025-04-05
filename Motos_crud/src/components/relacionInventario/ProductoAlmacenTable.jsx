@@ -86,8 +86,8 @@ export const ProductoAlmacenTable = () => {
   });
 
   const sortedInventario = [...filteredInventario]
-  .filter(producto => producto.cantidad > 0) // Filtra productos con cantidad mayor a 0
-  .sort((a, b) => a.nombreProducto.localeCompare(b.nombreProducto));
+    .filter(producto => producto.cantidad > 0) // Filtra productos con cantidad mayor a 0
+    .sort((a, b) => a.nombreProducto.localeCompare(b.nombreProducto));
 
 
   const formatearNumero = (valor) => {
@@ -134,7 +134,7 @@ export const ProductoAlmacenTable = () => {
             flexWrap="wrap"
             gap={2}
           >
-            <FilterListIcon 
+            <FilterListIcon
               sx={{
                 fontSize: 32, // Ajusta el tamaño del ícono
                 color: "#1f618d", // Personaliza el color para que combine con el diseño
