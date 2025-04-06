@@ -257,7 +257,7 @@ export const MovXProductosTable = () => {
                   {inventario.map((producto) => (
                     <TableRow key={producto.idMovimiento}>
                       <TableCell align="left">
-                        {producto.idMovimiento}
+                        {producto.idDetalle}
                       </TableCell>
                       <TableCell align="left">
                         {new Date(producto.fecha_movimiento).toLocaleDateString(
