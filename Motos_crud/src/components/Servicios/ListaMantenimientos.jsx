@@ -6,8 +6,6 @@ import { EditarMantenimiento } from "./EditarMantenimiento";
 import { obtenerProductos } from "../../api/productosApi";
 import { obtenerMotos } from "../../api/motosApi";
 import { VerMantenimientoCancelado } from "./VerMantenimientoCancelado";
-import { useNavigate } from "react-router";
-import AddchartIcon from "@mui/icons-material/Addchart";
 import EditIcon from "@mui/icons-material/Edit";
 import Paper from "@mui/material/Paper";
 import Table from "@mui/material/Table";
@@ -21,7 +19,6 @@ import CleaningServicesIcon from '@mui/icons-material/CleaningServices';
 import InfoIcon from "@mui/icons-material/Info";
 import SearchIcon from '@mui/icons-material/Search';
 import Select from "react-select";
-import { useSpring, animated } from "@react-spring/web";
 
 export const ListaMantenimientos = () => {
   const [mantenimientos, setMantenimientos] = useState([]);
@@ -31,7 +28,6 @@ export const ListaMantenimientos = () => {
   const [servicios, setServicios] = useState([]);
   const [productos, setProductos] = useState([]);
   const [todos, setTodos] = useState(false);
-  const navigate = useNavigate();
   const [motos, setMotos] = useState([]);
   const [filtro, setFiltro] = useState({
     fecha_inicio: "",
@@ -60,7 +56,6 @@ export const ListaMantenimientos = () => {
     }
   };
 
-
   const fetchServicios = async () => {
     const data = await ObtenerServicios();
     if (data) {
@@ -86,16 +81,7 @@ export const ListaMantenimientos = () => {
     cargarMantenimientos();
   };
 
-  const actualizarLista = (mantenimientoActualizado) => {
-    setMantenimientos((prevMantenimientos) =>
-      prevMantenimientos.map((m) =>
-        m.id === mantenimientoActualizado.id ? mantenimientoActualizado : m
-      )
-    );
-  };
-
   const cargarMantenimientos = async () => {
-
     const data = await ObtenerMantenimientos({
       filtro: {
         ...filtro,
@@ -140,18 +126,22 @@ export const ListaMantenimientos = () => {
 
   const obtenerInicioYFinSemana = () => {
     const fechaActual = new Date();
-    const primerDiaSemana = fechaActual.getDate() - fechaActual.getDay();
-    const ultimoDiaSemana = primerDiaSemana + 6;
 
-    // Crear las fechas de inicio y fin de la semana
-    const inicioSemana = new Date(fechaActual.setDate(primerDiaSemana));
-    const finSemana = new Date(fechaActual.setDate(ultimoDiaSemana));
+    // Crear una nueva fecha para el primer día de la semana (domingo)
+    const primerDiaSemana = new Date(fechaActual);
+    primerDiaSemana.setDate(fechaActual.getDate() - fechaActual.getDay()); // Domingo de la semana
 
-    const fechaInicioFormateada = inicioSemana.toISOString().split("T")[0];
-    const fechaFinFormateada = finSemana.toISOString().split("T")[0];
+    // Crear una nueva fecha para el último día de la semana (sábado)
+    const ultimoDiaSemana = new Date(primerDiaSemana);
+    ultimoDiaSemana.setDate(primerDiaSemana.getDate() + 6); // Sábado de la misma semana
+
+    // Aseguramos que el domingo sea el día correcto de la semana
+    const fechaInicioFormateada = primerDiaSemana.toISOString().split("T")[0];
+    const fechaFinFormateada = ultimoDiaSemana.toISOString().split("T")[0];
 
     return { fechaInicioFormateada, fechaFinFormateada };
   };
+
 
   useEffect(() => {
     const { fechaInicioFormateada, fechaFinFormateada } = obtenerInicioYFinSemana();
@@ -161,7 +151,6 @@ export const ListaMantenimientos = () => {
       fecha_final: fechaFinFormateada,
     });
   }, []);
-
 
   const formatearDinero = (valor) => {
     return new Intl.NumberFormat("es-MX", {
@@ -194,19 +183,12 @@ export const ListaMantenimientos = () => {
 
   const miniDrawerWidth = 50;
 
-  const styles = useSpring({
-      from: { opacity: 0, transform: "translateY(50px)", filter: "blur(10px)" },
-      to: { opacity: 1, transform: "translateY(0)", filter: "blur(0px)" },
-      config: { tension: 500, friction: 30 },
-    });
-
   return (
     <>
       <Box
         sx={{ backgroundColor: "#f2f3f4", minHeight: "100vh", paddingBottom: 4, transition: "margin 0.3s ease-in-out", marginLeft: `${miniDrawerWidth}px`, }}
       >
         <NavBar />
-        <animated.div style={styles}>
         <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", marginTop: 3, marginLeft: 12 }}>
           <Box sx={{ flexGrow: 1 }}>
             <Grid2 container spacing={2} justifyContent="center" alignItems="center">
@@ -317,12 +299,6 @@ export const ListaMantenimientos = () => {
                   >
                     <CleaningServicesIcon sx={{ fontSize: 24 }} />
                   </Button>
-                  <Button
-                    variant="contained"
-                    sx={{ backgroundColor: "#1f618d", color: "white", ":hover": { opacity: 0.7 }, right: 20, borderRadius: "8px", padding: "5px 10px", display: "flex", alignItems: "center", gap: "8px", marginRight: 8 }} onClick={() => navigate("/servicios/RealizarMantenimiento")}>
-                    <AddchartIcon sx={{ fontSize: 24 }} />
-                    Agregar Mantenimiento
-                  </Button>
                 </Box>
               </Grid2>
             </Grid2>
@@ -366,12 +342,12 @@ export const ListaMantenimientos = () => {
                         </TableCell>
                         <TableCell align="center" sx={{ textAlign: "left", width: "15%" }}>
                           {mantenimiento.servicios.length > 0
-                            ? mantenimiento.servicios.map((s) => s.nombre).join(", ")
+                            ? mantenimiento.servicios.map((s) => s.nombre.toUpperCase()).join(", ")
                             : "N/A"}
                         </TableCell>
                         <TableCell align="center" sx={{ textAlign: "left", width: "15%" }}>
                           {mantenimiento.productos.length > 0
-                            ? mantenimiento.productos.map((p) => p.nombre).join(", ")
+                            ? mantenimiento.productos.map((p) => p.nombre.toUpperCase()).join(", ")
                             : "N/A"}
                         </TableCell>
                         <TableCell align="center" sx={{ textAlign: "left", width: "15%" }}>
@@ -379,7 +355,7 @@ export const ListaMantenimientos = () => {
                         </TableCell>
 
                         <TableCell align="center" sx={{ textAlign: "left", width: "10%" }}>
-                          {mantenimiento.comentario}
+                          {mantenimiento.comentario?.toUpperCase()}
                         </TableCell>
                         <TableCell align="center" sx={{ textAlign: "center", }}>
                           {formatearDinero(mantenimiento.costo_total)}
@@ -459,7 +435,6 @@ export const ListaMantenimientos = () => {
             />
           </Paper>
         </Box>
-      </animated.div>
       </Box>
     </>
   );

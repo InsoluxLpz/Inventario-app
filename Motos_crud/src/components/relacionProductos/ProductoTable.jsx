@@ -16,6 +16,7 @@ import { AgregarProductoModal } from "./AgregarProductoModal";
 import AddchartIcon from '@mui/icons-material/Addchart';
 import { obtenerProveedores } from "../../api/proveedoresApi";
 import { useSpring, animated } from "@react-spring/web";
+import { TablePagination } from "@mui/material";
 
 export const ProductoTable = () => {
   const [openModalEditar, setOpenModalEditar] = useState(false);
@@ -30,12 +31,14 @@ export const ProductoTable = () => {
   const [searchNombre, setSearchNombre] = useState("");  // Filtro por nombre
   const [searchDescripcion, setSearchDescripcion] = useState(""); // Filtro por descripción
 
+  const [page, setPage] = useState(0); // Página actual
+  const [rowsPerPage, setRowsPerPage] = useState(50); // Número de filas por página
+
   const fetchProductos = async () => {
     const data = await obtenerProductos();
     if (data) {
       setProductos(data);
     }
-
   };
 
   const fetchGrupos = async () => {
@@ -53,11 +56,10 @@ export const ProductoTable = () => {
   };
 
   const fetchProveedor = async () => {
-    const data = await obtenerProveedores([])
+    const data = await obtenerProveedores([]);
     if (data) {
       setProveedores(data);
     }
-
   };
 
   const handleModalAgregar = () => {
@@ -67,7 +69,6 @@ export const ProductoTable = () => {
   const handleCloseModalAgregar = () => {
     setOpenModalAgregar(false);
   };
-
 
   const handleActualizarStatus = (id) => {
     ActualizarStatus(id, (idActualizado) => {
@@ -79,7 +80,6 @@ export const ProductoTable = () => {
     });
   };
 
-
   const actualizarLista = (productoActualizado) => {
     setProductos((prevProductos) =>
       prevProductos.map((producto) =>
@@ -90,12 +90,9 @@ export const ProductoTable = () => {
     );
   };
 
-
   const agregarProducto = (producto) => {
     setProductos(prevProductos => [...prevProductos, producto]);
   };
-
-
 
   const productosFiltrados = productos.filter((producto) => {
     if (showInactive) {
@@ -115,7 +112,6 @@ export const ProductoTable = () => {
       descripcion.includes(searchDescripcion.toLowerCase())
     );
   });
-
 
   // * Ordenar los productos por nombre alfabéticamente
   const productosOrdenados = filteredProductos.sort((a, b) => {
@@ -140,6 +136,15 @@ export const ProductoTable = () => {
     fetchProveedor();
   }, []);
 
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0); // Reset to the first page when rows per page changes
+  };
+
   const miniDrawerWidth = 50;
 
   const getStatusColor = (status) => {
@@ -151,21 +156,12 @@ export const ProductoTable = () => {
     }
   };
 
-  
-    // * diseño de carga en las tablas
-    const styles = useSpring({
-      from: { opacity: 0, transform: "translateY(50px)", filter: "blur(10px)" },
-      to: { opacity: 1, transform: "translateY(0)", filter: "blur(0px)" },
-      config: { tension: 500, friction: 30 },
-    });
-
   return (
     <>
       <Box
         sx={{ backgroundColor: "#f2f3f4", minHeight: "100vh", paddingBottom: 4, transition: "margin 0.3s ease-in-out", marginLeft: `${miniDrawerWidth}px` }}
       >
         <NavBar onSearch={setSearchTerm} />
-        <animated.div style={styles}>
         <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", marginTop: 3, marginLeft: 12 }}>
           <Box sx={{ flexGrow: 1 }}>
             <Grid2 container spacing={2} justifyContent="center" alignItems="center">
@@ -226,8 +222,9 @@ export const ProductoTable = () => {
               />
             </Box>
           </Box>
+
           <Paper sx={{ width: "100%", maxWidth: "2000px", margin: "0 auto", backgroundColor: "white", padding: 2 }}>
-            <TableContainer sx={{ maxHeight: 700, backgroundColor: "#ffff", border: "1px solid #d7dbdd", borderRadius: "2px" }}>
+            <TableContainer sx={{ maxHeight: 560, backgroundColor: "#ffff", border: "1px solid #d7dbdd", borderRadius: "2px" }}>
               <Table stickyHeader>
                 <TableHead>
                   <TableRow>
@@ -239,39 +236,16 @@ export const ProductoTable = () => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {productosOrdenados.map((producto) => (
-                    <TableRow key={producto.id} sx={{
-                      backgroundColor: getStatusColor(producto.status), "&:hover": {
-                        backgroundColor: "#eaecee ",
-                      }
-                    }}
-                    >
-                      <TableCell align="center" sx={{ textAlign: "left", width: "10%", }}>
-                        {producto.codigo}
-                      </TableCell>
-                      <TableCell align="center" sx={{ textAlign: "left", width: "15%", }}>
-                        {producto.nombre}
-                      </TableCell>
-                      <TableCell align="center" sx={{ textAlign: "left", width: "15%", }}>
-                        {producto.descripcion}
-                      </TableCell>
-                      <TableCell align="center" sx={{ textAlign: "left", width: "10%", }}>
-                        {producto.unidad_medida}
-                      </TableCell>
-                      <TableCell align="center" sx={{ textAlign: "left", width: "10%", }}>
-                        {producto.grupo}
-                      </TableCell>
-                      <TableCell align="center" sx={{ textAlign: "center", width: "5%", }}>
-                        {formatearDinero(producto.precio)}
-                      </TableCell>
+                  {productosOrdenados.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((producto) => (
+                    <TableRow key={producto.id} sx={{ backgroundColor: getStatusColor(producto.status), "&:hover": { backgroundColor: "#eaecee " } }}>
+                      <TableCell align="center" sx={{ textAlign: "left", width: "10%" }}>{producto.codigo}</TableCell>
+                      <TableCell align="center" sx={{ textAlign: "left", width: "15%" }}>{producto.nombre}</TableCell>
+                      <TableCell align="center" sx={{ textAlign: "left", width: "15%" }}>{producto.descripcion}</TableCell>
+                      <TableCell align="center" sx={{ textAlign: "left", width: "10%" }}>{producto.unidad_medida}</TableCell>
+                      <TableCell align="center" sx={{ textAlign: "left", width: "10%" }}>{producto.grupo}</TableCell>
+                      <TableCell align="center" sx={{ textAlign: "center", width: "5%" }}>{formatearDinero(producto.precio)}</TableCell>
                       <TableCell align="center" sx={{ textAlign: "left", width: "5%" }}>
-                        <IconButton
-                          sx={{ color: 'black' }}
-                          onClick={() => {
-                            setProductoSeleccionado(producto);
-                            setOpenModalEditar(true);
-                          }}
-                        >
+                        <IconButton sx={{ color: 'black' }} onClick={() => { setProductoSeleccionado(producto); setOpenModalEditar(true); }}>
                           <EditIcon sx={{ fontSize: 20 }} />
                         </IconButton>
                         <IconButton color="error" sx={{ marginLeft: 1 }} onClick={() => handleActualizarStatus(producto.id)}>
@@ -284,28 +258,37 @@ export const ProductoTable = () => {
               </Table>
             </TableContainer>
           </Paper>
+
+          <EditarProductoModal
+            modalOpen={openModalEditar}
+            onClose={() => setOpenModalEditar(false)}
+            producto={productoSeleccionado}
+            ListaProductos={productos}
+            actualizarLista={actualizarLista}
+            listagrupos={grupos}
+            unidadMedida={unidadMedida}
+            ListaProveedores={proveedores}
+          />
+
+          <AgregarProductoModal
+            modalOpen={openModalAgregar}
+            onClose={handleCloseModalAgregar}
+            grupos={grupos}
+            unidadMedida={unidadMedida}
+            agregarProducto={agregarProducto}
+          />
+          {/* Paginación */}
+          <TablePagination
+            rowsPerPageOptions={[50]}
+            component="div"
+            count={productosOrdenados.length}
+            rowsPerPage={rowsPerPage}
+            page={page}
+            onPageChange={handleChangePage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+          />
         </Box>
-
-        <EditarProductoModal
-          modalOpen={openModalEditar}
-          onClose={() => setOpenModalEditar(false)}
-          producto={productoSeleccionado}
-          ListaProductos={productos}
-          actualizarLista={actualizarLista}
-          listagrupos={grupos}
-          unidadMedida={unidadMedida}
-          ListaProveedores={proveedores}
-        />
-
-        <AgregarProductoModal
-          modalOpen={openModalAgregar}
-          onClose={handleCloseModalAgregar}
-          grupos={grupos}
-          unidadMedida={unidadMedida}
-          agregarProducto={agregarProducto}
-        />
-      </animated.div>
-      </Box >
+      </Box>
     </>
   );
-};  
+};

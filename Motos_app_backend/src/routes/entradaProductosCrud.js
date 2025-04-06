@@ -186,10 +186,10 @@ router.get('/obtener_movimientos', async (req, res) => {
         limit = 50,
         tipoMovimiento, // Añadido tipoMovimiento
         subMovimiento   // Añadido subMovimiento
-    } = req.query; 
+    } = req.query;
     const offset = (page - 1) * limit;
     console.log("page:", page, "limit:", limit, "offset:", offset, "tipoMovimiento", tipoMovimiento, "subMovimiento", subMovimiento);
-    
+
     try {
         let query = `
             SELECT 
@@ -249,7 +249,7 @@ router.get('/obtener_movimientos', async (req, res) => {
         // Agrupamiento y orden
         query += " GROUP BY ma.id, tm.idMovimiento, sm.id";
         query += " ORDER BY ma.fecha DESC"; // Ordenar por fecha más reciente
-        
+
         // Paginación
         query += " LIMIT ? OFFSET ?";
         queryParams.push(Number(limit), Number(offset));
@@ -364,9 +364,9 @@ router.get('/obtener_movimientosXProductos_detalles/:idProducto?', async (req, r
     const { idProducto } = req.params;
     const { fechaInicio, fechaFin } = req.query;
 
-    console.log('idProducto',idProducto);
-    console.log('fechaInicio',fechaInicio);
-    console.log('idProducto',fechaFin);
+    console.log('idProducto', idProducto);
+    console.log('fechaInicio', fechaInicio);
+    console.log('idProducto', fechaFin);
     try {
         // Construcción de la consulta base
         let query = `
@@ -422,7 +422,7 @@ router.get('/obtener_movimientosXProductos_detalles/:idProducto?', async (req, r
         }
 
         res.status(200).json(result);
-        
+
     } catch (error) {
         console.error("Error al obtener datos:", error);
         res.status(500).json({ message: "Error en el servidor" });
@@ -434,46 +434,46 @@ router.get('/obtener_movimientosXProductos_detalles/:idProducto?', async (req, r
 // * Obtener todos los productos
 router.get('/productos', async (req, res) => {
     try {
-      const query = `
+        const query = `
         SELECT id AS idProducto, nombre
         FROM productos
         ORDER BY nombre ASC;
       `;
-      const [result] = await db.query(query);
-  
-      if (result.length === 0) {
-        return res.status(404).json({ message: "No se encontraron productos." });
-      }
-  
-      res.status(200).json(result);
+        const [result] = await db.query(query);
+
+        if (result.length === 0) {
+            return res.status(404).json({ message: "No se encontraron productos." });
+        }
+
+        res.status(200).json(result);
     } catch (error) {
-      console.error("Error al obtener productos:", error);
-      res.status(500).json({ message: "Error en el servidor." });
+        console.error("Error al obtener productos:", error);
+        res.status(500).json({ message: "Error en el servidor." });
     }
-  });
-  
+});
+
 // * buscar productos por codigo
 router.get('/buscar_producto/:codigo', async (req, res) => {
     const { codigo } = req.params; // Obtenemos el código desde los parámetros de la URL
-  
+
     try {
-      // Consulta para buscar el producto por su código
-      const query = `SELECT * FROM productos WHERE codigo = ? LIMIT 1`;
-      const [rows] = await db.query(query, [codigo]);
-  
-      if (rows.length > 0) {
-        // Si se encontró el producto, lo retornamos
-        return res.status(200).json(rows[0]);
-      } else {
-        // Si no se encuentra, se retorna un error 404
-        return res.status(404).json({ message: 'Producto no encontrado' });
-      }
+        // Consulta para buscar el producto por su código
+        const query = `SELECT * FROM productos WHERE codigo = ? LIMIT 1`;
+        const [rows] = await db.query(query, [codigo]);
+
+        if (rows.length > 0) {
+            // Si se encontró el producto, lo retornamos
+            return res.status(200).json(rows[0]);
+        } else {
+            // Si no se encuentra, se retorna un error 404
+            return res.status(404).json({ message: 'Producto no encontrado' });
+        }
     } catch (error) {
-      console.error('Error al buscar producto:', error);
-      return res.status(500).json({ message: 'Error en el servidor' });
+        console.error('Error al buscar producto:', error);
+        return res.status(500).json({ message: 'Error en el servidor' });
     }
-  });
-  
+});
+
 
 
 

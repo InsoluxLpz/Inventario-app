@@ -216,7 +216,7 @@ router.get('/obtener_mantenimientos', async (req, res) => {
                 md.costo,
                 md.subtotal
             FROM mantenimientos m
-            LEFT JOIN cat_motocicletas_prueba mt ON m.idMoto = mt.id
+            LEFT JOIN cat_motocicletas mt ON m.idMoto = mt.id
             LEFT JOIN mantenimientos_servicios sm ON m.id = sm.idMantenimiento AND sm.STATUS = 1
             LEFT JOIN cat_servicios cs ON sm.idServicio = cs.id
             LEFT JOIN usuarios u ON m.idCancelo = u.idUsuario
@@ -234,7 +234,7 @@ router.get('/obtener_mantenimientos', async (req, res) => {
             }
 
             if (fecha_final) {
-                query += ` AND m.fecha_inicio <= ?`;
+                query += ` AND m.fecha_inicio < DATE_ADD(?, INTERVAL 1 DAY)`;
                 queryParams.push(fecha_final);
             }
         }
@@ -431,6 +431,3 @@ router.delete('/cancelar_mantenimiento/:id', async (req, res) => {
 });
 
 module.exports = router;
-
-
-

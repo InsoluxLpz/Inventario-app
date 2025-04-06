@@ -25,8 +25,11 @@ export const AgregarRefaccionesModal = ({ onClose, modalOpen, agregarProductoATa
     useEffect(() => {
         const fetchProductos = async () => {
             const data = await obtenerProductos();
-            if (data) setRefacciones(data);
+            if (data) {
+                setRefacciones(data.sort((a, b) => a.nombre.localeCompare(b.nombre)));
+            }
         };
+
 
         const fetchInventario = async () => {
             const data = await obtenerInventario();
@@ -41,7 +44,12 @@ export const AgregarRefaccionesModal = ({ onClose, modalOpen, agregarProductoATa
         const productoSeleccionado = refacciones.find((p) => p.nombre === selectedOption?.value);
         if (!productoSeleccionado) return;
 
-        const itemInventario = inventario.find((inv) => inv.idProducto === productoSeleccionado.id);
+        // Buscar el inventario por nombreProducto en lugar de idProducto
+        const itemInventario = inventario.find((inv) => inv.nombreProducto === productoSeleccionado.nombre);
+
+        console.log("Producto seleccionado:", productoSeleccionado);
+        console.log("Inventario encontrado:", itemInventario);
+
         setCantidadDisponible(itemInventario ? itemInventario.cantidad : 0);
 
         setFormData({
@@ -52,6 +60,7 @@ export const AgregarRefaccionesModal = ({ onClose, modalOpen, agregarProductoATa
 
         inputCantidadRef.current?.focus();
     };
+
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -147,6 +156,18 @@ export const AgregarRefaccionesModal = ({ onClose, modalOpen, agregarProductoATa
                                             }
                                             value={formData.producto ? { value: formData.producto, label: formData.producto } : null}
                                             onChange={handleProductoChange}
+                                            styles={{
+                                                control: (base) => ({
+                                                    ...base,
+                                                    minHeight: "45px",
+                                                    height: "45px",
+                                                }),
+                                                menuList: (provided) => ({
+                                                    ...provided,
+                                                    maxHeight: "170px",
+                                                    overflowY: "auto",
+                                                }),
+                                            }}
                                             isSearchable={true}
                                             placeholder="SELECCIONA"
                                         />

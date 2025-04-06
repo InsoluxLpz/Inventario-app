@@ -158,7 +158,7 @@ export const VerMantenimientoCancelado = ({ modalOpen, onClose, mantenimiento, l
                                 <hr />
 
                                 <h6 className="mb-2">Desglose de Partes/Refacciones de Almacén</h6>
-                                <div className="table-responsive">
+                                <div className="table-responsive" style={{ maxHeight: "200px", overflowY: "auto" }}>
                                     <table className="table" style={{ maxWidth: "80%", margin: "auto" }}>
                                         <thead>
                                             <tr>
@@ -172,9 +172,9 @@ export const VerMantenimientoCancelado = ({ modalOpen, onClose, mantenimiento, l
                                             {formData.productos.map((producto, index) => (
                                                 <tr key={index}>
                                                     <td style={{ textAlign: "center", width: "15%" }}>{producto.nombre}</td>
-                                                    <td style={{ textAlign: "right", width: "15%" }}>${formatNumber(producto.costo)}.00</td>
+                                                    <td style={{ textAlign: "right", width: "15%" }}>${formatNumber(producto.costo)}</td>
                                                     <td style={{ textAlign: "right", width: "15%" }}>{producto.cantidad}</td>
-                                                    <td style={{ textAlign: "right", width: "15%" }}>${formatNumber(producto.costo * producto.cantidad)}.00</td>
+                                                    <td style={{ textAlign: "right", width: "15%" }}>${formatNumber(producto.costo * producto.cantidad)}</td>
                                                 </tr>
                                             ))}
                                         </tbody>

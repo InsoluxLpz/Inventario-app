@@ -33,6 +33,7 @@ import CleaningServicesIcon from "@mui/icons-material/CleaningServices";
 // * componente para el indicador de carga
 import IndicadorCarga from "../IndicadorCarga";
 import { useSpring, animated } from "@react-spring/web";
+import Swal from "sweetalert2";
 
 export const MovXProductosTable = () => {
   const navigate = useNavigate();
@@ -85,7 +86,7 @@ export const MovXProductosTable = () => {
         filtro.fechaInicio,
         filtro.fechaFin
       );
-  
+
       if (data) {
         const sortedData = data.sort((a, b) => a.idDetalle - b.idDetalle);
         setInventario(sortedData);
@@ -98,7 +99,7 @@ export const MovXProductosTable = () => {
       setTimeout(() => setProgreso(0), 500); // Oculta el indicador después de un pequeño retraso
     }
   };
-  
+
 
   // * Selección de producto desde el modal
   const handleSelectProducto = (idProducto) => {
