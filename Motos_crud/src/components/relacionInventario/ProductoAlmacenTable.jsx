@@ -202,14 +202,14 @@ export const ProductoAlmacenTable = () => {
                         "Producto",
                         "Grupo",
                         "Unidad de medida",
-                        "Costo unitario",
+                        "Precio",
                         "Cantidad",
                         "Subtotal",
                       ].map((header) => (
                         <TableCell
                           key={header}
                           align={
-                            ["Costo unitario", "Cantidad", "Subtotal"].includes(
+                            ["Precio", "Cantidad", "Subtotal"].includes(
                               header
                             )
                               ? "right"

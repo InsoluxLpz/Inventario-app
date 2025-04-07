@@ -2,8 +2,6 @@ import { Button, IconButton, Box, Typography } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { NavBar } from "../NavBar";
 import Select from "react-select";
-import WarehouseIcon from "@mui/icons-material/Warehouse";
-import MoveToInboxIcon from "@mui/icons-material/MoveToInbox";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import ContentPasteSearchIcon from "@mui/icons-material/ContentPasteSearch";
 import {
@@ -379,6 +377,8 @@ export const AgregarProductosAlmacen = () => {
       autorizo: null,
       tipoMovimiento: null,
     });
+
+    windows.location.reload();
   };
 
   // * efecto para el filtro de tipo de entrada por el tipo de movimiento
