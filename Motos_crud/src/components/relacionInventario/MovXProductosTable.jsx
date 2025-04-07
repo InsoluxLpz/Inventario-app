@@ -236,6 +236,7 @@ export const MovXProductosTable = () => {
                       "Existencia anterior",
                       "Cantidad",
                       "Existencia posterior",
+                      "Precio unitario",
                       "Realizó Movimiento",
                       "Detalles",
                     ].map((header) => (
@@ -280,6 +281,9 @@ export const MovXProductosTable = () => {
                       <TableCell align="left">{producto.cantidad}</TableCell>
                       <TableCell align="left">
                         {producto.existencia_nueva}
+                      </TableCell>
+                      <TableCell align="left">
+                        {producto.precio_nuevo}
                       </TableCell>
                       <TableCell align="left">
                         {producto.nombreUsuario}

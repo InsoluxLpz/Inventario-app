@@ -379,6 +379,7 @@ router.get('/obtener_movimientosXProductos_detalles/:idProducto?', async (req, r
                     sm.tipoSubMovimiento, 
                     iad.cantidad, 
                     iad.costo_unitario, 
+                    iad.precio_nuevo, 
                     iad.existencia_anterior, 
                     iad.existencia_nueva, 
                     iad.fecha AS fecha_movimiento, 
