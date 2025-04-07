@@ -42,8 +42,10 @@ export const agregarInventario = async (inventarioData) => {
         }
         
         if (response.ok) {
-            Swal.fire('Éxito', 'Inventario agregado correctamente.', 'success');
-            return data;
+            Swal.fire('Éxito', 'Inventario agregado correctamente.', 'success').then(() => {
+                window.location.reload();
+            })
+        return data;
         } else {
             console.error('Error en la respuesta del backend:', data);
             Swal.fire('Error', data.message || 'Hubo un problema al agregar el inventario.', 'error');

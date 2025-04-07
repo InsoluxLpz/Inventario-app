@@ -378,7 +378,6 @@ export const AgregarProductosAlmacen = () => {
       tipoMovimiento: null,
     });
 
-    windows.location.reload();
   };
 
   // * efecto para el filtro de tipo de entrada por el tipo de movimiento
