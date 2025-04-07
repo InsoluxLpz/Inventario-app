@@ -146,6 +146,14 @@ export const MovXProductosTable = () => {
     config: { tension: 500, friction: 30 },
   });
 
+  // * funcion para formato de dinero
+  const formatearDinero = (valor) => {
+    return new Intl.NumberFormat("es-MX", {
+      style: "currency",
+      currency: "MXN",
+    }).format(valor);
+  };
+
   return (
     <>
       <NavBar />
@@ -283,7 +291,7 @@ export const MovXProductosTable = () => {
                         {producto.existencia_nueva}
                       </TableCell>
                       <TableCell align="left">
-                        {producto.precio_nuevo}
+                        {formatearDinero(producto.precio_nuevo)}
                       </TableCell>
                       <TableCell align="left">
                         {producto.nombreUsuario}
