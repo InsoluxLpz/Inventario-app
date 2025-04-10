@@ -49,9 +49,6 @@ export const VerMantenimientoCancelado = ({ modalOpen, onClose, mantenimiento, l
         }
     }, [mantenimiento]);
 
-
-
-
     useEffect(() => {
         const fetchAutorizo = async () => {
             const data = await cargarListasEntradas();
@@ -70,7 +67,6 @@ export const VerMantenimientoCancelado = ({ modalOpen, onClose, mantenimiento, l
     const formatNumber = (value) => {
         return parseFloat(value).toLocaleString('es-MX'); // Formato para México (1,500.00)
     };
-
 
     const opcionesMotos = [...motos]
         .map((moto) => ({ value: moto.id, label: moto.inciso }));
@@ -204,8 +200,6 @@ export const VerMantenimientoCancelado = ({ modalOpen, onClose, mantenimiento, l
                                                 readOnly
                                                 style={{ textAlign: "right" }}
                                             />
-
-
                                         </div>
                                     </div>
 

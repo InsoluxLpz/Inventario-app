@@ -138,6 +138,7 @@ export const ObtenerMantenimientos = async ({ filtro }) => {
     if (filtro.fecha_final) params.append("fecha_final", filtro.fecha_final);
     if (filtro.servicio) params.append("servicio", filtro.servicio);
     if (filtro.moto) params.append("moto", filtro.moto);
+    if (filtro.producto) params.append("producto", filtro.producto);
     if (filtro.todos !== undefined) params.append("todos", filtro.todos ? "1" : "0");
 
     try {

@@ -267,16 +267,16 @@ export const AgregarProductosAlmacen = () => {
   // * guardar los datos en el estado
   const handleSubmit = (e) => {
     e.preventDefault();
-  
+
     if (!validateForm()) return;
-  
+
     // Obtener la hora actual en formato HH:MM:SS
     const ahora = new Date();
     const horaActual = ahora.toTimeString().split(" ")[0]; // Extrae solo la hora
-  
+
     // Asegurar que la fecha tenga la hora antes de enviarla
     const fechaConHora = `${fechaFijo} ${horaActual}`;
-  
+
     const nuevoProducto = {
       fecha: fechaConHora, // Ahora incluye la hora actual
       idTipoMovimiento: tipoMovimientoFijo.value,
@@ -290,16 +290,16 @@ export const AgregarProductosAlmacen = () => {
           idProveedor: formData.proveedor
             ? proveedorFijo
             : {
-                value: formData.proveedor.value,
-                label: formData.proveedor.label,
-              },
+              value: formData.proveedor.value,
+              label: formData.proveedor.label,
+            },
           costo_unitario: formData.costo_unitario,
           cantidad: formData.cantidad,
         },
       ],
     };
     console.log("Nuevo Producto", nuevoProducto);
-  
+
     setProductosAgregados((prevProductos) => {
       const nuevosProductos = [...prevProductos, nuevoProducto];
       if (nuevosProductos.length > 0) {
@@ -311,7 +311,7 @@ export const AgregarProductosAlmacen = () => {
       }
       return nuevosProductos;
     });
-  
+
     setFormData({
       proveedor: proveedorFijo,
       fecha: fechaFijo,
@@ -322,11 +322,11 @@ export const AgregarProductosAlmacen = () => {
       autorizo: autorizoFijo,
       tipoMovimiento: tipoMovimientoFijo,
     });
-  
+
     setErrors({});
   };
 
-  
+
   // * mandar datos a insertar
   const handleGuardarTodo = async () => {
     if (productosAgregados.length === 0) {
@@ -458,341 +458,341 @@ export const AgregarProductosAlmacen = () => {
     }).format(valor);
   };
 
-  
-    // * diseño de carga en las tablas
-    const styles = useSpring({
-      from: { opacity: 0, transform: "translateY(50px)", filter: "blur(10px)" },
-      to: { opacity: 1, transform: "translateY(0)", filter: "blur(0px)" },
-      config: { tension: 500, friction: 30 },
-    });
+
+  // * diseño de carga en las tablas
+  const styles = useSpring({
+    from: { opacity: 0, transform: "translateY(50px)", filter: "blur(10px)" },
+    to: { opacity: 1, transform: "translateY(0)", filter: "blur(0px)" },
+    config: { tension: 500, friction: 30 },
+  });
 
   return (
     <>
       <NavBar />
       <animated.div style={styles}>
-      {/*  <<<<<<<<<<<<<------------------------ PRIMERA TABLA ------------------------>>>>>>>>>>>>>>> */}
-      <div className="container mt-4">
-        <Box
-          sx={{
-            backgroundColor: "#1f618d",
-            padding: "10px 20px",
-            borderRadius: "8px 8px 0 0",
-            marginTop: "10px", // Ajusta el valor de marginTop según lo que necesites
-            display: "flex",
-            // flexDirection: "column",
-            justifyContent: "center",
-            alignItems: "center",
-            height: "100%", // Asegúrate de que el contenedor tenga suficiente altura
-          }}
-        >
-          <Typography variant="h5" fontWeight="bold" color="white">
-            REALIZAR MOVIMIENTO
-          </Typography>
-        </Box>
-
-        <form onSubmit={handleSubmit}>
-          <div className="row">
-            {/* TIPO DE MOVIMIENTO */}
-            <div className="col-md-3">
-              <label>Tipo Movimiento</label>
-              <Select
-                options={listaTipoMovimiento}
-                value={formData.tipoMovimiento}
-                onChange={(opcion) =>
-                  handleSelectChange("tipoMovimiento", opcion)
-                }
-                isDisabled={tipoMovimientoBloqueado}
-              />
-              {errors.tipoMovimiento && (
-                <div className="text-danger">{errors.tipoMovimiento}</div>
-              )}
-            </div>
-
-            {/* TIPO DE ENTRADA */}
-            <div className="col-md-3">
-              <label>Metodo</label>
-              <Select
-                options={listaTipoEntradaFiltrada}
-                value={formData.tipo}
-                onChange={(opcion) => handleSelectChange("tipo", opcion)}
-                isDisabled={tipoEntradaBloqueado}
-              />
-              {errors.tipo && <div className="text-danger">{errors.tipo}</div>}
-            </div>
-
-            {/* PROVEEDORES */}
-            <div className="col-md-3">
-              <label>Proveedor</label>
-              <Select
-                options={listaProveedores}
-                value={formData.proveedor}
-                onChange={(opcion) => handleSelectChange("proveedor", opcion)}
-                isDisabled={proveedorBloqueado}
-              />
-              {errors.proveedor && (
-                <div className="text-danger">{errors.proveedor}</div>
-              )}
-            </div>
-            {/* FECHA */}
-            <div className="col-md-3">
-              <label>Fecha</label>
-              <input
-                type="date"
-                name="fecha"
-                className="form-control"
-                value={formData.fecha}
-                onChange={handleChange}
-                onFocus={(e) => e.target.showPicker()} // Abre el calendario al hacer clic en el input
-                disabled={FechaBloqueado}
-              />
-              {errors.fecha && (
-                <div className="text-danger">{errors.fecha}</div>
-              )}
-            </div>
-
-            {/* PRODUCTOS */}
-            <div className="col-md-3">
-              <label>Producto</label>
-              <IconButton
-                color="primary"
-                onClick={handleOpenModal}
-                flexdirection={"flex-end"}
-                disabled={!proveedorSeleccionado}
-              >
-                <ContentPasteSearchIcon sx={{ fontSize: 29 }} />
-              </IconButton>
-              <Select
-                ref={productosRef}
-                options={listaProductos}
-                value={formData.producto}
-                onChange={(opcion) => handleSelectChange("producto", opcion)}
-                isDisabled={!proveedorSeleccionado}
-              />
-              {errors.producto && (
-                <div className="text-danger">{errors.producto}</div>
-              )}
-            </div>
-
-            <div className="col-md-3" style={{ marginTop: "20px" }}>
-              <label>Cantidad</label>
-              <input
-                type="number"
-                name="cantidad"
-                className="form-control"
-                value={formData.cantidad}
-                onChange={handleChange}
-                ref={cantidadRef}
-                onKeyDown={handleKeyDownCostoUnit}
-              />
-              {errors.cantidad && (
-                <div className="text-danger">{errors.cantidad}</div>
-              )}
-            </div>
-
-            <div className="col-md-3" style={{ marginTop: "20px" }}>
-              <label>Costo Unitario</label>
-              <input
-                type="number"
-                name="costo_unitario"
-                className="form-control"
-                value={formData.costo_unitario}
-                onChange={handleChange}
-                ref={costoUnitarioRef}
-                onKeyDown={handleKeyDownAgregar}
-              />
-              {errors.costo_unitario && (
-                <div className="text-danger">{errors.costo_unitario}</div>
-              )}
-            </div>
-
-            <div className="col-md-3" style={{ marginTop: "20px" }}>
-              <label>Autoriza</label>
-              <Select
-                options={listaAutorizaciones}
-                value={formData.autorizo}
-                onChange={(opcion) => handleSelectChange("autorizo", opcion)}
-                isDisabled={autorizoBloqueado}
-              />
-              {errors.autorizo && (
-                <div className="text-danger">{errors.autorizo}</div>
-              )}
-            </div>
-          </div>
-
-          <div
-            className="mt-1"
-            style={{ display: "flex", justifyContent: "flex-start" }}
-          >
-            <Button
-              type="submit"
-              variant="contained"
-              color="primary"
-              ref={agregarRef}
-              onKeyDown={handleCombinedKeyDown}
-            >
-              Agregar
-            </Button>
-          </div>
-        </form>
-      </div>
-
-      {/*   LINEA DIVISORA ENTRE AGREGAR Y LOS PRODUCTOS YA AGREGADOS */}
-      {/* <hr /> */}
-
-      {/* <<<<<<<<<----------------------- SEGUNDA TABLA : ESTADO DE PRODUCTOS AGREGADOS ------------------>>>>>>>>>>>>*/}
-
-      <Box
-        sx={{
-          backgroundColor: "withe",
-          minHeight: "100vh",
-          paddingBottom: 5,
-          transition: "margin 0.3s ease-in-out",
-          marginLeft: `${miniDrawerWidth}px`,
-        }}
-      >
+        {/*  <<<<<<<<<<<<<------------------------ PRIMERA TABLA ------------------------>>>>>>>>>>>>>>> */}
         <div className="container mt-4">
           <Box
             sx={{
               backgroundColor: "#1f618d",
               padding: "10px 20px",
               borderRadius: "8px 8px 0 0",
-              marginTop: "30px",
+              marginTop: "10px", // Ajusta el valor de marginTop según lo que necesites
               display: "flex",
+              // flexDirection: "column",
               justifyContent: "center",
               alignItems: "center",
-              height: "100%",
+              height: "100%", // Asegúrate de que el contenedor tenga suficiente altura
             }}
           >
             <Typography variant="h5" fontWeight="bold" color="white">
-              MOVIMIENTO DE LOS PRODUCTOS
+              REALIZAR MOVIMIENTO
             </Typography>
           </Box>
 
-          <div
-            style={{
-              maxHeight: "300px", // Ajusta la altura según necesites
-              overflowY: "auto", // Activa el scroll vertical
-              marginTop: "20px",
-            }}
-          >
-            <table
-              className="table"
-              style={{
-                borderRadius: "8px",
-                overflow: "hidden",
-              }}
+          <form onSubmit={handleSubmit}>
+            <div className="row">
+              {/* TIPO DE MOVIMIENTO */}
+              <div className="col-md-3">
+                <label>Tipo Movimiento</label>
+                <Select
+                  options={listaTipoMovimiento}
+                  value={formData.tipoMovimiento}
+                  onChange={(opcion) =>
+                    handleSelectChange("tipoMovimiento", opcion)
+                  }
+                  isDisabled={tipoMovimientoBloqueado}
+                />
+                {errors.tipoMovimiento && (
+                  <div className="text-danger">{errors.tipoMovimiento}</div>
+                )}
+              </div>
+
+              {/* TIPO DE ENTRADA */}
+              <div className="col-md-3">
+                <label>Metodo</label>
+                <Select
+                  options={listaTipoEntradaFiltrada}
+                  value={formData.tipo}
+                  onChange={(opcion) => handleSelectChange("tipo", opcion)}
+                  isDisabled={tipoEntradaBloqueado}
+                />
+                {errors.tipo && <div className="text-danger">{errors.tipo}</div>}
+              </div>
+
+              {/* PROVEEDORES */}
+              <div className="col-md-3">
+                <label>Proveedor</label>
+                <Select
+                  options={listaProveedores}
+                  value={formData.proveedor}
+                  onChange={(opcion) => handleSelectChange("proveedor", opcion)}
+                  isDisabled={proveedorBloqueado}
+                />
+                {errors.proveedor && (
+                  <div className="text-danger">{errors.proveedor}</div>
+                )}
+              </div>
+              {/* FECHA */}
+              <div className="col-md-3">
+                <label>Fecha</label>
+                <input
+                  type="date"
+                  name="fecha"
+                  className="form-control"
+                  value={formData.fecha}
+                  onChange={handleChange}
+                  onFocus={(e) => e.target.showPicker()} // Abre el calendario al hacer clic en el input
+                  disabled={FechaBloqueado}
+                />
+                {errors.fecha && (
+                  <div className="text-danger">{errors.fecha}</div>
+                )}
+              </div>
+
+              {/* PRODUCTOS */}
+              <div className="col-md-3">
+                <label>Producto</label>
+                <IconButton
+                  color="primary"
+                  onClick={handleOpenModal}
+                  flexdirection={"flex-end"}
+                  disabled={!proveedorSeleccionado}
+                >
+                  <ContentPasteSearchIcon sx={{ fontSize: 29 }} />
+                </IconButton>
+                <Select
+                  ref={productosRef}
+                  options={listaProductos}
+                  value={formData.producto}
+                  onChange={(opcion) => handleSelectChange("producto", opcion)}
+                  isDisabled={!proveedorSeleccionado}
+                />
+                {errors.producto && (
+                  <div className="text-danger">{errors.producto}</div>
+                )}
+              </div>
+
+              <div className="col-md-3" style={{ marginTop: "20px" }}>
+                <label>Cantidad</label>
+                <input
+                  type="number"
+                  name="cantidad"
+                  className="form-control"
+                  value={formData.cantidad}
+                  onChange={handleChange}
+                  ref={cantidadRef}
+                  onKeyDown={handleKeyDownCostoUnit}
+                />
+                {errors.cantidad && (
+                  <div className="text-danger">{errors.cantidad}</div>
+                )}
+              </div>
+
+              <div className="col-md-3" style={{ marginTop: "20px" }}>
+                <label>Costo Unitario</label>
+                <input
+                  type="number"
+                  name="costo_unitario"
+                  className="form-control"
+                  value={formData.costo_unitario}
+                  onChange={handleChange}
+                  ref={costoUnitarioRef}
+                  onKeyDown={handleKeyDownAgregar}
+                />
+                {errors.costo_unitario && (
+                  <div className="text-danger">{errors.costo_unitario}</div>
+                )}
+              </div>
+
+              <div className="col-md-3" style={{ marginTop: "20px" }}>
+                <label>Autoriza</label>
+                <Select
+                  options={listaAutorizaciones}
+                  value={formData.autorizo}
+                  onChange={(opcion) => handleSelectChange("autorizo", opcion)}
+                  isDisabled={autorizoBloqueado}
+                />
+                {errors.autorizo && (
+                  <div className="text-danger">{errors.autorizo}</div>
+                )}
+              </div>
+            </div>
+
+            <div
+              className="mt-1"
+              style={{ display: "flex", justifyContent: "flex-start" }}
             >
-              <thead style={{ backgroundColor: "#1f618d", color: "white" }}>
-                <tr>
-                  <th>Producto</th>
-                  <th>Cantidad</th>
-                  <th style={{ paddingLeft: "50px" }}>Costo unitario</th>
-                  <th style={{ paddingLeft: "80px" }}>Subtotal</th>
-                  <th>Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                {productosAgregados.map((item, index) => (
-                  <tr
-                    key={index}
-                    style={{
-                      backgroundColor: index % 2 === 0 ? "#f9f9f9" : "#e9e9e9",
-                      borderRadius: "8px",
-                      boxShadow: "0px 1px 3px rgba(0, 0, 0, 0.1)",
-                    }}
-                  >
-                    <td>{item.productos[0]?.idProducto?.label || "N/A"}</td>
-                    <td>
-                      {item.productos[0]?.cantidad}
-                    </td>{" "}
-                    {/* Aumenté paddingLeft */}
-                    <td style={{ paddingLeft: "100px" }}>
-                      {item.productos[0]?.costo_unitario}
-                    </td>{" "}
-                    {/* Aumenté paddingLeft */}
-                    <td style={{ paddingLeft: "100px" }} >
-                      {formatearDinero(
-                        item.productos[0]?.cantidad *
-                          item.productos[0]?.costo_unitario
-                      )}
-                    </td>
-                    <td>
-                      <IconButton
-                        sx={{
-                          color: "red",
-                          ":hover": { backgroundColor: "#ffdddd" },
-                        }}
-                        onClick={() => eliminarProductoInventario(index)}
-                      >
-                        <DeleteOutlineIcon sx={{ fontSize: 29 }} />
-                      </IconButton>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
+              <Button
+                type="submit"
+                variant="contained"
+                color="primary"
+                ref={agregarRef}
+                onKeyDown={handleCombinedKeyDown}
+              >
+                Agregar
+              </Button>
+            </div>
+          </form>
+        </div>
 
-              <tfoot>
-                <tr>
-                  <td colSpan="4" className="text-end fw-bold ">
-                    Total:
-                  </td>
-                  <td>
-                    {formatearDinero(
-                      productosAgregados.reduce(
-                        (total, item) =>
-                          total +
-                          (item.productos[0]?.cantidad *
-                            item.productos[0]?.costo_unitario || 0),
-                        0
-                      )
-                    )}
-                  </td>
-                </tr>
-              </tfoot>
-            </table>
-          </div>
+        {/*   LINEA DIVISORA ENTRE AGREGAR Y LOS PRODUCTOS YA AGREGADOS */}
+        {/* <hr /> */}
 
-          <div
-            className="mt-2"
-            style={{ display: "flex", justifyContent: "flex-end" }}
-          >
-            <Button
-              onClick={handleGuardarTodo}
-              variant="contained"
-              color="primary"
-              disabled={productosAgregados.length === 0}
+        {/* <<<<<<<<<----------------------- SEGUNDA TABLA : ESTADO DE PRODUCTOS AGREGADOS ------------------>>>>>>>>>>>>*/}
+
+        <Box
+          sx={{
+            backgroundColor: "withe",
+            minHeight: "100vh",
+            paddingBottom: 5,
+            transition: "margin 0.3s ease-in-out",
+            marginLeft: `${miniDrawerWidth}px`,
+          }}
+        >
+          <div className="container mt-4">
+            <Box
               sx={{
                 backgroundColor: "#1f618d",
-                color: "white",
-                ":hover": { backgroundColor: "#145a8d" },
+                padding: "10px 20px",
+                borderRadius: "8px 8px 0 0",
+                marginTop: "30px",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                height: "100%",
               }}
             >
-              Guardar
-            </Button>
-            <Button
-              variant="outlined"
-              color="primary"
-              onClick={() => window.location.reload()}
-              disabled={productosAgregados.length === 0}
-              sx={{
-                borderColor: "#1f618d",
-                color: "#1f618d",
-                ":hover": { borderColor: "#145a8d", color: "#145a8d" },
-              }}
-            >
-              Cancelar
-            </Button>
-          </div>
-        </div>
-      </Box>
+              <Typography variant="h5" fontWeight="bold" color="white">
+                MOVIMIENTO DE LOS PRODUCTOS
+              </Typography>
+            </Box>
 
-      <ModalBuscarProductos
-        open={openModal}
-        onClose={handleCloseModal}
-        onSelect={handleProductoSeleccionado}
-        productos={listaProductos}
-      />
-    </animated.div>
+            <div
+              style={{
+                maxHeight: "300px", // Ajusta la altura según necesites
+                overflowY: "auto", // Activa el scroll vertical
+                marginTop: "20px",
+              }}
+            >
+              <table
+                className="table"
+                style={{
+                  borderRadius: "8px",
+                  overflow: "hidden",
+                }}
+              >
+                <thead style={{ backgroundColor: "#1f618d", color: "white" }}>
+                  <tr>
+                    <th>Producto</th>
+                    <th>Cantidad</th>
+                    <th style={{ paddingLeft: "50px" }}>Costo unitario</th>
+                    <th style={{ paddingLeft: "80px" }}>Subtotal</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {productosAgregados.map((item, index) => (
+                    <tr
+                      key={index}
+                      style={{
+                        backgroundColor: index % 2 === 0 ? "#f9f9f9" : "#e9e9e9",
+                        borderRadius: "8px",
+                        boxShadow: "0px 1px 3px rgba(0, 0, 0, 0.1)",
+                      }}
+                    >
+                      <td>{item.productos[0]?.idProducto?.label || "N/A"}</td>
+                      <td>
+                        {item.productos[0]?.cantidad}
+                      </td>{" "}
+                      {/* Aumenté paddingLeft */}
+                      <td style={{ paddingLeft: "100px" }}>
+                        {item.productos[0]?.costo_unitario}
+                      </td>{" "}
+                      {/* Aumenté paddingLeft */}
+                      <td style={{ paddingLeft: "100px" }} >
+                        {formatearDinero(
+                          item.productos[0]?.cantidad *
+                          item.productos[0]?.costo_unitario
+                        )}
+                      </td>
+                      <td>
+                        <IconButton
+                          sx={{
+                            color: "red",
+                            ":hover": { backgroundColor: "#ffdddd" },
+                          }}
+                          onClick={() => eliminarProductoInventario(index)}
+                        >
+                          <DeleteOutlineIcon sx={{ fontSize: 29 }} />
+                        </IconButton>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+
+                <tfoot>
+                  <tr>
+                    <td colSpan="4" className="text-end fw-bold ">
+                      Total:
+                    </td>
+                    <td>
+                      {formatearDinero(
+                        productosAgregados.reduce(
+                          (total, item) =>
+                            total +
+                            (item.productos[0]?.cantidad *
+                              item.productos[0]?.costo_unitario || 0),
+                          0
+                        )
+                      )}
+                    </td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+
+            <div
+              className="mt-2"
+              style={{ display: "flex", justifyContent: "flex-end" }}
+            >
+              <Button
+                onClick={handleGuardarTodo}
+                variant="contained"
+                color="primary"
+                disabled={productosAgregados.length === 0}
+                sx={{
+                  backgroundColor: "#1f618d",
+                  color: "white",
+                  ":hover": { backgroundColor: "#145a8d" },
+                }}
+              >
+                Guardar
+              </Button>
+              <Button
+                variant="outlined"
+                color="primary"
+                onClick={() => window.location.reload()}
+                disabled={productosAgregados.length === 0}
+                sx={{
+                  borderColor: "#1f618d",
+                  color: "#1f618d",
+                  ":hover": { borderColor: "#145a8d", color: "#145a8d" },
+                }}
+              >
+                Cancelar
+              </Button>
+            </div>
+          </div>
+        </Box>
+
+        <ModalBuscarProductos
+          open={openModal}
+          onClose={handleCloseModal}
+          onSelect={handleProductoSeleccionado}
+          productos={listaProductos}
+        />
+      </animated.div>
     </>
   );
 };

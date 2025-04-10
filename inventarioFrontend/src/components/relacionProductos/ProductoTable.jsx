@@ -28,16 +28,17 @@ export const ProductoTable = () => {
   const [showInactive, setShowInactive] = useState(false);
   const [grupos, setGrupos] = useState([]);
   const [unidadMedida, setUnidadMedida] = useState([]);
-  const [searchNombre, setSearchNombre] = useState("");  // Filtro por nombre
-  const [searchDescripcion, setSearchDescripcion] = useState(""); // Filtro por descripción
+  const [searchNombre, setSearchNombre] = useState("");
+  const [searchDescripcion, setSearchDescripcion] = useState("");
 
-  const [page, setPage] = useState(0); // Página actual
-  const [rowsPerPage, setRowsPerPage] = useState(50); // Número de filas por página
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(50);
 
   const fetchProductos = async () => {
     const data = await obtenerProductos();
     if (data) {
       setProductos(data);
+      console.log(data)
     }
   };
 

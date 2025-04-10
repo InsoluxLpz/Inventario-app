@@ -19,6 +19,9 @@ import CleaningServicesIcon from '@mui/icons-material/CleaningServices';
 import InfoIcon from "@mui/icons-material/Info";
 import SearchIcon from '@mui/icons-material/Search';
 import Select from "react-select";
+import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
+import { generarPDFMantenimiento } from "../../utils/GenerarPdfMantenimiento";
+
 
 export const ListaMantenimientos = () => {
   const [mantenimientos, setMantenimientos] = useState([]);
@@ -34,6 +37,7 @@ export const ListaMantenimientos = () => {
     fecha_final: "",
     servicio: "",
     moto: "",
+    producto: "",
   });
 
   const handleOpenModalEditar = (mantenimiento) => {
@@ -82,11 +86,14 @@ export const ListaMantenimientos = () => {
   };
 
   const cargarMantenimientos = async () => {
+
     const data = await ObtenerMantenimientos({
+
       filtro: {
         ...filtro,
-        servicio: filtro.servicio?.value || "",
+        servicio: filtro.servicio?.value || "",  // Asegúrate de que sea el valor correcto del filtro
         moto: filtro.moto?.value ? Number(filtro.moto.value) : "",
+        producto: filtro.producto?.value || "",  // Este también debe ser el valor correcto del filtro
         todos: todos
       }
     });
@@ -97,6 +104,7 @@ export const ListaMantenimientos = () => {
         moto_inciso: servicio.moto_inciso || "Desconocido",
         idMoto: servicio.idMoto || "",
         idAutorizo: servicio.idAutorizo || "",
+        nombre_autorizacion: servicio.nombre_autorizacion || "",
         fecha_inicio: servicio.fecha_inicio,
         fecha_cancelacion: servicio.fecha_cancelacion,
         comentario: servicio.comentario,
@@ -181,6 +189,15 @@ export const ListaMantenimientos = () => {
     ...motos.map((mot) => ({ value: mot.id, label: mot.inciso }))
   ];
 
+  const opcionesProductos = [
+    { value: "", label: "Selecciona" },
+    ...productos.sort((a, b) => a.nombre.localeCompare(b.nombre)).map((prod) => ({
+      value: prod.id,
+      label: prod.nombre
+    }))
+  ];
+
+
   const miniDrawerWidth = 50;
 
   return (
@@ -256,6 +273,33 @@ export const ListaMantenimientos = () => {
                   }}
                 />
               </Grid2>
+
+              <Grid2 item sm={6} md={3}>
+                <Select
+                  name="productos"
+                  options={opcionesProductos}
+                  isMulti={false}
+                  placeholder="SELECCIONA PRODUCTO"
+                  value={filtro.producto}
+                  onChange={(selectedOption) =>
+                    setFiltro({ ...filtro, producto: selectedOption })
+                  }
+                  styles={{
+                    control: (base) => ({
+                      ...base,
+                      minHeight: "45px",
+                      height: "55px",
+                      width: 200
+                    }),
+                    menuList: (provided) => ({
+                      ...provided,
+                      maxHeight: "200px",
+                      overflowY: "auto",
+                    }),
+                  }}
+                />
+              </Grid2>
+
 
               <Grid2 item sm={6} md={3}>
                 <TextField
@@ -382,17 +426,34 @@ export const ListaMantenimientos = () => {
                               >
                                 <DeleteIcon sx={{ fontSize: 20 }} />
                               </IconButton>
+                              <IconButton
+                                variant="contained"
+                                style={{ marginLeft: "10px", color: "#1b4f72" }}
+                                onClick={() => generarPDFMantenimiento(mantenimiento, formatearDinero)}
+                              >
+                                <PictureAsPdfIcon sx={{ fontSize: 20 }} />
+                              </IconButton>
                             </>
                           ) : (
-                            <IconButton
-                              variant="contained"
-                              color="primary"
-                              onClick={() => handleOpenModalInfo(mantenimiento)}
-                            >
-                              <InfoIcon sx={{ fontSize: 20 }} />
-                            </IconButton>
+                            <>
+                              <IconButton
+                                variant="contained"
+                                color="primary"
+                                onClick={() => handleOpenModalInfo(mantenimiento)}
+                              >
+                                <InfoIcon sx={{ fontSize: 20 }} />
+                              </IconButton>
+                              <IconButton
+                                variant="contained"
+                                style={{ marginLeft: "10px", color: "#1b4f72" }}
+                                onClick={() => generarPDFMantenimiento(mantenimiento, formatearDinero)}
+                              >
+                                <PictureAsPdfIcon sx={{ fontSize: 20 }} />
+                              </IconButton>
+                            </>
                           )}
                         </TableCell>
+
                       </TableRow>
                     ))
                   ) : (

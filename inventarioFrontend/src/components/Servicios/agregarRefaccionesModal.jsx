@@ -151,7 +151,7 @@ export const AgregarRefaccionesModal = ({ onClose, modalOpen, agregarProductoATa
                                                 .filter((prod) => prod.status !== 0) // Filtra los productos con status diferente de 0
                                                 .map((prod) => ({
                                                     value: prod.nombre,
-                                                    label: `${prod.nombre} - $${prod.precio}`
+                                                    label: `${prod.nombre}`
                                                 }))
                                             }
                                             value={formData.producto ? { value: formData.producto, label: formData.producto } : null}
@@ -175,12 +175,6 @@ export const AgregarRefaccionesModal = ({ onClose, modalOpen, agregarProductoATa
                                         {errors.producto && <div className="invalid-feedback">{errors.producto}</div>}
                                     </div>
 
-                                    {/* {cantidadDisponible !== null && (
-                                        <div className="col-md-12 mb-3">
-                                            <label className="form-label">Cantidad en Almacén:</label>
-                                            <input type="text" className="form-control" value={cantidadDisponible} disabled />
-                                        </div>
-                                    )} */}
 
                                     {/* Cantidad */}
                                     <div className="col-md-12 mb-3">
@@ -195,6 +189,14 @@ export const AgregarRefaccionesModal = ({ onClose, modalOpen, agregarProductoATa
                                         />
                                         {errors.cantidad && <div className="invalid-feedback">{errors.cantidad}</div>}
                                     </div>
+                                    {formData.producto && (
+                                        <div className="mt-1" style={{ fontSize: '0.9rem', color: cantidadDisponible === 0 ? 'red' : '#2c3e50' }}>
+                                            {cantidadDisponible !== null
+                                                ? `Stock disponible: ${cantidadDisponible}`
+                                                : 'Producto no inventariado'}
+                                        </div>
+                                    )}
+
                                 </div>
                             </div>
                             <div className="modal-footer">

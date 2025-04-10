@@ -194,28 +194,6 @@ export const AgregarProductoModal = ({ modalOpen, onClose, grupos, unidadMedida,
                                     </div>
 
                                     <div className="col-md-6 mb-3">
-                                        <label className="form-label">Precio</label>
-                                        <div className="input-group">
-                                            <span className="input-group-text" style={{ height: 47 }}>
-                                                $
-                                            </span>
-                                            <input
-                                                id="precio"
-                                                type="text"
-                                                name="precio"
-                                                className={`form-control ${errors.precio ? "is-invalid" : ""}`}
-                                                value={formData.precio}
-                                                onChange={handleChange}
-                                                onKeyDown={(e) => handleKeyDown(e, unidadRef, true)}
-                                            />
-
-                                            {errors.precio && <div className="invalid-feedback">{errors.precio}</div>}
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="row">
-                                    <div className="col-md-6 mb-3">
                                         <label className="form-label">Unidad de Medida</label>
                                         <Select
                                             ref={unidadRef}
@@ -229,7 +207,10 @@ export const AgregarProductoModal = ({ modalOpen, onClose, grupos, unidadMedida,
                                         {errors.unidad_medida && <div className="text-danger small">{errors.unidad_medida}</div>}
                                     </div>
 
-                                    <div className="col-md-6 mb-3">
+                                </div>
+
+                                <div className="row">
+                                    <div className="col-md-8 mb-3">
                                         <label className="form-label">Proveedores</label>
                                         <Select
                                             ref={proveedoresRef}

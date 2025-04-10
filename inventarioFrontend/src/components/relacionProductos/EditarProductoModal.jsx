@@ -262,27 +262,6 @@ export const EditarProductoModal = ({ onClose, modalOpen, producto, actualizarLi
                     </div>
 
                     <div className="col-md-6 mb-3">
-                      <label className="form-label">Precio</label>
-                      <div className="input-group">
-                        <span className="input-group-text" style={{ height: 47 }}>
-                          $
-                        </span>
-                        <input
-                          id="precio"
-                          type="text"
-                          name="precio"
-                          readOnly
-                          className={`form-control ${errors.precio ? "is-invalid" : ""}`}
-                          value={formatCurrency(formData.precio)}
-                          onKeyDown={(e) => handleKeyDown(e, unidadRef, true)}
-                        />
-                      </div>
-                      {errors.precio && (
-                        <div className="invalid-feedback">{errors.precio}</div>
-                      )}
-                    </div>
-
-                    <div className="col-md-6 mb-3">
                       <label className="form-label">Unidad de Medida</label>
                       <Select
                         ref={unidadRef}
@@ -336,25 +315,25 @@ export const EditarProductoModal = ({ onClose, modalOpen, producto, actualizarLi
                         <div className="text-danger small">{errors.proveedores}</div>
                       )}
                     </div>
-                  </div>
 
-                  <div className="col-md-6 mb-3">
-                    <label className="form-label">Activar/Desactivar producto</label>
-                    <select
-                      id="status"
-                      name="status"
-                      className={`form-control ${errors.status ? "is-invalid" : ""}`}
-                      value={formData.status}  // Asegúrate de que `formData.status` proviene de la BD
-                      onChange={handleChange}
-                      onKeyDown={(e) => handleKeyDown(e, "descripcion")}
-                    >
-                      <option value="">Seleccionar</option>
-                      <option value="1">Activo</option>
-                      <option value="0">Inactivo</option>
-                    </select>
-                    {errors.status && (
-                      <div className="invalid-feedback">{errors.status}</div>
-                    )}
+                    <div className="col-md-6 mb-3">
+                      <label className="form-label">Activar/Desactivar producto</label>
+                      <select
+                        id="status"
+                        name="status"
+                        className={`form-control ${errors.status ? "is-invalid" : ""}`}
+                        value={formData.status}  // Asegúrate de que `formData.status` proviene de la BD
+                        onChange={handleChange}
+                        onKeyDown={(e) => handleKeyDown(e, "descripcion")}
+                      >
+                        <option value="">Seleccionar</option>
+                        <option value="1">Activo</option>
+                        <option value="0">Inactivo</option>
+                      </select>
+                      {errors.status && (
+                        <div className="invalid-feedback">{errors.status}</div>
+                      )}
+                    </div>
                   </div>
 
                   <div className="col-md-12 mb-3">
