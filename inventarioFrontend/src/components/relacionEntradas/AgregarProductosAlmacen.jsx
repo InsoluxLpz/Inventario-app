@@ -390,11 +390,11 @@ export const AgregarProductosAlmacen = () => {
 
       if (movimientoSeleccionado === "entrada") {
         nuevaLista = listaTipoEntrada.filter((t) =>
-          ["compra", "ajuste"].includes(t.label.toLowerCase())
+          ["compra", "ajuste","consumible" ].includes(t.label.toLowerCase())
         );
       } else if (movimientoSeleccionado === "salida") {
         nuevaLista = listaTipoEntrada.filter((t) =>
-          ["devolucion", "traspaso"].includes(t.label.toLowerCase())
+          ["devolucion", "traspaso", "consumible"].includes(t.label.toLowerCase())
         );
       }
 
