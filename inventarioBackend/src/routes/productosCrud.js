@@ -6,9 +6,9 @@ const db = dbConexion();
 router.post('/agregar_producto', async (req, res) => {
     console.log("Datos recibidos en el backend:", req.body);
 
-    const { codigo, nombre, precio, descripcion, grupo, unidad_medida, proveedores, idUsuario } = req.body;
+    const { codigo, nombre, descripcion, grupo, unidad_medida, proveedores, idUsuario } = req.body;
 
-    if (!codigo || !nombre || !grupo || !unidad_medida || !precio || !idUsuario || !proveedores.length) {
+    if (!codigo || !nombre || !grupo || !unidad_medida || !idUsuario || !proveedores.length) {
         return res.status(400).json({ message: 'Faltan parámetros para guardar en la base de datos' });
     }
 
@@ -28,9 +28,9 @@ router.post('/agregar_producto', async (req, res) => {
 
 
         const insertProductoQuery = `
-            INSERT INTO productos (codigo, nombre, precio, descripcion, idGrupo, idUnidadMedida, idUsuario, fecha_registro) 
+            INSERT INTO productos (codigo, nombre, descripcion, idGrupo, idUnidadMedida, idUsuario, fecha_registro) 
             VALUES (?, ?, ?, ?, ?, ?, ?, CURDATE())`;
-        const valuesProducto = [codigo, nombre, precio, descripcion, grupo, unidad_medida, idUsuario];
+        const valuesProducto = [codigo, nombre, descripcion, grupo, unidad_medida, idUsuario];
 
         const [productoResult] = await connection.query(insertProductoQuery, valuesProducto);
         const idProducto = productoResult.insertId;
@@ -118,9 +118,9 @@ router.put('/actualizar_producto/:id', async (req, res) => {
 
         const updateProductoQuery = `
             UPDATE productos
-            SET codigo = ?, nombre = ?, precio = ?, descripcion = ?, idGrupo = ?, idUnidadMedida = ?, status = ? 
+            SET codigo = ?, nombre = ?, descripcion = ?, idGrupo = ?, idUnidadMedida = ?, status = ? 
             WHERE id = ?`;
-        const valuesProducto = [codigo, nombre, precio, descripcion, grupo, unidad_medida, status, id];
+        const valuesProducto = [codigo, nombre, descripcion, grupo, unidad_medida, status, id];
         await connection.query(updateProductoQuery, valuesProducto);
 
         // Obtener los proveedores actuales del producto
@@ -150,7 +150,7 @@ router.put('/actualizar_producto/:id', async (req, res) => {
         await connection.commit();
 
         const getUpdatedProductoQuery = `
-            SELECT p.id, p.codigo, p.nombre, p.precio, p.descripcion, 
+            SELECT p.id, p.codigo, p.nombre, p.descripcion, 
                 p.idUnidadMedida AS unidad_medida, p.idGrupo, p.status,
                 JSON_ARRAYAGG(JSON_OBJECT('id', pp.idProveedor, 'status', pp.status)) AS proveedores
             FROM productos p

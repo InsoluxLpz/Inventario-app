@@ -14,7 +14,7 @@ export const generarPDFMantenimiento = (mantenimiento, formatearDinero) => {
     const startX = 14;
     const colWidth = 90;
 
-    doc.text(`- Vehículo (Inciso): ${mantenimiento.moto_inciso}`, startX, 30);
+    doc.text(`- Moto: ${mantenimiento.moto_inciso}`, startX, 30);
     doc.text(`- Fecha Inicio: ${new Date(mantenimiento.fecha_inicio).toLocaleDateString("es-MX")}`, startX + colWidth, 30);
 
     doc.text(`- Odómetro: ${mantenimiento.odometro} km`, startX, 40);
@@ -41,7 +41,7 @@ export const generarPDFMantenimiento = (mantenimiento, formatearDinero) => {
     // Tabla de Productos con alineación
     autoTable(doc, {
         startY: doc.lastAutoTable.finalY + 10,
-        head: [["Producto", "Cantidad", "Costo Unitario", "Subtotal"]],
+        head: [["Refacciones", "Cantidad", "Costo Unitario", "Subtotal"]],
         body: mantenimiento.productos.length > 0
             ? mantenimiento.productos.map(p => [
                 p.nombre,

@@ -131,9 +131,9 @@ router.get('/obtener_listas', async (req, res) => {
     try {
         const [proveedores] = await db.query("SELECT id, nombre_empresa FROM proveedores");
         const [productos] = await db.query(`SELECT * from productos`);
-        const [autorizaciones] = await db.query("SELECT idAutorizo, nombre FROM autorizaciones");
-        const [tiposEntrada] = await db.query("SELECT id, tipoSubMovimiento FROM sub_movimientos");
-        const [tipoMovimiento] = await db.query("SELECT idMovimiento, movimiento FROM tipo_movimiento");
+        const [autorizaciones] = await db.query("SELECT idAutorizo, nombre FROM cat_autorizaciones");
+        const [tiposEntrada] = await db.query("SELECT id, tipoSubMovimiento FROM cat_sub_movimientos");
+        const [tipoMovimiento] = await db.query("SELECT idMovimiento, movimiento FROM cat_tipo_movimiento");
 
         res.status(200).json({
             proveedores,
@@ -208,13 +208,13 @@ router.get('/obtener_movimientos', async (req, res) => {
             FROM movimientos_almacen ma
             LEFT JOIN movimientos_almacen_detalle mad 
                 ON ma.id = mad.idMovimiento
-            LEFT JOIN autorizaciones a 
+            LEFT JOIN cat_autorizaciones a 
                 ON ma.idAutorizo = a.idAutorizo
             LEFT JOIN usuarios u 
                 ON u.idUsuario = ma.idUsuario
-            LEFT JOIN tipo_movimiento tm 
+            LEFT JOIN cat_tipo_movimiento tm 
                 ON ma.idTipoMovimiento = tm.idMovimiento
-            LEFT JOIN sub_movimientos sm 
+            LEFT JOIN cat_sub_movimientos sm 
                 ON ma.idTipoSubmovimiento = sm.id
         `;
 
@@ -260,8 +260,8 @@ router.get('/obtener_movimientos', async (req, res) => {
         let totalQuery = `
             SELECT COUNT(DISTINCT ma.id) AS total
             FROM movimientos_almacen ma
-            LEFT JOIN tipo_movimiento tm ON ma.idTipoMovimiento = tm.idMovimiento
-            LEFT JOIN sub_movimientos sm ON ma.idTipoSubmovimiento = sm.id
+            LEFT JOIN cat_tipo_movimiento tm ON ma.idTipoMovimiento = tm.idMovimiento
+            LEFT JOIN cat_sub_movimientos sm ON ma.idTipoSubmovimiento = sm.id
         `;
 
         const totalQueryParams = [];
@@ -334,9 +334,9 @@ router.get('/obtener_movimientos_detalles/:idMovimiento', async (req, res) => {
                 mad.costo_unitario,
                 mad.subtotal
             FROM movimientos_almacen ma
-            JOIN tipo_movimiento tm ON ma.idTipoMovimiento = tm.idMovimiento
-            JOIN sub_movimientos sm ON ma.idTipoSubmovimiento = sm.id
-            JOIN autorizaciones a ON ma.idAutorizo = a.idAutorizo
+            JOIN cat_tipo_movimiento tm ON ma.idTipoMovimiento = tm.idMovimiento
+            JOIN cat_sub_movimientos sm ON ma.idTipoSubmovimiento = sm.id
+            JOIN cat_autorizaciones a ON ma.idAutorizo = a.idAutorizo
             JOIN usuarios u ON ma.idUsuario = u.idUsuario
             JOIN movimientos_almacen_detalle mad ON ma.id = mad.idMovimiento
             JOIN productos p ON mad.idProducto = p.id
@@ -392,9 +392,9 @@ router.get('/obtener_movimientosXProductos_detalles/:idProducto?', async (req, r
                 FROM inventario_almacen_detalle iad 
                 JOIN inventario_almacen ia ON iad.idProducto = ia.idProducto 
                 JOIN usuarios u ON u.idUsuario = iad.idUsuario 
-                JOIN tipo_movimiento tm ON tm.idMovimiento = iad.idTipoMovimiento 
+                JOIN cat_tipo_movimiento tm ON tm.idMovimiento = iad.idTipoMovimiento 
                 JOIN productos p ON p.id = iad.idProducto 
-                JOIN sub_movimientos sm ON sm.id = iad.idTipoSubmovimiento  
+                JOIN cat_sub_movimientos sm ON sm.id = iad.idTipoSubmovimiento  
                 JOIN cat_unidad_medida ud ON ud.id = iad.idUnidadMedida
                 WHERE 1 = 1
         `;

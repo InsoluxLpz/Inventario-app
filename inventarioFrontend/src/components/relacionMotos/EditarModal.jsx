@@ -79,7 +79,7 @@ export const EditarModal = ({ onClose, modalOpen, moto, actualizarLista, listaMa
         const newErrors = {};
 
         Object.keys(formData).forEach((key) => {
-            if (key !== "nota" && (formData[key] === "" || formData[key] === null || formData[key] === undefined)) {
+            if (key !== "nota" && key !== "fecha_compra" && (formData[key] === "" || formData[key] === null || formData[key] === undefined)) {
                 newErrors[key] = "Este campo es obligatorio";
             }
         });
@@ -94,7 +94,12 @@ export const EditarModal = ({ onClose, modalOpen, moto, actualizarLista, listaMa
 
         if (!validateForm()) return;
 
-        const updatedMoto = await ActualizarMoto(moto.id, formData);
+        const formToSend = {
+            ...formData,
+            fecha_compra: formData.fecha_compra ? formData.fecha_compra : null, // o "" según tu backend
+        };
+
+        const updatedMoto = await ActualizarMoto(moto.id, formToSend);
 
         if (updatedMoto && updatedMoto.error) {
             // Si la API devuelve un error, verificamos si es un problema de duplicado
@@ -223,8 +228,7 @@ export const EditarModal = ({ onClose, modalOpen, moto, actualizarLista, listaMa
                                 <div className="row">
                                     <div className="col-md-4 mb-3">
                                         <label className="form-label">Fecha de Compra</label>
-                                        <input id="fecha_compra" type="date" name="fecha_compra" onFocus={(e) => e.target.showPicker()} className={`form-control ${errors.fecha_compra ? "is-invalid" : ""}`} value={formData.fecha_compra} onChange={handleChange} onKeyDown={(e) => handleKeyDown(e, "status")} />
-                                        {errors.fecha_compra && <div className="invalid-feedback">{errors.fecha_compra}</div>}
+                                        <input id="fecha_compra" type="date" name="fecha_compra" onFocus={(e) => e.target.showPicker()} className={`form-control`} value={formData.fecha_compra} onChange={handleChange} onKeyDown={(e) => handleKeyDown(e, "status")} />
                                     </div>
                                     <div className="col-md-4 mb-3">
                                         <label className="form-label">Status</label>

@@ -31,7 +31,7 @@ router.post('/agregar_moto', async (req, res) => {
     console.log("datos recibidos en el back", req.body)
 
 
-    if (!inciso || !idMarca || !anio || !modelo || !color || !no_serie || !motor || !placa || !propietario || !fecha_compra || !status) {
+    if (!inciso || !idMarca || !anio || !modelo || !color || !no_serie || !motor || !placa || !propietario || !status) {
         return res.status(400).json({ message: 'Hacen falta parámetros para guardar en la tabla' });
     }
 
@@ -82,7 +82,7 @@ router.put('/actualizar_moto/:id', async (req, res) => {
     const motoId = req.params.id;
     const { inciso, idMarca, anio, modelo, color, no_serie, motor, placa, propietario, fecha_compra, status, nota } = req.body;
 
-    if (!inciso || !idMarca || !anio || !modelo || !color || !no_serie || !motor || !placa || !propietario || !fecha_compra || !status) {
+    if (!inciso || !idMarca || !anio || !modelo || !color || !no_serie || !motor || !placa || !propietario || !status) {
         return res.status(400).json({ message: 'Hacen falta parámetros para actualizar la tabla' });
     }
 

@@ -53,7 +53,7 @@ export const AgregarModal = ({ onClose, modalOpen, agregarMotoLista, listaMarcas
         const newErrors = {};
 
         Object.keys(formData).forEach((key) => {
-            if (key !== "nota" && (formData[key] === "" || formData[key] === null || formData[key] === undefined)) {
+            if (key !== "nota" && key !== "fecha_compra" && (formData[key] === "" || formData[key] === null || formData[key] === undefined)) {
                 newErrors[key] = "Este campo es obligatorio";
             }
         });
@@ -62,16 +62,25 @@ export const AgregarModal = ({ onClose, modalOpen, agregarMotoLista, listaMarcas
         return Object.keys(newErrors).length === 0;
     };
 
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         console.log("Enviando formulario...");
 
         if (!validateForm()) {
             console.log("Validación fallida:", errors);
-            return; // Si hay errores, no continúa
+            return;
         }
 
-        const result = await agregarMoto(formData);
+        // Crear copia limpia de los datos
+        const cleanedData = { ...formData };
+
+        // Si no se capturó fecha de compra, eliminarla del objeto antes de enviarlo
+        if (!cleanedData.fecha_compra || cleanedData.fecha_compra.trim() === "") {
+            delete cleanedData.fecha_compra;
+        }
+
+        const result = await agregarMoto(cleanedData);
         console.log("Respuesta del backend:", result);
 
         if (result && result.error) {
@@ -95,6 +104,7 @@ export const AgregarModal = ({ onClose, modalOpen, agregarMotoLista, listaMarcas
             onClose();
         }
     };
+
 
     const handleKeyDown = (e, nextField, isSelect = false) => {
         if (e.key === "Enter") {
@@ -198,8 +208,7 @@ export const AgregarModal = ({ onClose, modalOpen, agregarMotoLista, listaMarcas
                                 <div className="row">
                                     <div className="col-md-4 mb-3">
                                         <label className="form-label">Fecha de Compra</label>
-                                        <input id="fecha_compra" type="date" name="fecha_compra" onFocus={(e) => e.target.showPicker()} className={`form-control ${errors.fecha_compra ? "is-invalid" : ""}`} value={formData.fecha_compra} onChange={handleChange} onKeyDown={(e) => handleKeyDown(e, "status")} />
-                                        {errors.fecha_compra && <div className="invalid-feedback">{errors.fecha_compra}</div>}
+                                        <input id="fecha_compra" type="date" name="fecha_compra" onFocus={(e) => e.target.showPicker()} className={`form-control`} value={formData.fecha_compra} onChange={handleChange} onKeyDown={(e) => handleKeyDown(e, "status")} />
                                     </div>
                                     <div className="col-md-4 mb-3">
                                         <label className="form-label">Status</label>

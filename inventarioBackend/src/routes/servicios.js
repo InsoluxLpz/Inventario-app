@@ -174,12 +174,12 @@ router.post('/agregar_mantenimiento', async (req, res) => {
 
 router.get('/obtener_mantenimientos', async (req, res) => {
 
-    let { fecha_inicio, fecha_final, servicio, moto, todos } = req.query;
+    let { fecha_inicio, fecha_final, servicio, moto, todos, producto } = req.query;
     todos = parseInt(todos, 10);
     const connection = await db.getConnection();
 
     try {
-        if (todos !== 1 && !fecha_inicio && !fecha_final && !servicio && !moto) {
+        if (todos !== 1 && !fecha_inicio && !fecha_final && !servicio && !moto && !producto) {
             const hoy = new Date();
             const diaSemana = hoy.getDay();
             const inicioSemana = new Date(hoy);
@@ -193,11 +193,12 @@ router.get('/obtener_mantenimientos', async (req, res) => {
         }
 
         let query = `
-            SELECT 
+                      SELECT 
                 m.id AS servicio_id,
                 m.fecha_inicio,
                 m.idMoto,
                 m.idAutorizo,
+                aut.nombre AS nombre_autorizacion,
                 m.status,
                 m.idCancelo,
                 m.fecha_cancelacion,
@@ -219,6 +220,7 @@ router.get('/obtener_mantenimientos', async (req, res) => {
             LEFT JOIN cat_motocicletas mt ON m.idMoto = mt.id
             LEFT JOIN mantenimientos_servicios sm ON m.id = sm.idMantenimiento AND sm.STATUS = 1
             LEFT JOIN cat_servicios cs ON sm.idServicio = cs.id
+            LEFT JOIN cat_autorizaciones aut ON m.idAutorizo = aut.idAutorizo
             LEFT JOIN usuarios u ON m.idCancelo = u.idUsuario
             LEFT JOIN mantenimientos_detalles md ON m.id = md.idMantenimiento
             LEFT JOIN productos p ON md.idProducto = p.id
@@ -253,6 +255,15 @@ router.get('/obtener_mantenimientos', async (req, res) => {
             queryParams.push(servicio);
         }
 
+        if (producto) {
+            query += ` AND m.id IN (
+                    SELECT idMantenimiento 
+                    FROM mantenimientos_detalles
+                    WHERE idProducto = ?
+                )`;
+            queryParams.push(producto);
+        }
+
         const [rows] = await connection.query(query, queryParams);
 
         const serviciosMap = new Map();
@@ -264,6 +275,7 @@ router.get('/obtener_mantenimientos', async (req, res) => {
                     fecha_inicio: row.fecha_inicio,
                     idMoto: row.idMoto,
                     idAutorizo: row.idAutorizo,
+                    nombre_autorizacion: row.nombre_autorizacion,
                     status: row.status,
                     moto_inciso: row.moto_inciso,
                     odometro: row.odometro,
@@ -307,6 +319,7 @@ router.get('/obtener_mantenimientos', async (req, res) => {
         connection.release();
     }
 });
+
 
 router.put('/actualizar_mantenimiento/:id', async (req, res) => {
     const { id } = req.params;

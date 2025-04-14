@@ -260,6 +260,7 @@ export const ProductoTable = () => {
             </TableContainer>
           </Paper>
 
+
           <EditarProductoModal
             modalOpen={openModalEditar}
             onClose={() => setOpenModalEditar(false)}

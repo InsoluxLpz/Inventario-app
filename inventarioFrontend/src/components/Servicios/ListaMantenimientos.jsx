@@ -91,9 +91,9 @@ export const ListaMantenimientos = () => {
 
       filtro: {
         ...filtro,
-        servicio: filtro.servicio?.value || "",  // Asegúrate de que sea el valor correcto del filtro
+        servicio: filtro.servicio?.value || "",
         moto: filtro.moto?.value ? Number(filtro.moto.value) : "",
-        producto: filtro.producto?.value || "",  // Este también debe ser el valor correcto del filtro
+        producto: filtro.producto?.value || "",
         todos: todos
       }
     });
@@ -197,7 +197,6 @@ export const ListaMantenimientos = () => {
     }))
   ];
 
-
   const miniDrawerWidth = 50;
 
   return (
@@ -279,7 +278,7 @@ export const ListaMantenimientos = () => {
                   name="productos"
                   options={opcionesProductos}
                   isMulti={false}
-                  placeholder="SELECCIONA PRODUCTO"
+                  placeholder="SELECCIONA REFACCIÓN"
                   value={filtro.producto}
                   onChange={(selectedOption) =>
                     setFiltro({ ...filtro, producto: selectedOption })
