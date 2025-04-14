@@ -229,11 +229,13 @@ export const MovimientosAlmacenTable = () => {
       setSubMovimientos([
         { value: 1, label: "COMPRA" },
         { value: 2, label: "AJUSTE" },
+        { value: 5, label: "CONSUMIBLE" },
       ]);
     } else if (filtro.tipoMovimiento === 2) {
       setSubMovimientos([
         { value: 3, label: "TRASPASO" },
         { value: 4, label: "DEVOLUCION" },
+        { value: 5, label: "CONSUMIBLE" },
       ]);
     } else {
       setSubMovimientos([]); // En caso de que no haya tipo seleccionado, no mostrar subtipos
