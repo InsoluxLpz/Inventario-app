@@ -5,6 +5,7 @@ const productosCrud = require('./src/routes/productosCrud')
 const servicios = require('./src/routes/servicios')
 const proveedoresCrud = require('./src/routes/proveedoresCrud')
 const entradaProductosCrud = require('./src/routes/entradaProductosCrud')
+const gruposCrud = require('./src/routes/gruposCrud')
 const cors = require('cors')
 require('dotenv').config()
 
@@ -20,6 +21,7 @@ app.use('/productos', productosCrud);
 app.use('/servicios', servicios);
 app.use('/proveedores', proveedoresCrud);
 app.use('/entrada', entradaProductosCrud);
+app.use('/grupos', gruposCrud);
 
 
 app.listen(process.env.PORT, () => {

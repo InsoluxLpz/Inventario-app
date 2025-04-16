@@ -30,7 +30,7 @@ import HomeRepairServiceIcon from '@mui/icons-material/HomeRepairService';
 import StorageIcon from '@mui/icons-material/Storage';
 import LogoutIcon from "@mui/icons-material/Logout";
 import Swal from 'sweetalert2';
-// import { ExpandMoreIcon } from "@material-ui/icons";
+import GroupWorkIcon from '@mui/icons-material/GroupWork';
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 
@@ -173,7 +173,8 @@ export const NavBar = () => {
     "/servicios/ListaMantenimientos": "Reporte Mantenimientos",
     "/servicios/CatalogoServicios": "Catalogo de servicios",
     "/almacen/Entradas": "Entradas/Salidas",
-    "/servicios/RealizarMantenimiento": "Agregar Mantenimiento"
+    "/servicios/RealizarMantenimiento": "Agregar Mantenimiento",
+    "/grupos/ListaGrupos": "Agregar Grupo"
   };
 
   const currentTitle = routeTitles[location.pathname] || "Inicio";
@@ -358,6 +359,30 @@ export const NavBar = () => {
                   }}
                 />
               </ListItem>
+
+              <ListItem
+                button
+                selected={selectedItem === "/grupos/ListaGrupos"}
+                onClick={() => handleNavigate("/grupos/ListaGrupos")}
+                sx={{
+                  backgroundColor:
+                    selectedItem === "/grupos/ListaGrupos"
+                      ? "#85929e"
+                      : "transparent",
+                  pl: 3,
+                }}
+              >
+                <ListItemIcon sx={{ minWidth: 32 }}>
+                  <GroupWorkIcon sx={{ fontSize: 18 }} />
+                </ListItemIcon>
+                <ListItemText
+                  primary="Grupos"
+                  sx={{
+                    fontSize: "0.875rem",
+                    display: open ? "block" : "none",
+                  }}
+                />
+              </ListItem>
             </List>
           </Collapse>
 
@@ -452,12 +477,12 @@ export const NavBar = () => {
               />
             )}
           </ListItem>
-          
+
 
           <Collapse in={openServices} timeout="auto" unmountOnExit>
             <List component="div" disablePadding>
 
-            <ListItem
+              <ListItem
                 button
                 selected={selectedItem === "/almacen/ProductoAlmacenTable"}
                 onClick={() => handleNavigate("/almacen/ProductoAlmacenTable")}
@@ -477,7 +502,7 @@ export const NavBar = () => {
                   sx={{ display: open ? "block" : "none" }}
                 />
               </ListItem>
-              
+
               <ListItem
                 button
                 selected={selectedItem === "/servicios/ListaMantenimientos"}

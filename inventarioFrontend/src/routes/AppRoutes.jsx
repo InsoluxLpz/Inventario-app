@@ -18,6 +18,7 @@ import { ProductoAlmacenTable } from '../components/relacionInventario/ProductoA
 import { AgregarProductosAlmacen } from '../components/relacionEntradas/AgregarProductosAlmacen';
 import { MovimientosAlmacenTable } from '../components/relacionEntradas/MovimientosAlmacenTable.jsx';
 import { MovXProductosTable } from '../components/relacionInventario/MovXProductosTable.jsx';
+import { ListaGrupos } from '../components/relacionGrupos/ListaGrupos.jsx';
 
 export const AppRoutes = () => {
     return (
@@ -42,7 +43,8 @@ export const AppRoutes = () => {
                 <Route path="/almacen/relacionEntradas" element={<AgregarProductosAlmacen />} />
                 <Route path="/almacen/ProductoAlmacenTable" element={<ProductoAlmacenTable />} />
                 <Route path="/almacen/MovimientosAlmacenTable" element={<MovimientosAlmacenTable />} />
-                <Route path="/almacen/MovXProductosTable" element={<MovXProductosTable/>} />
+                <Route path="/almacen/MovXProductosTable" element={<MovXProductosTable />} />
+                <Route path="/grupos/ListaGrupos" element={<ListaGrupos />} />
             </Route>
         </Routes>
 
