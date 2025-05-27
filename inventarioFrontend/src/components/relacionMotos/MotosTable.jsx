@@ -14,7 +14,7 @@ import { Box, Button, FormControlLabel, IconButton, Switch, TextField, Typograph
 import { ActualizarStatus, obtenerMotos } from "../../api/motosApi";
 import { useEffect } from "react";
 import { NavBar } from "../NavBar";
-import { obtenerMarcas } from "../../api/marcasApi";
+import { obtenerMarcas } from "../../api/MarcasApi";
 import { MarcasModal } from "./MarcasModal";
 import { EditarModal } from "./EditarModal";
 import { AgregarModal } from "./AgregarModal";

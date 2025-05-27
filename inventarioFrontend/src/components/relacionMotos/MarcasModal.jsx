@@ -1,6 +1,6 @@
 import { Button } from '@mui/material';
 import React, { useState } from 'react'
-import { agregarMarcas } from '../../api/marcasApi';
+import { agregarMarcas } from '../../api/MarcasApi';
 
 export const MarcasModal = ({ onClose, modalOpen }) => {
     if (!modalOpen) return null;
