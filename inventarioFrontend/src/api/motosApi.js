@@ -90,7 +90,7 @@ export const ActualizarStatus = async (id, actualizarLista) => {
     try {
         const result = await Swal.fire({
             title: "¿Estás seguro de cambiar el status?",
-            text: "Esta acción cambiara el status de la nota a inactiva",
+            text: "Esta acción cambiara el status de la moto a inactiva",
             icon: "question",
             showCancelButton: true,
             confirmButtonColor: "#f1c40f",

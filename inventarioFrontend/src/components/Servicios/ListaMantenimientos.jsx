@@ -38,6 +38,7 @@ export const ListaMantenimientos = () => {
     servicio: "",
     moto: "",
     producto: "",
+    inventario: "",
   });
 
   const handleOpenModalEditar = (mantenimiento) => {
@@ -94,6 +95,7 @@ export const ListaMantenimientos = () => {
         servicio: filtro.servicio?.value || "",
         moto: filtro.moto?.value ? Number(filtro.moto.value) : "",
         producto: filtro.producto?.value || "",
+        inventario: filtro.inventario?.value || "",
         todos: todos
       }
     });
@@ -114,6 +116,7 @@ export const ListaMantenimientos = () => {
         odometro: servicio.odometro || 0,
         status: servicio.status,
         nombre: servicio.nombre,
+        inventario: servicio.inventario
       }));
       const mantenimientosOrdenados = mantenimientosAdaptados.sort((a, b) => new Date(a.fecha_inicio) - new Date(b.fecha_inicio));
 
@@ -196,6 +199,12 @@ export const ListaMantenimientos = () => {
       label: prod.nombre
     }))
   ];
+  const opcionesInventario = [
+    { value: "", label: "Selecciona" },
+    { value: "1", label: "Principal" },
+    { value: "2", label: "Secundario" },
+  ];
+
 
   const miniDrawerWidth = 50;
 
@@ -218,6 +227,32 @@ export const ListaMantenimientos = () => {
                     />
                   }
                   label="Mostrar todos"
+                />
+              </Grid2>
+              <Grid2 item sm={6} md={3}>
+                <Select
+                  name="inventario"
+                  options={opcionesInventario}
+                  isMulti={false}
+                  placeholder="SELECCIONA INVENTARIO"
+                  value={filtro.inventario}
+                  onChange={(selectedOption) =>
+                    setFiltro({ ...filtro, inventario: selectedOption })
+                  }
+
+                  styles={{
+                    control: (base) => ({
+                      ...base,
+                      minHeight: "45px",
+                      height: "55px",
+                      width: 200
+                    }),
+                    menuList: (provided) => ({
+                      ...provided,
+                      maxHeight: "200px",
+                      overflowY: "auto",
+                    }),
+                  }}
                 />
               </Grid2>
 
@@ -361,7 +396,7 @@ export const ListaMantenimientos = () => {
               <Table >
                 <TableHead>
                   <TableRow>
-                    {["Vehiculo", "Servicio(s)", "Refacciones Almacen", "Fecha de Inicio", "Comentario", "Costo Total", "status", "Acciones"].map((header) => (
+                    {["Vehiculo", "Servicio(s)", "Refacciones Almacen", "Fecha de Inicio", "Comentario", "Costo Total", "Inventario", "status", "Acciones"].map((header) => (
                       <TableCell key={header} align="center" sx={{ fontWeight: "bold", backgroundColor: "#f4f6f7", color: "black", textAlign: "left", width: "6.66%" }}>
                         {header}
                       </TableCell>
@@ -402,6 +437,10 @@ export const ListaMantenimientos = () => {
                         </TableCell>
                         <TableCell align="center" sx={{ textAlign: "center", }}>
                           {formatearDinero(mantenimiento.costo_total)}
+                        </TableCell>
+                        <TableCell align="center" sx={{ textAlign: "center", }}>
+                          {mantenimiento.inventario === 1 ? "Principal" : mantenimiento.inventario === 2 ? "Secundario" : ""}
+
                         </TableCell>
                         <TableCell align="center" sx={{ textAlign: "left", fontWeight: "bold", color: mantenimiento.status === 0 ? "red" : "green" }}>
                           {mantenimiento.status === 0 ? "Cancelado" : "Activo"}

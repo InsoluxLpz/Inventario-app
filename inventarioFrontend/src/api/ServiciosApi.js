@@ -139,6 +139,7 @@ export const ObtenerMantenimientos = async ({ filtro }) => {
     if (filtro.servicio) params.append("servicio", filtro.servicio);
     if (filtro.moto) params.append("moto", filtro.moto);
     if (filtro.producto) params.append("producto", filtro.producto);
+    if (filtro.inventario) params.append("inventario", filtro.inventario);
     if (filtro.todos !== undefined) params.append("todos", filtro.todos ? "1" : "0");
 
     try {
@@ -248,7 +249,7 @@ export const EliminarMantenimiento = async (id, actualizarLista) => {
             return;
         }
 
-        const response = await fetch(`http://192.168.0.104:4000/servicios/cancelar_mantenimiento/${id}`, {
+        const response = await fetch(`${API_URL}/servicios/cancelar_mantenimiento/${id}`, {
             method: 'DELETE',
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ idUsuario }) // Enviar el ID del usuario que cancela

@@ -26,6 +26,7 @@ export const VerMantenimientoCancelado = ({ modalOpen, onClose, mantenimiento, l
         comentario: "",
         status: "",
         nombre: "",
+        inventario: "",
     });
 
     const [autorizaciones, setAutorizaciones] = useState([]);
@@ -41,9 +42,10 @@ export const VerMantenimientoCancelado = ({ modalOpen, onClose, mantenimiento, l
                 servicio: mantenimiento.servicios.map(s => s.id) || [],
                 productos: mantenimiento.productos || [],
                 comentario: mantenimiento.comentario || "",
+                inventario: mantenimiento.inventario || "",
                 costo_total: mantenimiento.costo_total
-                    ? parseFloat(mantenimiento.costo_total) // ✅ Convertir a número correctamente
-                    : 0.00, // ✅ Si está vacío, ponerlo en 0.00
+                    ? parseFloat(mantenimiento.costo_total)
+                    : 0.00,
                 nombre: mantenimiento.nombre || "",
             });
         }
@@ -137,7 +139,7 @@ export const VerMantenimientoCancelado = ({ modalOpen, onClose, mantenimiento, l
                                 </div>
 
                                 <div className="row">
-                                    <div className="col-md-10 mb-2">
+                                    <div className="col-md-8 mb-2">
                                         <label className="form-label">Servicio(s)</label>
                                         <Select
                                             name="servicio"
@@ -148,6 +150,24 @@ export const VerMantenimientoCancelado = ({ modalOpen, onClose, mantenimiento, l
                                             isDisabled
                                         />
 
+                                    </div>
+
+                                    <div className="col-md-4 mb-2">
+                                        <label className="form-label">inventario</label>
+                                        <select
+
+                                            id="inventario"
+                                            name="inventario"
+                                            className={`form-control `}
+                                            value={formData.inventario}
+                                            onKeyDown={(e) => handleKeyDown(e, "nota")}
+                                            disabled
+                                        >
+                                            <option value="" disabled>SELECCIONA</option>
+                                            <option value="1">PRINCIPAL</option>
+                                            <option value="2">SECUNDARIO</option>
+
+                                        </select>
                                     </div>
                                 </div>
 

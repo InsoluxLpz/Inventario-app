@@ -25,6 +25,7 @@ export const EditarMantenimiento = ({ modalOpen, onClose, mantenimiento, listaMo
         costo_total: "",
         comentario: "",
         status: "",
+        inventario: "",
     });
 
     const [autorizaciones, setAutorizaciones] = useState([]);
@@ -43,6 +44,7 @@ export const EditarMantenimiento = ({ modalOpen, onClose, mantenimiento, listaMo
                 servicio: mantenimiento.servicios.map(s => s.id) || [],
                 productos: mantenimiento.productos || [],
                 comentario: mantenimiento.comentario || "",
+                inventario: mantenimiento.inventario || "",
                 costo_total: mantenimiento.costo_total
                     ? parseFloat(mantenimiento.costo_total)
                     : 0.00,
@@ -179,7 +181,7 @@ export const EditarMantenimiento = ({ modalOpen, onClose, mantenimiento, listaMo
                                 </div>
 
                                 <div className="row">
-                                    <div className="col-md-10 mb-2">
+                                    <div className="col-md-8 mb-2">
                                         <label className="form-label">Servicio(s)</label>
                                         <Select
                                             ref={servicioRef}
@@ -198,6 +200,26 @@ export const EditarMantenimiento = ({ modalOpen, onClose, mantenimiento, listaMo
                                             onKeyDown={(e) => handleKeyDown(e, autorizoRef, true)}
                                         />
                                         {errors.servicio && <div className="text-danger">{errors.servicio}</div>}
+
+                                    </div>
+                                    <div className="col-md-4 mb-2">
+                                        <label className="form-label">Inventario</label>
+                                        <select
+
+                                            id="inventario"
+                                            name="inventario"
+                                            className={`form-control ${errors.inventario ? "is-invalid" : ""}`}
+                                            value={formData.inventario}
+                                            onChange={handleChange}
+                                            onKeyDown={(e) => handleKeyDown(e, "nota")}
+                                            disabled
+                                        >
+                                            <option value="" disabled>SELECCIONA</option>
+                                            <option value="1">PRINCIPAL</option>
+                                            <option value="2">SECUNDARIO</option>
+
+                                        </select>
+                                        {errors.almacen && <div className="text-danger">{errors.almacen}</div>}
 
                                     </div>
                                 </div>

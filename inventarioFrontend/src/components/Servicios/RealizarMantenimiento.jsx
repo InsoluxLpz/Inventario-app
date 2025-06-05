@@ -20,6 +20,7 @@ export const RealizarMantenimiento = () => {
         servicio: [],
         costo_total: "",
         comentario: "",
+        inventario: "",
     });
 
     const [errors, setErrors] = useState({});
@@ -209,6 +210,7 @@ export const RealizarMantenimiento = () => {
             idCancelo: null,
             fecha_cancelacion: null,
             servicios: formData.servicio,
+            inventario: formData.inventario,
             productos: productosSeleccionados.map((prod) => ({
                 idProducto: prod.id,
                 cantidad: prod.cantidad,
@@ -283,7 +285,7 @@ export const RealizarMantenimiento = () => {
 
         setProductosSeleccionados([]);
         setErrors({});
-        setIsModalOpen(false); // Si aplica
+        setIsModalOpen(false);
     };
 
     return (
@@ -400,7 +402,7 @@ export const RealizarMantenimiento = () => {
                             </div>
 
                             <div className="row">
-                                <div className="col-md-10 mb-2">
+                                <div className="col-md-8 mb-2">
                                     <label className="form-label">Servicio(s)</label>
                                     <Select
                                         ref={servicioRef}
@@ -445,6 +447,24 @@ export const RealizarMantenimiento = () => {
                                     />
                                     {errors.servicio && (
                                         <div className="text-danger">{errors.servicio}</div>
+                                    )}
+                                </div>
+                                <div className="col-md-4 mb-2">
+                                    <label className="form-label">Almacen</label>
+                                    <select
+                                        id="inventario"
+                                        name="inventario"
+                                        className={`form-control ${errors.inventario ? "is-invalid" : ""}`}
+                                        value={formData.inventario}
+                                        onChange={handleChange}
+                                        onKeyDown={(e) => handleKeyDown(e, "nota")}
+                                    >
+                                        <option value="" disabled>SELECCIONA</option>
+                                        <option value="1">PRINCIPAL</option>
+                                        <option value="2">SECUNDARIO</option>
+                                    </select>
+                                    {errors.inventario && (
+                                        <div className="text-danger">{errors.inventario}</div>
                                     )}
                                 </div>
                             </div>

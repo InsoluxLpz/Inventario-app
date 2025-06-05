@@ -190,10 +190,7 @@ export const ProductoAlmacenTable = () => {
           </Box>
 
           <Paper sx={{ width: "100%", margin: "0 auto" }}>
-            <TableContainer
-              sx={{ maxHeight: "600px", backgroundColor: "#eaeded" }}
-            >
-              <Box sx={{ overflowX: "auto" }}>
+            <TableContainer sx={{ maxHeight: 600, backgroundColor: "#eaeded" }}>
                 <Table stickyHeader>
                   <TableHead>
                     <TableRow>
@@ -277,7 +274,6 @@ export const ProductoAlmacenTable = () => {
                     </TableRow>
                   </TableBody>
                 </Table>
-              </Box>
             </TableContainer>
           </Paper>
         </Box>
