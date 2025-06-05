@@ -110,9 +110,9 @@ const moment = require('moment-timezone');
 router.post('/agregar_mantenimiento', async (req, res) => {
     console.log("Datos recibidos en el backend:", req.body);
 
-    const { fecha_inicio, odometro, costo, comentario, moto, idAutorizo, idUsuario, idCancelo, fecha_cancelacion, servicios, productos } = req.body;
+    const { fecha_inicio, odometro, costo, comentario, moto, idAutorizo, idUsuario, idCancelo, fecha_cancelacion, servicios, productos, inventario } = req.body;
 
-    if (!fecha_inicio || !moto || !costo || !idUsuario || !idAutorizo) {
+    if (!fecha_inicio || !moto || !costo || !idUsuario || !idAutorizo || !inventario) {
         return res.status(400).json({ error: "Faltan datos obligatorios" });
     }
 
@@ -124,8 +124,8 @@ router.post('/agregar_mantenimiento', async (req, res) => {
 
         // Insertar en la base de datos con la fecha ya convertida a hora local
         const [servicioResult] = await connection.query(
-            "INSERT INTO mantenimientos (fecha_inicio, odometro, costo_total, comentario, idMoto, idAutorizo, idUsuario, idCancelo, fecha_cancelacion) VALUES (?, ?, ?, ?, ?, ?, ?, ?,?)",
-            [fechaInicioLocal, odometro, costo, comentario, moto, idAutorizo, idUsuario, idCancelo, fecha_cancelacion]
+            "INSERT INTO mantenimientos (fecha_inicio, odometro, costo_total, comentario, idMoto, idAutorizo, idUsuario, idCancelo, fecha_cancelacion,inventario) VALUES (?, ?, ?, ?, ?, ?, ?, ?,?,?)",
+            [fechaInicioLocal, odometro, costo, comentario, moto, idAutorizo, idUsuario, idCancelo, fecha_cancelacion, inventario]
         );
         const idServicio = servicioResult.insertId;
 
@@ -174,12 +174,12 @@ router.post('/agregar_mantenimiento', async (req, res) => {
 
 router.get('/obtener_mantenimientos', async (req, res) => {
 
-    let { fecha_inicio, fecha_final, servicio, moto, todos, producto } = req.query;
+    let { fecha_inicio, fecha_final, servicio, moto, todos, producto, inventario } = req.query;
     todos = parseInt(todos, 10);
     const connection = await db.getConnection();
 
     try {
-        if (todos !== 1 && !fecha_inicio && !fecha_final && !servicio && !moto && !producto) {
+        if (todos !== 1 && !fecha_inicio && !fecha_final && !servicio && !moto && !producto && !inventario) {
             const hoy = new Date();
             const diaSemana = hoy.getDay();
             const inicioSemana = new Date(hoy);
@@ -200,6 +200,7 @@ router.get('/obtener_mantenimientos', async (req, res) => {
                 m.idAutorizo,
                 aut.nombre AS nombre_autorizacion,
                 m.status,
+                m.inventario,
                 m.idCancelo,
                 m.fecha_cancelacion,
                 mt.id AS idMoto,
@@ -246,6 +247,12 @@ router.get('/obtener_mantenimientos', async (req, res) => {
             queryParams.push(moto);
         }
 
+        if (inventario) {
+            query += ` AND m.inventario = ?`;
+            queryParams.push(inventario);
+        }
+
+
         if (servicio) {
             query += ` AND m.id IN (
                     SELECT idMantenimiento 
@@ -285,6 +292,7 @@ router.get('/obtener_mantenimientos', async (req, res) => {
                     idCancelo: row.idCancelo,
                     nombre: row.nombre,
                     fecha_cancelacion: row.fecha_cancelacion,
+                    inventario: row.inventario,
                     servicios: [],
                     productos: []
                 });
