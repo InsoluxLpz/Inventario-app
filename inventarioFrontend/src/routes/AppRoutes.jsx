@@ -19,6 +19,7 @@ import { AgregarProductosAlmacen } from '../components/relacionEntradas/AgregarP
 import { MovimientosAlmacenTable } from '../components/relacionEntradas/MovimientosAlmacenTable.jsx';
 import { MovXProductosTable } from '../components/relacionInventario/MovXProductosTable.jsx';
 import { ListaGrupos } from '../components/relacionGrupos/ListaGrupos.jsx';
+import { ListaMultiAlmacenes } from '../components/relacionMultiAlmacenes/ListaMultiAlmacenes.jsx';
 
 export const AppRoutes = () => {
     return (
@@ -45,6 +46,8 @@ export const AppRoutes = () => {
                 <Route path="/almacen/MovimientosAlmacenTable" element={<MovimientosAlmacenTable />} />
                 <Route path="/almacen/MovXProductosTable" element={<MovXProductosTable />} />
                 <Route path="/grupos/ListaGrupos" element={<ListaGrupos />} />
+                {/* Realacion multi almacenes */}
+                <Route path="/relacionMultiAlmacenes/ListaMultiAlmacenes" element={<ListaMultiAlmacenes />} />
             </Route>
         </Routes>
 

@@ -33,6 +33,7 @@ import Swal from 'sweetalert2';
 import GroupWorkIcon from '@mui/icons-material/GroupWork';
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
+// import WarehouseIcon from '@mui/icons-material/Warehouse';
 
 const drawerWidth = 250;
 
@@ -174,7 +175,8 @@ export const NavBar = () => {
     "/servicios/CatalogoServicios": "Catalogo de servicios",
     "/almacen/Entradas": "Entradas/Salidas",
     "/servicios/RealizarMantenimiento": "Agregar Mantenimiento",
-    "/grupos/ListaGrupos": "Agregar Grupo"
+    "/grupos/ListaGrupos": "Agregar Grupo",
+    "/relacionMultiAlmacenes/ListaMultiAlmacenes": "Lista Almacenes",
   };
 
   const currentTitle = routeTitles[location.pathname] || "Inicio";
@@ -366,7 +368,7 @@ export const NavBar = () => {
                 onClick={() => handleNavigate("/grupos/ListaGrupos")}
                 sx={{
                   backgroundColor:
-                    selectedItem === "/grupos/ListaGrupos"
+                    selectedItem === "Agregar Grupo"
                       ? "#85929e"
                       : "transparent",
                   pl: 3,
@@ -383,6 +385,32 @@ export const NavBar = () => {
                   }}
                 />
               </ListItem>
+
+              {/* se agregaron multialmacenes */}
+              <ListItem
+                button
+                selected={selectedItem === "/relacionMultiAlmacenes/ListaMultiAlmacenes"}
+                onClick={() => handleNavigate("/relacionMultiAlmacenes/ListaMultiAlmacenes")}
+                sx={{
+                  backgroundColor:
+                    selectedItem === "Lista Almacenes"
+                      ? "#85929e"
+                      : "transparent",
+                  pl: 3,
+                }}
+              >
+                <ListItemIcon sx={{ minWidth: 32 }}>
+                  <WarehouseIcon sx={{ fontSize: 18 }} />
+                </ListItemIcon>
+                <ListItemText
+                  primary="Almacenes"
+                  sx={{
+                    fontSize: "0.875rem",
+                    display: open ? "block" : "none",
+                  }}
+                />
+              </ListItem>
+
             </List>
           </Collapse>
 
