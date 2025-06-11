@@ -134,13 +134,15 @@ router.get('/obtener_listas', async (req, res) => {
         const [autorizaciones] = await db.query("SELECT idAutorizo, nombre FROM cat_autorizaciones");
         const [tiposEntrada] = await db.query("SELECT id, tipoSubMovimiento FROM cat_sub_movimientos");
         const [tipoMovimiento] = await db.query("SELECT idMovimiento, movimiento FROM cat_tipo_movimiento");
+        const [listaAlmacenes] = await db.query("SELECT * FROM cat_almacenes");
 
         res.status(200).json({
             proveedores,
             productos,
             autorizaciones,
             tiposEntrada,
-            tipoMovimiento
+            tipoMovimiento,
+            listaAlmacenes
         });
     } catch (error) {
         console.error("Error al obtener listas:", error);

@@ -8,14 +8,14 @@ const dbConexion = () => {
         password: process.env.DBPASSWORD,
         database: process.env.DATABASE,
         waitForConnections: true,
-        connectionLimit: 5, // Número máximo de conexiones simultáneas
-        queueLimit: 10
+        connectionLimit: 2, // Número máximo de conexiones simultáneas
+        queueLimit: 5
     });
-
-    console.log('Base de datos configurada');
+    
     return db;
 };
 
+console.log('Base de datos conectada con exito');
 module.exports = {
     dbConexion
 };

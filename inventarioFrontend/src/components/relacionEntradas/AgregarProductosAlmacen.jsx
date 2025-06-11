@@ -29,6 +29,8 @@ export const AgregarProductosAlmacen = () => {
   const [listaAutorizaciones, setListaAutorizaciones] = useState([]);
   const [listaTipoEntrada, setListaTipoEntrada] = useState([]);
   const [listaTipoMovimiento, setListaTipoMovimiento] = useState([]);
+  const [listaAlmacenes, setListaAlmacenes] = useState([]);
+
   const [errors, setErrors] = useState({});
   const [productosAgregados, setProductosAgregados] = useState([]);
   // * filtro producto por proveedores
@@ -57,12 +59,20 @@ export const AgregarProductosAlmacen = () => {
   const [autorizoBloqueado, setAutorizoBloqueado] = useState(false);
   const [autorizoFijo, setAutorizoFijo] = useState(null);
 
+  // * descativar select para almacen
+  const [almacenBloqueado, setAlmacenBloqueado] = useState(false);
+  const [almacenFijo, setAlmacenFijo] = useState(null);
+
   // * estado del modal
   const [openModal, setOpenModal] = useState(false);
   const [productoSeleccionado, setProductoSeleccionado] = useState(null);
   const [selectedMovimiento, setSelectedMovimiento] = useState(null);
   // * envio del total al backend
   const [total, setTotal] = useState(0);
+
+
+  // * que se active solamente cuando se seleccione traspaso si no, sale desactivado
+  
 
   const [formData, setFormData] = useState({
     proveedor: null,
@@ -142,6 +152,14 @@ export const AgregarProductosAlmacen = () => {
             data.tipoMovimiento.map((m) => ({
               value: m.idMovimiento,
               label: m.movimiento,
+            }))
+          );
+        }
+        if (data.listaAlmacenes) {
+          setListaAlmacenes(
+            data.listaAlmacenes.map((m) => ({
+              value: m.id,
+              label: m.nombre,
             }))
           );
         }
@@ -290,9 +308,9 @@ export const AgregarProductosAlmacen = () => {
           idProveedor: formData.proveedor
             ? proveedorFijo
             : {
-              value: formData.proveedor.value,
-              label: formData.proveedor.label,
-            },
+                value: formData.proveedor.value,
+                label: formData.proveedor.label,
+              },
           costo_unitario: formData.costo_unitario,
           cantidad: formData.cantidad,
         },
@@ -325,7 +343,6 @@ export const AgregarProductosAlmacen = () => {
 
     setErrors({});
   };
-
 
   // * mandar datos a insertar
   const handleGuardarTodo = async () => {
@@ -377,7 +394,6 @@ export const AgregarProductosAlmacen = () => {
       autorizo: null,
       tipoMovimiento: null,
     });
-
   };
 
   // * efecto para el filtro de tipo de entrada por el tipo de movimiento
@@ -390,11 +406,13 @@ export const AgregarProductosAlmacen = () => {
 
       if (movimientoSeleccionado === "entrada") {
         nuevaLista = listaTipoEntrada.filter((t) =>
-          ["compra", "ajuste","consumible" ].includes(t.label.toLowerCase())
+          ["compra", "ajuste", "consumible"].includes(t.label.toLowerCase())
         );
       } else if (movimientoSeleccionado === "salida") {
         nuevaLista = listaTipoEntrada.filter((t) =>
-          ["devolucion", "traspaso", "consumible"].includes(t.label.toLowerCase())
+          ["devolucion", "traspaso", "consumible"].includes(
+            t.label.toLowerCase()
+          )
         );
       }
 
@@ -458,7 +476,6 @@ export const AgregarProductosAlmacen = () => {
     }).format(valor);
   };
 
-
   // * diseño de carga en las tablas
   const styles = useSpring({
     from: { opacity: 0, transform: "translateY(50px)", filter: "blur(10px)" },
@@ -517,7 +534,23 @@ export const AgregarProductosAlmacen = () => {
                   onChange={(opcion) => handleSelectChange("tipo", opcion)}
                   isDisabled={tipoEntradaBloqueado}
                 />
-                {errors.tipo && <div className="text-danger">{errors.tipo}</div>}
+                {errors.tipo && (
+                  <div className="text-danger">{errors.tipo}</div>
+                )}
+              </div>
+
+              {/* NUEVO CAMPO: ALMACÉN */}
+              <div className="col-md-3">
+                <label>Almacén</label>
+                <Select
+                  options={listaAlmacenes}
+                  value={formData.almacen}
+                  onChange={(opcion) => handleSelectChange("almacen", opcion)}
+                  isDisabled={almacenBloqueado}
+                />
+                {errors.almacen && (
+                  <div className="text-danger">{errors.almacen}</div>
+                )}
               </div>
 
               {/* PROVEEDORES */}
@@ -534,7 +567,7 @@ export const AgregarProductosAlmacen = () => {
                 )}
               </div>
               {/* FECHA */}
-              <div className="col-md-3">
+              <div className="col-md-3" style={{marginTop: "18px"}}>
                 <label>Fecha</label>
                 <input
                   type="date"
@@ -573,6 +606,7 @@ export const AgregarProductosAlmacen = () => {
                 )}
               </div>
 
+
               <div className="col-md-3" style={{ marginTop: "20px" }}>
                 <label>Cantidad</label>
                 <input
@@ -605,7 +639,22 @@ export const AgregarProductosAlmacen = () => {
                 )}
               </div>
 
-              <div className="col-md-3" style={{ marginTop: "20px" }}>
+              <div
+              className="mt-1 row-1"
+              style={{ display: "flex", alignItems: "venter" }}
+              >
+              <Button
+                type="submit"
+                variant="contained"
+                color="primary"
+                ref={agregarRef}
+                onKeyDown={handleCombinedKeyDown}
+              >
+                Agregar
+              </Button>
+            </div>
+
+              <div style={{ marginLeft: "auto", width: "25%" }}>
                 <label>Autoriza</label>
                 <Select
                   options={listaAutorizaciones}
@@ -619,20 +668,7 @@ export const AgregarProductosAlmacen = () => {
               </div>
             </div>
 
-            <div
-              className="mt-1"
-              style={{ display: "flex", justifyContent: "flex-start" }}
-            >
-              <Button
-                type="submit"
-                variant="contained"
-                color="primary"
-                ref={agregarRef}
-                onKeyDown={handleCombinedKeyDown}
-              >
-                Agregar
-              </Button>
-            </div>
+          
           </form>
         </div>
 
@@ -696,24 +732,23 @@ export const AgregarProductosAlmacen = () => {
                     <tr
                       key={index}
                       style={{
-                        backgroundColor: index % 2 === 0 ? "#f9f9f9" : "#e9e9e9",
+                        backgroundColor:
+                          index % 2 === 0 ? "#f9f9f9" : "#e9e9e9",
                         borderRadius: "8px",
                         boxShadow: "0px 1px 3px rgba(0, 0, 0, 0.1)",
                       }}
                     >
                       <td>{item.productos[0]?.idProducto?.label || "N/A"}</td>
-                      <td>
-                        {item.productos[0]?.cantidad}
-                      </td>{" "}
+                      <td>{item.productos[0]?.cantidad}</td>{" "}
                       {/* Aumenté paddingLeft */}
                       <td style={{ paddingLeft: "100px" }}>
                         {item.productos[0]?.costo_unitario}
                       </td>{" "}
                       {/* Aumenté paddingLeft */}
-                      <td style={{ paddingLeft: "100px" }} >
+                      <td style={{ paddingLeft: "100px" }}>
                         {formatearDinero(
                           item.productos[0]?.cantidad *
-                          item.productos[0]?.costo_unitario
+                            item.productos[0]?.costo_unitario
                         )}
                       </td>
                       <td>
