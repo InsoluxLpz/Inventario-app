@@ -110,9 +110,9 @@ const moment = require('moment-timezone');
 router.post('/agregar_mantenimiento', async (req, res) => {
     console.log("Datos recibidos en el backend:", req.body);
 
-    const { fecha_inicio, odometro, costo, comentario, moto, idAutorizo, idUsuario, idCancelo, fecha_cancelacion, servicios, productos, inventario } = req.body;
+    const { fecha_inicio, odometro, costo, comentario, moto, idAutorizo, idUsuario, idCancelo, fecha_cancelacion, servicios, productos, idAlmacen } = req.body;
 
-    if (!fecha_inicio || !moto || !costo || !idUsuario || !idAutorizo || !inventario) {
+    if (!fecha_inicio || !moto || !costo || !idUsuario || !idAutorizo || !idAlmacen) {
         return res.status(400).json({ error: "Faltan datos obligatorios" });
     }
 
@@ -124,8 +124,8 @@ router.post('/agregar_mantenimiento', async (req, res) => {
 
         // Insertar en la base de datos con la fecha ya convertida a hora local
         const [servicioResult] = await connection.query(
-            "INSERT INTO mantenimientos (fecha_inicio, odometro, costo_total, comentario, idMoto, idAutorizo, idUsuario, idCancelo, fecha_cancelacion,inventario) VALUES (?, ?, ?, ?, ?, ?, ?, ?,?,?)",
-            [fechaInicioLocal, odometro, costo, comentario, moto, idAutorizo, idUsuario, idCancelo, fecha_cancelacion, inventario]
+            "INSERT INTO mantenimientos (fecha_inicio, odometro, costo_total, comentario, idMoto, idAutorizo, idUsuario, idCancelo, fecha_cancelacion) VALUES (?, ?, ?, ?, ?, ?, ?, ?,?)",
+            [fechaInicioLocal, odometro, costo, comentario, moto, idAutorizo, idUsuario, idCancelo, fecha_cancelacion]
         );
         const idServicio = servicioResult.insertId;
 
@@ -137,6 +137,7 @@ router.post('/agregar_mantenimiento', async (req, res) => {
                 [servicioValues]
             );
         }
+        console.log('Productos a insertar en mantenimientos_detalles:', productos);
 
         // Insertar en servicios_detalles si hay productos
         if (productos && productos.length > 0) {
@@ -145,11 +146,12 @@ router.post('/agregar_mantenimiento', async (req, res) => {
                 producto.idProducto,
                 producto.cantidad,
                 producto.costo,
-                producto.subtotal
+                producto.subtotal,
+                idAlmacen,
             ]);
 
             await connection.query(
-                "INSERT INTO mantenimientos_detalles (idMantenimiento, idProducto, cantidad, costo, subtotal) VALUES ?",
+                "INSERT INTO mantenimientos_detalles (idMantenimiento, idProducto, cantidad, costo, subtotal,idAlmacen) VALUES ?",
                 [productoValues]
             );
         }
@@ -200,7 +202,7 @@ router.get('/obtener_mantenimientos', async (req, res) => {
                 m.idAutorizo,
                 aut.nombre AS nombre_autorizacion,
                 m.status,
-                m.inventario,
+                md.idAlmacen,
                 m.idCancelo,
                 m.fecha_cancelacion,
                 mt.id AS idMoto,
@@ -210,6 +212,7 @@ router.get('/obtener_mantenimientos', async (req, res) => {
                 m.comentario,
                 m.idUsuario,
                 u.nombre,
+                alm.nombre AS nombre_inventario,
                 sm.idServicio AS servicio_aplicado_id,
                 cs.nombre AS servicio_aplicado_nombre,
                 md.idProducto AS producto_id,
@@ -224,6 +227,7 @@ router.get('/obtener_mantenimientos', async (req, res) => {
             LEFT JOIN cat_autorizaciones aut ON m.idAutorizo = aut.idAutorizo
             LEFT JOIN usuarios u ON m.idCancelo = u.idUsuario
             LEFT JOIN mantenimientos_detalles md ON m.id = md.idMantenimiento
+            LEFT JOIN cat_almacenes alm ON md.idAlmacen = alm.id
             LEFT JOIN productos p ON md.idProducto = p.id
             WHERE 1 = 1
         `;
@@ -248,7 +252,7 @@ router.get('/obtener_mantenimientos', async (req, res) => {
         }
 
         if (inventario) {
-            query += ` AND m.inventario = ?`;
+            query += ` AND md.idAlmacen = ?`;
             queryParams.push(inventario);
         }
 
@@ -292,7 +296,8 @@ router.get('/obtener_mantenimientos', async (req, res) => {
                     idCancelo: row.idCancelo,
                     nombre: row.nombre,
                     fecha_cancelacion: row.fecha_cancelacion,
-                    inventario: row.inventario,
+                    idAlmacen: row.idAlmacen,
+                    nombre_inventario: row.nombre_inventario,
                     servicios: [],
                     productos: []
                 });

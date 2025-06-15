@@ -12,7 +12,7 @@ router.post('/agregar_inventario', async (req, res) => {
         idAutorizo,
         productos,
         idUsuario,
-        total
+        total,
     } = req.body;
 
     console.log('Datos recibidos:', { fecha, idTipoMovimiento, idTipoSubmovimiento, idAutorizo, productos, idUsuario, total });
@@ -39,7 +39,7 @@ router.post('/agregar_inventario', async (req, res) => {
             idTipoSubmovimiento,
             idAutorizo,
             idUsuario,
-            total
+            total,
         ]);
 
         const idMovimiento = result.insertId; // Usar el mismo idMovimiento para todos los productos
@@ -153,31 +153,43 @@ router.get('/obtener_listas', async (req, res) => {
 
 // * consulta buena falta la autorizacion
 router.get('/obtener_inventario', async (req, res) => {
-    try {
-        const [result] = await db.query(`
-                SELECT 
-                    p.nombre as nombreProducto,
-                    p.idGrupo as idGrupo,
-                    cp.nombre as nombreGrupo,
-                    cum.id as idUnidadMedida,
-                    cum.nombre as unidadMedida,
-                    p.precio as costoUnitario,
-                    ia.cantidad as cantidad,
-                    p.codigo
-                FROM productos p
-                LEFT JOIN inventario_almacen ia ON p.id = ia.idProducto
-                LEFT JOIN cat_grupos cp ON cp.id = p.idGrupo
-                LEFT JOIN cat_unidad_medida cum ON p.idUnidadMedida = cum.id
-                WHERE p.status = 1;
-        `);
+    const { idAlmacen } = req.query;
 
+    let query = `
+    SELECT 
+      p.nombre as nombreProducto,
+      p.idGrupo as idGrupo,
+      cp.nombre as nombreGrupo,
+      cum.id as idUnidadMedida,
+      cum.nombre as unidadMedida,
+      p.precio as costoUnitario,
+      ia.cantidad as cantidad,
+      iad.idAlmacen as idAlmacen,
+      alm.nombre AS nombre_inventario,
+      p.codigo
+    FROM productos p
+    LEFT JOIN inventario_almacen ia ON p.id = ia.idProducto
+    LEFT JOIN inventario_almacen_detalle iad ON p.id = iad.idProducto
+    LEFT JOIN cat_almacenes alm ON ia.idAlmacen = alm.id
+    LEFT JOIN cat_grupos cp ON cp.id = p.idGrupo
+    LEFT JOIN cat_unidad_medida cum ON p.idUnidadMedida = cum.id
+    WHERE p.status = 1
+  `;
+
+    // Agrega filtro por almacén si se proporciona
+    if (idAlmacen) {
+        query += ` AND ia.idAlmacen = ?`;
+    }
+
+    try {
+        const [result] = await db.query(query, idAlmacen ? [idAlmacen] : []);
         res.status(200).json(result);
     } catch (error) {
         console.error("Error al obtener datos:", error);
         res.status(500).json({ message: "Error en el servidor" });
     }
-
 });
+
 
 // * consulta que se puede pedir mas adelante para la tabla movimientos almacen
 router.get('/obtener_movimientos', async (req, res) => {
@@ -311,11 +323,6 @@ router.get('/obtener_movimientos', async (req, res) => {
 });
 
 
-
-
-
-
-
 // * consulta para la tabla movimientos almacen detalles
 router.get('/obtener_movimientos_detalles/:idMovimiento', async (req, res) => {
     const { idMovimiento } = req.params;
@@ -433,7 +440,6 @@ router.get('/obtener_movimientosXProductos_detalles/:idProducto?', async (req, r
 });
 
 
-
 // * Obtener todos los productos
 router.get('/productos', async (req, res) => {
     try {
@@ -476,11 +482,6 @@ router.get('/buscar_producto/:codigo', async (req, res) => {
         return res.status(500).json({ message: 'Error en el servidor' });
     }
 });
-
-
-
-
-
 
 
 module.exports = router;

@@ -4,11 +4,12 @@ import { Button } from '@mui/material';
 import { ActualizarMantenimiento } from '../../api/ServiciosApi';
 import { cargarListasEntradas } from '../../api/almacenProductosApi';
 
-export const EditarMantenimiento = ({ modalOpen, onClose, mantenimiento, listaMotos, listaServicios }) => {
+export const EditarMantenimiento = ({ modalOpen, onClose, mantenimiento, listaMotos, listaServicios, listaInventarios }) => {
     if (!modalOpen || !mantenimiento) return null;
 
     const motos = listaMotos;
     const Servicios = listaServicios;
+    const inventarios = listaInventarios;
 
     const formatFecha = (fecha) => {
         if (!fecha) return "";
@@ -25,7 +26,7 @@ export const EditarMantenimiento = ({ modalOpen, onClose, mantenimiento, listaMo
         costo_total: "",
         comentario: "",
         status: "",
-        inventario: "",
+        idAlmacen: "",
     });
 
     const [autorizaciones, setAutorizaciones] = useState([]);
@@ -44,7 +45,7 @@ export const EditarMantenimiento = ({ modalOpen, onClose, mantenimiento, listaMo
                 servicio: mantenimiento.servicios.map(s => s.id) || [],
                 productos: mantenimiento.productos || [],
                 comentario: mantenimiento.comentario || "",
-                inventario: mantenimiento.inventario || "",
+                idAlmacen: mantenimiento.idAlmacen || "",
                 costo_total: mantenimiento.costo_total
                     ? parseFloat(mantenimiento.costo_total)
                     : 0.00,
@@ -108,6 +109,9 @@ export const EditarMantenimiento = ({ modalOpen, onClose, mantenimiento, listaMo
 
     const opcionesMotos = [...motos]
         .map((moto) => ({ value: moto.id, label: moto.inciso }));
+
+    const opcionesInventario = [...inventarios]
+        .map((inv) => ({ value: inv.id, label: inv.nombre }));
 
     const opcionesServicios = [...Servicios]
         .sort((a, b) => a.nombre.localeCompare(b.nombre))
@@ -204,22 +208,17 @@ export const EditarMantenimiento = ({ modalOpen, onClose, mantenimiento, listaMo
                                     </div>
                                     <div className="col-md-4 mb-2">
                                         <label className="form-label">Inventario</label>
-                                        <select
-
-                                            id="inventario"
-                                            name="inventario"
-                                            className={`form-control ${errors.inventario ? "is-invalid" : ""}`}
-                                            value={formData.inventario}
-                                            onChange={handleChange}
-                                            onKeyDown={(e) => handleKeyDown(e, "nota")}
-                                            disabled
-                                        >
-                                            <option value="" disabled>SELECCIONA</option>
-                                            <option value="1">PRINCIPAL</option>
-                                            <option value="2">SECUNDARIO</option>
-
-                                        </select>
-                                        {errors.almacen && <div className="text-danger">{errors.almacen}</div>}
+                                        <input
+                                            // ref={autorizoRef}
+                                            id="idAlmacen"
+                                            type="text"
+                                            name="idAlmacen"
+                                            className="form-control form-control-sm"
+                                            value={opcionesInventario.find(op => op.value === formData.idAlmacen)?.label || ""}
+                                            readOnly
+                                            onKeyDown={(e) => handleKeyDown(e, "costo_refacciones")}
+                                        />
+                                        {errors.idAlmacen && <div className="text-danger">{errors.idAlmacen}</div>}
 
                                     </div>
                                 </div>

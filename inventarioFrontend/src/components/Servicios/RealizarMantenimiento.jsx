@@ -6,8 +6,8 @@ import { obtenerMotos } from "../../api/motosApi";
 import { AgregarMantenimiento, ObtenerMantenimientos, ObtenerServicios, } from "../../api/ServiciosApi";
 import { AgregarRefaccionesModal } from "./agregarRefaccionesModal";
 import { cargarListasEntradas } from "../../api/almacenProductosApi";
-import { useNavigate } from "react-router";
 import { useSpring, animated } from "@react-spring/web";
+import { obtenerInventarios } from "../../api/productosApi";
 
 export const RealizarMantenimiento = () => {
     const idUsuario = localStorage.getItem("idUsuario");
@@ -20,13 +20,14 @@ export const RealizarMantenimiento = () => {
         servicio: [],
         costo_total: "",
         comentario: "",
-        inventario: "",
+        idAlmacen: "",
     });
 
     const [errors, setErrors] = useState({});
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [motos, setMotos] = useState([]);
     const [autorizaciones, setAutorizaciones] = useState([]);
+    const [inventario, setInventario] = useState([]);
     const [servicio, setServicio] = useState([]);
     const [productosSeleccionados, setProductosSeleccionados] = useState([]);
     const motoRef = useRef(null);
@@ -115,6 +116,17 @@ export const RealizarMantenimiento = () => {
             );
         }
     };
+    const fetchInventarios = async () => {
+        const data = await obtenerInventarios();
+        if (data) {
+            const options = data.map((item) => ({
+                value: item.id,
+                label: item.nombre,
+            }));
+            setInventario(options);
+        }
+    };
+
 
     const opcionesVehiculos = motos.map((moto) => ({
         value: moto.id,
@@ -138,6 +150,7 @@ export const RealizarMantenimiento = () => {
         cargarServicios();
         fetchMotos();
         fetchAutorizo();
+        fetchInventarios();
     }, []);
 
     const handleChange = (e) => {
@@ -210,7 +223,7 @@ export const RealizarMantenimiento = () => {
             idCancelo: null,
             fecha_cancelacion: null,
             servicios: formData.servicio,
-            inventario: formData.inventario,
+            idAlmacen: formData.idAlmacen,
             productos: productosSeleccionados.map((prod) => ({
                 idProducto: prod.id,
                 cantidad: prod.cantidad,
@@ -277,6 +290,7 @@ export const RealizarMantenimiento = () => {
             ...prev,
             vehiculo: "",
             idAutorizo: "",
+            idInventario: "",
             odometro: "",
             servicio: [],
             costo_total: "",
@@ -450,19 +464,38 @@ export const RealizarMantenimiento = () => {
                                     )}
                                 </div>
                                 <div className="col-md-4 mb-2">
-                                    <label className="form-label">Almacen</label>
-                                    <select
-                                        id="inventario"
-                                        name="inventario"
-                                        className={`form-control ${errors.inventario ? "is-invalid" : ""}`}
-                                        value={formData.inventario}
-                                        onChange={handleChange}
-                                        onKeyDown={(e) => handleKeyDown(e, "nota")}
-                                    >
-                                        <option value="" disabled>SELECCIONA</option>
-                                        <option value="1">PRINCIPAL</option>
-                                        <option value="2">SECUNDARIO</option>
-                                    </select>
+                                    <label className="form-label">Inventario</label>
+                                    <Select
+                                        key={formData.idAlmacen}
+                                        ref={autorizoRef}
+                                        id="idAlmacen"
+                                        name="idAlmacen"
+                                        options={inventario}
+                                        value={inventario.find(
+                                            (option) => option.value === formData.idAlmacen
+                                        )}
+                                        placeholder="SELECCIONA"
+                                        onChange={(selectedOption) => {
+                                            setFormData({
+                                                ...formData,
+                                                idAlmacen: selectedOption.value,
+                                            });
+                                            setErrors((prev) => ({ ...prev, idAlmacen: "" }));
+                                        }}
+                                        onKeyDown={(e) => handleKeyDown(e, "costo_refacciones")}
+                                        styles={{
+                                            control: (base) => ({
+                                                ...base,
+                                                minHeight: "45px",
+                                                height: "45px",
+                                            }),
+                                            menuList: (provided) => ({
+                                                ...provided,
+                                                maxHeight: "200px",
+                                                overflowY: "auto",
+                                            }),
+                                        }}
+                                    />
                                     {errors.inventario && (
                                         <div className="text-danger">{errors.inventario}</div>
                                     )}
@@ -625,6 +658,7 @@ export const RealizarMantenimiento = () => {
                             onClose={handleCloseModal}
                             modalOpen={isModalOpen}
                             agregarProductoATabla={agregarProductoATabla}
+                            idAlmacenSeleccionado={formData.idAlmacen}
                         />
                     </div>
                 </div>

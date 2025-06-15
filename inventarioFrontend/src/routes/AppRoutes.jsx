@@ -1,7 +1,3 @@
-
-
-
-import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { LoginScreen } from '../screen/LoginScreen';
 import { MotosScreen } from '../screen/MotosScreen';

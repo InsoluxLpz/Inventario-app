@@ -32,7 +32,7 @@ export const agregarInventario = async (inventarioData) => {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(inventarioData),
         });
-        
+
         let data;
         try {
             data = await response.json();
@@ -40,18 +40,18 @@ export const agregarInventario = async (inventarioData) => {
             console.error('No se pudo parsear la respuesta JSON:', error);
             data = { message: 'Respuesta inválida del servidor' };
         }
-        
+
         if (response.ok) {
             Swal.fire('Éxito', 'Inventario agregado correctamente.', 'success').then(() => {
                 window.location.reload();
             })
-        return data;
+            return data;
         } else {
             console.error('Error en la respuesta del backend:', data);
             Swal.fire('Error', data.message || 'Hubo un problema al agregar el inventario.', 'error');
             return { error: data.message || 'Hubo un problema al agregar el inventario.' };
         }
-        
+
     } catch (error) {
         console.error('Error al realizar la solicitud:', error);
         Swal.fire('Error', 'Hubo un problema al conectar con el servidor.', 'error');
@@ -151,9 +151,9 @@ export const cargarListasEntradas = async () => {
     }
 };
 
-export const cargarListasCampos = async () => {
+export const cargarListasCampos = async (idAlmacen) => {
     try {
-        const response = await fetch(`${API_URL}/entrada/obtener_inventario`, {
+        const response = await fetch(`${API_URL}/entrada/obtener_inventario?idAlmacen=${idAlmacen}`, {
             method: "GET",
             headers: {
                 'Content-Type': 'application/json'
@@ -178,52 +178,52 @@ export const cargarListasMovimientos = async (
     limit = 50,
     tipoMovimiento = "",
     subMovimiento = ""
-  ) => {
+) => {
     try {
-      let url = `${API_URL}/entrada/obtener_movimientos?fechaInicio=${fechaInicio}&fechaFin=${fechaFin}&page=${page}&limit=${limit}`;
-  
-      if (tipoMovimiento) {
-        url += `&tipoMovimiento=${tipoMovimiento}`;
-      }
-      if (subMovimiento) {
-        url += `&subMovimiento=${subMovimiento}`;
-      }
-  
-      console.log("URL solicitada:", url);
-  
-      const response = await fetch(url, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-  
-      if (response.ok) {
-        const data = await response.json();
-        if (Array.isArray(data.data) && data.data.length === 0) {
-          Swal.fire(
-            "Sin movimientos",
-            data.message || "No se encontraron movimientos",
-            "info"
-          );
-          return [];
+        let url = `${API_URL}/entrada/obtener_movimientos?fechaInicio=${fechaInicio}&fechaFin=${fechaFin}&page=${page}&limit=${limit}`;
+
+        if (tipoMovimiento) {
+            url += `&tipoMovimiento=${tipoMovimiento}`;
         }
-        return data;
-      } else {
-        const errorData = await response.json().catch(() => ({
-          message: "Error inesperado.",
-        }));
-        Swal.fire("Error", errorData.message, "error");
-        return [];
-      }
+        if (subMovimiento) {
+            url += `&subMovimiento=${subMovimiento}`;
+        }
+
+        console.log("URL solicitada:", url);
+
+        const response = await fetch(url, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            if (Array.isArray(data.data) && data.data.length === 0) {
+                Swal.fire(
+                    "Sin movimientos",
+                    data.message || "No se encontraron movimientos",
+                    "info"
+                );
+                return [];
+            }
+            return data;
+        } else {
+            const errorData = await response.json().catch(() => ({
+                message: "Error inesperado.",
+            }));
+            Swal.fire("Error", errorData.message, "error");
+            return [];
+        }
     } catch (error) {
-      console.error("Error al realizar la solicitud:", error);
-      Swal.fire("Error", "Problema al conectar con el servidor.", "error");
-      return [];
+        console.error("Error al realizar la solicitud:", error);
+        Swal.fire("Error", "Problema al conectar con el servidor.", "error");
+        return [];
     }
-  };
-  
-  
+};
+
+
 
 
 
@@ -252,7 +252,7 @@ export const cargarListasMovimientosXProductosDetalles = async (idProducto, fech
     try {
         // Construir la URL dinámica
         let url = `${API_URL}/entrada/obtener_movimientosXProductos_detalles`;
-        
+
         if (idProducto) {
             url += `/${idProducto}`;
         }
@@ -313,21 +313,20 @@ export const buscarProducto = async (codigo) => {
 // * consulta para buscar productos por nombre del producto
 export const obtenerTodosLosProductos = async () => {
     try {
-      const response = await fetch(`${API_URL}/entrada/productos`, {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-      });
-      if (response.ok) {
-        const data = await response.json();
-        return data;
-      } else {
-        console.error("Error en la respuesta del servidor");
-        return null;
-      }
+        const response = await fetch(`${API_URL}/entrada/productos`, {
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
+        });
+        if (response.ok) {
+            const data = await response.json();
+            return data;
+        } else {
+            console.error("Error en la respuesta del servidor");
+            return null;
+        }
     } catch (error) {
-      console.error("Error al realizar la solicitud", error);
-      Swal.fire("Error", "Hubo un problema al conectar con el servidor.", "error");
-      return null;
+        console.error("Error al realizar la solicitud", error);
+        Swal.fire("Error", "Hubo un problema al conectar con el servidor.", "error");
+        return null;
     }
-  };
-  
+};

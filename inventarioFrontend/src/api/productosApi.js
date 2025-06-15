@@ -225,3 +225,23 @@ export const obtenerUnidadMedidas = async () => {
         return null;
     }
 };
+export const obtenerInventarios = async () => {
+    try {
+        const response = await fetch(`${API_URL}/productos/obtener_almacen`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+        });
+
+        if (response.ok) {
+            const data = await response.json()
+            return data;
+        }
+
+    } catch (error) {
+        console.error('Error al realizar la solicitud:', error);
+        Swal.fire('Error', 'Hubo un problema al conectar con el servidor.', 'error');
+        return null;
+    }
+};

@@ -3,7 +3,7 @@ import { Box, Button, FormControlLabel, Grid2, IconButton, Switch, TextField, Ty
 import { NavBar } from "../NavBar";
 import { EliminarMantenimiento, ObtenerMantenimientos, ObtenerServicios, } from "../../api/ServiciosApi";
 import { EditarMantenimiento } from "./EditarMantenimiento";
-import { obtenerProductos } from "../../api/productosApi";
+import { obtenerInventarios, obtenerProductos } from "../../api/productosApi";
 import { obtenerMotos } from "../../api/motosApi";
 import { VerMantenimientoCancelado } from "./VerMantenimientoCancelado";
 import EditIcon from "@mui/icons-material/Edit";
@@ -21,6 +21,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import Select from "react-select";
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import { generarPDFMantenimiento } from "../../utils/GenerarPdfMantenimiento";
+import { obtenerInventario } from "../../api/almacenProductosApi";
 
 
 export const ListaMantenimientos = () => {
@@ -30,6 +31,7 @@ export const ListaMantenimientos = () => {
   const [openModalInfo, setOpenModalInfo] = useState(false);
   const [servicios, setServicios] = useState([]);
   const [productos, setProductos] = useState([]);
+  const [inventario, setInventario] = useState([]);
   const [todos, setTodos] = useState(false);
   const [motos, setMotos] = useState([]);
   const [filtro, setFiltro] = useState({
@@ -68,6 +70,11 @@ export const ListaMantenimientos = () => {
         .filter((serv) => serv.status !== 0)
       setServicios(serviciosFiltrados);
     }
+  };
+
+  const fetchInventario = async () => {
+    const data = await obtenerInventarios();
+    if (data) setInventario(data);
   };
 
   const fetchProducto = async () => {
@@ -116,7 +123,8 @@ export const ListaMantenimientos = () => {
         odometro: servicio.odometro || 0,
         status: servicio.status,
         nombre: servicio.nombre,
-        inventario: servicio.inventario
+        idAlmacen: servicio.idAlmacen,
+        nombre_inventario: servicio.nombre_inventario,
       }));
       const mantenimientosOrdenados = mantenimientosAdaptados.sort((a, b) => new Date(a.fecha_inicio) - new Date(b.fecha_inicio));
 
@@ -133,6 +141,7 @@ export const ListaMantenimientos = () => {
     fetchMotos();
     fetchProducto();
     fetchServicios();
+    fetchInventario();
   }, []);
 
   const obtenerInicioYFinSemana = () => {
@@ -201,8 +210,10 @@ export const ListaMantenimientos = () => {
   ];
   const opcionesInventario = [
     { value: "", label: "Selecciona" },
-    { value: "1", label: "Principal" },
-    { value: "2", label: "Secundario" },
+    ...inventario.sort((a, b) => a.nombre.localeCompare(b.nombre)).map((prod) => ({
+      value: prod.id,
+      label: prod.nombre
+    }))
   ];
 
 
@@ -439,7 +450,7 @@ export const ListaMantenimientos = () => {
                           {formatearDinero(mantenimiento.costo_total)}
                         </TableCell>
                         <TableCell align="center" sx={{ textAlign: "center", }}>
-                          {mantenimiento.inventario === 1 ? "Principal" : mantenimiento.inventario === 2 ? "Secundario" : ""}
+                          {mantenimiento.nombre_inventario}
 
                         </TableCell>
                         <TableCell align="center" sx={{ textAlign: "left", fontWeight: "bold", color: mantenimiento.status === 0 ? "red" : "green" }}>
@@ -523,6 +534,7 @@ export const ListaMantenimientos = () => {
               listaMotos={motos}
               listaProductos={productos}
               listaServicios={servicios}
+              listaInventarios={inventario}
             />
 
             <VerMantenimientoCancelado
@@ -531,6 +543,7 @@ export const ListaMantenimientos = () => {
               mantenimiento={mantenimientoSeleccionado}
               listaMotos={motos}
               listaServicios={servicios}
+              listaInventarios={inventario}
             />
           </Paper>
         </Box>

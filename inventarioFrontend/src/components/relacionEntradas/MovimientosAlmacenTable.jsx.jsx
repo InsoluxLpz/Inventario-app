@@ -28,6 +28,7 @@ import FeedIcon from "@mui/icons-material/Feed";
 import { EditarProductoAlmacenModal } from "./EditarProductoAlmacenModal";
 import { useNavigate } from "react-router";
 import CleaningServicesIcon from "@mui/icons-material/CleaningServices";
+import { obtenerInventarios } from "../../api/productosApi";
 
 export const MovimientosAlmacenTable = () => {
   const navigate = useNavigate();
@@ -38,6 +39,7 @@ export const MovimientosAlmacenTable = () => {
   const [productoSeleccionado, setProductoSeleccionado] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [showInactive, setShowInactive] = useState(false);
+  const [almacen, setAlmacen] = useState([]);
 
   // * modal movimientos detalles
   const [openModal, setOpenModal] = useState(false);
@@ -58,6 +60,7 @@ export const MovimientosAlmacenTable = () => {
     fechaFin: "",
     tipoMovimiento: "",
     subMovimiento: "",
+    idAlmacen: "",
   });
 
   const handleOpenModal = (id) => {
@@ -128,6 +131,16 @@ export const MovimientosAlmacenTable = () => {
 
   // * funcion para cargar los tipos de movimientos y subtipos en el select
   useEffect(() => {
+    const fetchAlmacen = async () => {
+      const data = await obtenerInventarios();
+      if (data) {
+        const options = data.map((item) => ({
+          value: item.id,
+          label: item.nombre,
+        }));
+        setAlmacen(options);
+      }
+    };
     const cargarListas = async () => {
       try {
         const data = await cargarListasEntradas();
@@ -154,6 +167,7 @@ export const MovimientosAlmacenTable = () => {
       }
     };
     cargarListas();
+    fetchAlmacen();
   }, []);
 
   // * funcion para actualizar la tabla
@@ -178,7 +192,8 @@ export const MovimientosAlmacenTable = () => {
       1,
       50,
       filtro.tipoMovimiento,
-      filtro.subMovimiento
+      filtro.subMovimiento,
+      filtro.idAlmacen,
     );
   };
 
@@ -203,9 +218,14 @@ export const MovimientosAlmacenTable = () => {
           ?.toLowerCase()
           .includes(filtro.subMovimiento.toLowerCase().trim()));
 
+    const almacenMatch =
+      filtro.idAlmacen === "" ||
+      m.idAlmacen === filtro.idAlmacen;
+
     return (
       fechaInicioMatch &&
       fechaFinMatch &&
+      almacenMatch &&
       tipoMovimientoMatch &&
       subMovimientoMatch
     );
@@ -263,6 +283,25 @@ export const MovimientosAlmacenTable = () => {
           >
             <CleaningServicesIcon sx={{ fontSize: 24 }} />
           </Button>
+
+
+          <FormControl sx={{ minWidth: 200 }}>
+            <InputLabel id="almacen-label">Seleccione Almacén</InputLabel>
+            <Select
+              labelId="almacen-label"
+              name="idAlmacen"
+              value={filtro.idAlmacen}
+              onChange={handleFiltroChange}
+              label="Seleccione Almacén"
+            >
+              {almacen.map((option) => (
+                <MenuItem key={option.value} value={option.value}>
+                  {option.label}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
 
           <FormControl sx={{ minWidth: 200 }}>
             <InputLabel>Tipo Movimiento</InputLabel>
@@ -351,7 +390,7 @@ export const MovimientosAlmacenTable = () => {
                       // "No.Movimiento",
                       "Fecha",
                       "Tipo de Movimiento",
-                      "Subtipo",
+                      "Subtipo", -
                       // "Realizo Mov.",
                       // "Autorizo",
                       "Detalles",
@@ -379,8 +418,8 @@ export const MovimientosAlmacenTable = () => {
                       <TableCell align="left">
                         {producto.fecha_movimiento
                           ? new Date(
-                              producto.fecha_movimiento
-                            ).toLocaleDateString("es-MX")
+                            producto.fecha_movimiento
+                          ).toLocaleDateString("es-MX")
                           : "Fecha no disponible"}
                       </TableCell>
                       <TableCell align="left">

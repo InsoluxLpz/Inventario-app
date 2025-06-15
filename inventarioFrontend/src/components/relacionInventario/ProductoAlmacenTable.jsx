@@ -15,15 +15,20 @@ import {
 import FilterListIcon from "@mui/icons-material/FilterList";
 import { useSpring, animated } from "@react-spring/web";
 import { cargarListasCampos } from "../../api/almacenProductosApi";
+import Select from "react-select";
+import { obtenerInventarios } from "../../api/productosApi";
 
 export const ProductoAlmacenTable = () => {
   const [inventario, setInventario] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [almacen, setAlmacen] = useState([]);
   const [filtro, setFiltro] = useState({
+    almacen: "",
     codigo: "",
     unidadMedida: "",
     nombreProducto: "",
     nombreGrupo: "",
+    idAlmacen: "",
   });
 
   // Animación para todo el componente
@@ -33,20 +38,33 @@ export const ProductoAlmacenTable = () => {
     config: { tension: 500, friction: 30 },
   });
 
+
   useEffect(() => {
-    fetchInventario();
+    fetchAlmacen();
   }, []);
 
-  const fetchInventario = async () => {
+  const fetchAlmacen = async () => {
+    const data = await obtenerInventarios();
+    if (data) {
+      const options = data.map((item) => ({
+        value: item.id,
+        label: item.nombre,
+      }));
+      setAlmacen(options);
+    }
+  };
+
+  const fetchInventario = async (idAlmacen) => {
     try {
-      const data = await cargarListasCampos();
+      const data = await cargarListasCampos(idAlmacen); // <-- asegúrate que tu función lo acepte
       if (data) {
         setInventario(data);
       }
     } catch (error) {
-      console.error("Error en la petición al obtener Inventario");
+      console.error("Error al obtener Inventario:", error);
     }
   };
+
 
   const handleFiltroChange = (e) => {
     setFiltro({ ...filtro, [e.target.name]: e.target.value });
@@ -77,9 +95,15 @@ export const ProductoAlmacenTable = () => {
       (m.nombreGrupo &&
         m.nombreGrupo.toLowerCase().includes(filtro.nombreGrupo.toLowerCase()));
 
+    const almacenMatch =
+      filtro.idAlmacen === "" ||
+      m.idAlmacen === filtro.idAlmacen;
+
+
     return (
       nombreProductoMatch &&
       codigoMatch &&
+      almacenMatch &&
       unidadMedidaMatch &&
       nombreGrupoMatch
     );
@@ -141,6 +165,34 @@ export const ProductoAlmacenTable = () => {
                 marginRight: 1, // Añade margen para separar del primer filtro
               }}
             />
+            <Select
+              id="idAlmacen"
+              name="idAlmacen"
+              options={almacen}
+              menuPortalTarget={document.body}
+              value={almacen.find((option) => option.value === filtro.idAlmacen)}
+              placeholder="SELECCIONA ALMACEN "
+              onChange={(selectedOption) => {
+                setFiltro((prev) => ({
+                  ...prev,
+                  idAlmacen: selectedOption.value,
+                }));
+                fetchInventario(selectedOption.value);
+              }}
+              styles={{
+                control: (base) => ({
+                  ...base,
+                  minHeight: "45px",
+                  height: "45px",
+                }),
+                menuList: (provided) => ({
+                  ...provided,
+                  maxHeight: "135px",
+                  overflowY: "auto",
+                }),
+              }}
+            />
+
             <TextField
               label="Código"
               name="codigo"
@@ -191,89 +243,89 @@ export const ProductoAlmacenTable = () => {
 
           <Paper sx={{ width: "100%", margin: "0 auto" }}>
             <TableContainer sx={{ maxHeight: 600, backgroundColor: "#eaeded" }}>
-                <Table stickyHeader>
-                  <TableHead>
-                    <TableRow>
-                      {[
-                        "Codigo",
-                        "Producto",
-                        "Grupo",
-                        "Unidad de medida",
-                        "Precio",
-                        "Cantidad",
-                        "Subtotal",
-                      ].map((header) => (
-                        <TableCell
-                          key={header}
-                          align={
-                            ["Precio", "Cantidad", "Subtotal"].includes(
-                              header
-                            )
-                              ? "right"
-                              : "left"
-                          }
-                          sx={{
-                            fontWeight: "bold",
-                            backgroundColor: "#f4f6f7",
-                            color: "black",
-                            minWidth: 100,
-                          }}
-                        >
-                          {header}
-                        </TableCell>
-                      ))}
-                    </TableRow>
-                  </TableHead>
-
-                  <TableBody>
-                    {sortedInventario.map((producto) => (
-                      <TableRow key={producto.id}>
-                        <TableCell align="left">{producto.codigo}</TableCell>
-                        <TableCell align="left">
-                          {producto.nombreProducto}
-                        </TableCell>
-                        <TableCell align="left">
-                          {producto.nombreGrupo}
-                        </TableCell>
-                        <TableCell align="left">
-                          {producto.unidadMedida}
-                        </TableCell>
-                        <TableCell align="right">
-                          {formatearDinero(producto.costoUnitario)}
-                        </TableCell>
-                        <TableCell align="right">
-                          {formatearNumero(producto.cantidad)}
-                        </TableCell>
-                        <TableCell align="right">
-                          {formatearDinero(
-                            producto.cantidad * producto.costoUnitario
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-
-                    {/* fila para el total, la suma de los subtotales de cada producto */}
-                    <TableRow>
+              <Table stickyHeader>
+                <TableHead>
+                  <TableRow>
+                    {[
+                      "Codigo",
+                      "Producto",
+                      "Grupo",
+                      "Unidad de medida",
+                      "Precio",
+                      "Cantidad",
+                      "Subtotal",
+                    ].map((header) => (
                       <TableCell
-                        colSpan={6}
-                        align="right"
-                        sx={{ fontWeight: "bold" }}
-                      >
-                        Total en inventario:
-                      </TableCell>
-                      <TableCell align="right" sx={{ fontWeight: "bold" }}>
-                        {formatearDinero(
-                          sortedInventario.reduce(
-                            (total, producto) =>
-                              total +
-                              producto.cantidad * producto.costoUnitario,
-                            0
+                        key={header}
+                        align={
+                          ["Precio", "Cantidad", "Subtotal"].includes(
+                            header
                           )
+                            ? "right"
+                            : "left"
+                        }
+                        sx={{
+                          fontWeight: "bold",
+                          backgroundColor: "#f4f6f7",
+                          color: "black",
+                          minWidth: 100,
+                        }}
+                      >
+                        {header}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                </TableHead>
+
+                <TableBody>
+                  {sortedInventario.map((producto) => (
+                    <TableRow key={producto.id}>
+                      <TableCell align="left">{producto.codigo}</TableCell>
+                      <TableCell align="left">
+                        {producto.nombreProducto}
+                      </TableCell>
+                      <TableCell align="left">
+                        {producto.nombreGrupo}
+                      </TableCell>
+                      <TableCell align="left">
+                        {producto.unidadMedida}
+                      </TableCell>
+                      <TableCell align="right">
+                        {formatearDinero(producto.costoUnitario)}
+                      </TableCell>
+                      <TableCell align="right">
+                        {formatearNumero(producto.cantidad)}
+                      </TableCell>
+                      <TableCell align="right">
+                        {formatearDinero(
+                          producto.cantidad * producto.costoUnitario
                         )}
                       </TableCell>
                     </TableRow>
-                  </TableBody>
-                </Table>
+                  ))}
+
+                  {/* fila para el total, la suma de los subtotales de cada producto */}
+                  <TableRow>
+                    <TableCell
+                      colSpan={6}
+                      align="right"
+                      sx={{ fontWeight: "bold" }}
+                    >
+                      Total en inventario:
+                    </TableCell>
+                    <TableCell align="right" sx={{ fontWeight: "bold" }}>
+                      {formatearDinero(
+                        sortedInventario.reduce(
+                          (total, producto) =>
+                            total +
+                            producto.cantidad * producto.costoUnitario,
+                          0
+                        )
+                      )}
+                    </TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
             </TableContainer>
           </Paper>
         </Box>

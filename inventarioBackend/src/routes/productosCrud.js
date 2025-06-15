@@ -362,6 +362,24 @@ router.get('/obtener_unidad_medida', async (req, res) => {
 
 });
 
+router.get('/obtener_almacen', async (req, res) => {
+
+    const query = `SELECT * FROM cat_almacenes`
+
+    try {
+        const [results] = await db.query(query);
+
+        if (results.length === 0) {
+            return res.status(404).json('No se encontraron vlaores a mostrar en la tabla')
+        }
+
+        return res.status(200).json(results);
+    } catch (error) {
+        console.error('Error al obtener los prodructos:', error);
+        return res.status(500).json({ message: 'Error al obtener los productos' });
+    }
+});
+
 
 
 

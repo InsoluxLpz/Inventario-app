@@ -3,11 +3,12 @@ import Select from 'react-select';
 import { Button } from '@mui/material';
 import { cargarListasEntradas } from '../../api/almacenProductosApi';
 
-export const VerMantenimientoCancelado = ({ modalOpen, onClose, mantenimiento, listaMotos, listaServicios }) => {
+export const VerMantenimientoCancelado = ({ modalOpen, onClose, mantenimiento, listaMotos, listaServicios, listaInventarios }) => {
     if (!modalOpen || !mantenimiento) return null;
 
     const motos = listaMotos;
     const Servicios = listaServicios;
+    const inventarios = listaInventarios;
 
     const formatFecha = (fecha) => {
         if (!fecha) return "";
@@ -26,7 +27,7 @@ export const VerMantenimientoCancelado = ({ modalOpen, onClose, mantenimiento, l
         comentario: "",
         status: "",
         nombre: "",
-        inventario: "",
+        idAlmacen: "",
     });
 
     const [autorizaciones, setAutorizaciones] = useState([]);
@@ -42,7 +43,7 @@ export const VerMantenimientoCancelado = ({ modalOpen, onClose, mantenimiento, l
                 servicio: mantenimiento.servicios.map(s => s.id) || [],
                 productos: mantenimiento.productos || [],
                 comentario: mantenimiento.comentario || "",
-                inventario: mantenimiento.inventario || "",
+                idAlmacen: mantenimiento.idAlmacen || "",
                 costo_total: mantenimiento.costo_total
                     ? parseFloat(mantenimiento.costo_total)
                     : 0.00,
@@ -67,11 +68,15 @@ export const VerMantenimientoCancelado = ({ modalOpen, onClose, mantenimiento, l
 
 
     const formatNumber = (value) => {
-        return parseFloat(value).toLocaleString('es-MX'); // Formato para México (1,500.00)
+        return parseFloat(value).toLocaleString('es-MX');
     };
 
     const opcionesMotos = [...motos]
         .map((moto) => ({ value: moto.id, label: moto.inciso }));
+
+    const opcionesInventario = [...inventarios]
+        .map((inv) => ({ value: inv.id, label: inv.nombre }));
+
 
     const opcionesServicios = [...Servicios]
         .sort((a, b) => a.nombre.localeCompare(b.nombre))
@@ -154,20 +159,16 @@ export const VerMantenimientoCancelado = ({ modalOpen, onClose, mantenimiento, l
 
                                     <div className="col-md-4 mb-2">
                                         <label className="form-label">inventario</label>
-                                        <select
-
-                                            id="inventario"
-                                            name="inventario"
-                                            className={`form-control `}
-                                            value={formData.inventario}
-                                            onKeyDown={(e) => handleKeyDown(e, "nota")}
-                                            disabled
-                                        >
-                                            <option value="" disabled>SELECCIONA</option>
-                                            <option value="1">PRINCIPAL</option>
-                                            <option value="2">SECUNDARIO</option>
-
-                                        </select>
+                                        <input
+                                            // ref={autorizoRef}
+                                            id="idAlmacen"
+                                            type="text"
+                                            name="idAlmacen"
+                                            className="form-control form-control-sm"
+                                            value={opcionesInventario.find(op => op.value === formData.idAlmacen)?.label || ""}
+                                            readOnly
+                                            onKeyDown={(e) => handleKeyDown(e, "costo_refacciones")}
+                                        />
                                     </div>
                                 </div>
 

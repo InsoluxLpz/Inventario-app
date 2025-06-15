@@ -5,7 +5,7 @@ import { useEffect, useState, useRef } from "react";
 import Select from "react-select";
 import { obtenerInventario } from "../../api/almacenProductosApi";
 
-export const AgregarRefaccionesModal = ({ onClose, modalOpen, agregarProductoATabla }) => {
+export const AgregarRefaccionesModal = ({ onClose, modalOpen, agregarProductoATabla, idAlmacenSeleccionado }) => {
     if (!modalOpen) return null;
 
     const [formData, setFormData] = useState({
@@ -44,11 +44,14 @@ export const AgregarRefaccionesModal = ({ onClose, modalOpen, agregarProductoATa
         const productoSeleccionado = refacciones.find((p) => p.nombre === selectedOption?.value);
         if (!productoSeleccionado) return;
 
+
         // Buscar el inventario por nombreProducto en lugar de idProducto
-        const itemInventario = inventario.find((inv) => inv.nombreProducto === productoSeleccionado.nombre);
+        const itemInventario = inventario.find((inv) => inv.nombreProducto === productoSeleccionado.nombre &&
+            inv.idAlmacen === idAlmacenSeleccionado);
 
         console.log("Producto seleccionado:", productoSeleccionado);
         console.log("Inventario encontrado:", itemInventario);
+        console.log("Inventario encontrado:", idAlmacenSeleccionado);
 
         setCantidadDisponible(itemInventario ? itemInventario.cantidad : 0);
 
@@ -184,7 +187,7 @@ export const AgregarRefaccionesModal = ({ onClose, modalOpen, agregarProductoATa
                                             name="cantidad"
                                             className={`form-control ${errors.cantidad ? "is-invalid" : ""}`}
                                             onChange={handleChange}
-                                            value={formData.cantidad} // Ahora puede estar vacío sin volverse 0
+                                            value={formData.cantidad}
                                             ref={inputCantidadRef}
                                         />
                                         {errors.cantidad && <div className="invalid-feedback">{errors.cantidad}</div>}
