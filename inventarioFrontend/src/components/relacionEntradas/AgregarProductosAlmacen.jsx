@@ -72,7 +72,7 @@ export const AgregarProductosAlmacen = () => {
 
 
   // * que se active solamente cuando se seleccione traspaso si no, sale desactivado
-  
+
 
   const [formData, setFormData] = useState({
     proveedor: null,
@@ -83,6 +83,9 @@ export const AgregarProductosAlmacen = () => {
     tipo: null,
     autorizo: null,
     tipoMovimiento: null,
+    almacenOrigen: null,
+    almacenDestino: null,
+    almacenUnico: null,
   });
 
   // * funciones para el modal
@@ -272,11 +275,31 @@ export const AgregarProductosAlmacen = () => {
   // * validacion para no permitir enviar ningun valor vacio del formulario
   const validateForm = () => {
     const newErrors = {};
+
     Object.keys(formData).forEach((key) => {
-      if (!formData[key]) {
+      if (
+        key !== "almacenOrigen" &&
+        key !== "almacenDestino" &&
+        key !== "almacenUnico" &&
+        !formData[key]
+      ) {
         newErrors[key] = "Este campo es obligatorio";
       }
     });
+
+    if (formData.tipo?.label?.toLowerCase() === "traspaso") {
+      if (!formData.almacenOrigen) {
+        newErrors.almacenOrigen = "Seleccione el almacén de origen";
+      }
+      if (!formData.almacenDestino) {
+        newErrors.almacenDestino = "Seleccione el almacén de destino";
+      }
+    } else {
+      if (!formData.almacenUnico) {
+        newErrors.almacenUnico = "Seleccione el almacén";
+      }
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -308,9 +331,9 @@ export const AgregarProductosAlmacen = () => {
           idProveedor: formData.proveedor
             ? proveedorFijo
             : {
-                value: formData.proveedor.value,
-                label: formData.proveedor.label,
-              },
+              value: formData.proveedor.value,
+              label: formData.proveedor.label,
+            },
           costo_unitario: formData.costo_unitario,
           cantidad: formData.cantidad,
         },
@@ -339,6 +362,9 @@ export const AgregarProductosAlmacen = () => {
       tipo: tipoEntradaFijo,
       autorizo: autorizoFijo,
       tipoMovimiento: tipoMovimientoFijo,
+      almacenOrigen: prev.almacenOrigen,
+      almacenDestino: prev.almacenDestino,
+      almacenUnico: prev.almacenUnico,
     });
 
     setErrors({});
@@ -354,14 +380,23 @@ export const AgregarProductosAlmacen = () => {
 
     // * esto es lo que se envia al backend
     const datosParaEnviar = {
-      fecha: productosAgregados[0].fecha, // Usa la fecha de uno de los productos
+      fecha: productosAgregados[0].fecha,
       idTipoMovimiento: productosAgregados[0].idTipoMovimiento,
       idTipoSubmovimiento: productosAgregados[0].idTipoSubmovimiento,
       idAutorizo: productosAgregados[0].idAutorizo,
-      productos: productosAgregados.flatMap((item) => item.productos), // Flatten para enviar todos los productos en un solo array
-      total: total,
+      productos: productosAgregados.flatMap((item) => item.productos),
+      total,
       idUsuario,
+      idAlmacenOrigen:
+        formData.tipo?.label?.toLowerCase() === "traspaso"
+          ? formData.almacenOrigen?.value
+          : null,
+      idAlmacenDestino:
+        formData.tipo?.label?.toLowerCase() === "traspaso"
+          ? formData.almacenDestino?.value
+          : formData.almacenUnico?.value,
     };
+
     // * Llamada a la API para agregar el inventario
     await agregarInventario(datosParaEnviar);
 
@@ -540,18 +575,57 @@ export const AgregarProductosAlmacen = () => {
               </div>
 
               {/* NUEVO CAMPO: ALMACÉN */}
-              <div className="col-md-3">
-                <label>Almacén</label>
-                <Select
-                  options={listaAlmacenes}
-                  value={formData.almacen}
-                  onChange={(opcion) => handleSelectChange("almacen", opcion)}
-                  isDisabled={almacenBloqueado}
-                />
-                {errors.almacen && (
-                  <div className="text-danger">{errors.almacen}</div>
-                )}
-              </div>
+              {/* Renderizado dinámico de campos de almacén */}
+              {formData.tipo?.label?.toLowerCase() === "traspaso" ? (
+                <>
+                  {/* Almacén Origen */}
+                  <div className="col-md-3">
+                    <label>De almacén</label>
+                    <Select
+                      options={listaAlmacenes}
+                      value={formData.almacenOrigen}
+                      onChange={(opcion) =>
+                        handleSelectChange("almacenOrigen", opcion)
+                      }
+                      isDisabled={almacenBloqueado}
+                    />
+                    {errors.almacenOrigen && (
+                      <div className="text-danger">{errors.almacenOrigen}</div>
+                    )}
+                  </div>
+
+                  {/* Almacén Destino */}
+                  <div className="col-md-3">
+                    <label>A almacén</label>
+                    <Select
+                      options={listaAlmacenes}
+                      value={formData.almacenDestino}
+                      onChange={(opcion) =>
+                        handleSelectChange("almacenDestino", opcion)
+                      }
+                      isDisabled={almacenBloqueado}
+                    />
+                    {errors.almacenDestino && (
+                      <div className="text-danger">{errors.almacenDestino}</div>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <div className="col-md-3">
+                  <label>Almacén</label>
+                  <Select
+                    options={listaAlmacenes}
+                    value={formData.almacenUnico}
+                    onChange={(opcion) =>
+                      handleSelectChange("almacenUnico", opcion)
+                    }
+                    isDisabled={almacenBloqueado}
+                  />
+                  {errors.almacenUnico && (
+                    <div className="text-danger">{errors.almacenUnico}</div>
+                  )}
+                </div>
+              )}
 
               {/* PROVEEDORES */}
               <div className="col-md-3">
@@ -567,7 +641,7 @@ export const AgregarProductosAlmacen = () => {
                 )}
               </div>
               {/* FECHA */}
-              <div className="col-md-3" style={{marginTop: "18px"}}>
+              <div className="col-md-3" style={{ marginTop: "18px" }}>
                 <label>Fecha</label>
                 <input
                   type="date"
@@ -640,19 +714,19 @@ export const AgregarProductosAlmacen = () => {
               </div>
 
               <div
-              className="mt-1 row-1"
-              style={{ display: "flex", alignItems: "venter" }}
+                className="mt-1 row-1"
+                style={{ display: "flex", alignItems: "venter" }}
               >
-              <Button
-                type="submit"
-                variant="contained"
-                color="primary"
-                ref={agregarRef}
-                onKeyDown={handleCombinedKeyDown}
-              >
-                Agregar
-              </Button>
-            </div>
+                <Button
+                  type="submit"
+                  variant="contained"
+                  color="primary"
+                  ref={agregarRef}
+                  onKeyDown={handleCombinedKeyDown}
+                >
+                  Agregar
+                </Button>
+              </div>
 
               <div style={{ marginLeft: "auto", width: "25%" }}>
                 <label>Autoriza</label>
@@ -668,7 +742,7 @@ export const AgregarProductosAlmacen = () => {
               </div>
             </div>
 
-          
+
           </form>
         </div>
 
@@ -748,7 +822,7 @@ export const AgregarProductosAlmacen = () => {
                       <td style={{ paddingLeft: "100px" }}>
                         {formatearDinero(
                           item.productos[0]?.cantidad *
-                            item.productos[0]?.costo_unitario
+                          item.productos[0]?.costo_unitario
                         )}
                       </td>
                       <td>

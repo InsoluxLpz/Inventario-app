@@ -13,26 +13,27 @@ router.post('/agregar_inventario', async (req, res) => {
         productos,
         idUsuario,
         total,
+        idAlmacenOrigen,
+        idAlmacenDestino,
     } = req.body;
 
-    console.log('Datos recibidos:', { fecha, idTipoMovimiento, idTipoSubmovimiento, idAutorizo, productos, idUsuario, total });
+    console.log('Datos recibidos:', { fecha, idTipoMovimiento, idTipoSubmovimiento, idAutorizo, productos, idUsuario, total, idAlmacenOrigen, idAlmacenDestino });
 
     // Validación de datos
     if (!fecha || !productos || productos.length === 0 ||
-        !idTipoMovimiento || !idTipoSubmovimiento || !idAutorizo || !idUsuario) {
+        !idTipoMovimiento || !idTipoSubmovimiento || !idAutorizo || !idUsuario || !idAlmacenDestino) {
         return res.status(400).json({ message: 'Todos los campos son obligatorios y debe haber al menos un producto' });
     }
 
     let connection;
     try {
         connection = await db.getConnection();
-        await connection.beginTransaction(); // Iniciar transacción
+        await connection.beginTransaction();
 
-        // Insertar en movimientos_almacen (solo una vez)
         const queryMaestro = `
             INSERT INTO movimientos_almacen
-            (fecha, idTipoMovimiento, idTipoSubmovimiento, idAutorizo, idUsuario, total)
-            VALUES (?, ?, ?, ?, ?, ?)`;
+            (fecha, idTipoMovimiento, idTipoSubmovimiento, idAutorizo, idUsuario, total,idAlmacenOrigen,idAlmacenDestino)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
         const [result] = await connection.query(queryMaestro, [
             fecha,
             idTipoMovimiento,
@@ -40,6 +41,8 @@ router.post('/agregar_inventario', async (req, res) => {
             idAutorizo,
             idUsuario,
             total,
+            idAlmacenOrigen,
+            idAlmacenDestino,
         ]);
 
         const idMovimiento = result.insertId; // Usar el mismo idMovimiento para todos los productos
@@ -82,21 +85,18 @@ router.post('/agregar_inventario', async (req, res) => {
     }
 });
 
-
-
-
 // Actualizar un registro del inventario por ID
 router.put('/actualizar_inventario/:id', async (req, res) => {
     const { id } = req.params;
-    const { fecha, cantidad, costo_unitario, producto, tipo, autorizo, proveedor } = req.body;
+    const { fecha, cantidad, costo_unitario, producto, tipo, autorizo, proveedor, idAlmacenOrigen, idAlmacenDestino } = req.body;
 
-    if (!fecha || !cantidad || !costo_unitario || !producto || !tipo || !autorizo || !proveedor) {
+    if (!fecha || !cantidad || !costo_unitario || !producto || !tipo || !autorizo || !proveedor || !idAlmacenDestino) {
         return res.status(400).json({ message: 'Faltan parámetros en la petición' });
     }
 
     try {
-        const query = `UPDATE movimientos_almacen SET fecha = ?, cantidad = ?, costo_unitario = ?, producto = ?, tipo = ?, autorizo = ?, proveedor = ? WHERE id = ?`;
-        const values = [fecha, cantidad, costo_unitario, producto, tipo, autorizo, proveedor, id];
+        const query = `UPDATE movimientos_almacen SET fecha = ?, cantidad = ?, costo_unitario = ?, producto = ?, tipo = ?, autorizo = ?, proveedor = ? idAlmacenOrigen = ?, idAlmacenDestino = ? WHERE id = ?`;
+        const values = [fecha, cantidad, costo_unitario, producto, tipo, autorizo, proveedor, idAlmacenOrigen, idAlmacenDestino, id];
 
         await db.query(query, values);
 
