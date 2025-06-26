@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from '@mui/icons-material/Delete';
 import AddchartIcon from "@mui/icons-material/Addchart";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -112,7 +113,7 @@ export const ListaMultiAlmacenes = () => {
                         </Typography>
                     </Box>
                 </Box>
-                
+
 
                 <Paper
                     sx={{
@@ -146,6 +147,9 @@ export const ListaMultiAlmacenes = () => {
                                             <IconButton onClick={() => handleOpenModalEdit(alm)}>
                                                 <EditIcon sx={{ fontSize: 20 }} />
                                             </IconButton>
+                                            {/* <IconButton onClick={() => handleOpenModalEdit(alm)}>
+                                                <DeleteIcon sx={{ fontSize: 20, color: "#922b21 " }} />
+                                            </IconButton> */}
                                         </TableCell>
                                     </TableRow>
                                 ))}
@@ -183,7 +187,7 @@ export const ListaMultiAlmacenes = () => {
 
             </animated.div>
 
-              <EditarAlmacenesModal
+            <EditarAlmacenesModal
                 onClose={handleCloseModalEdit}
                 modalOpen={openModalEditar}
                 almacen={almacenSeleccionado}
@@ -195,7 +199,7 @@ export const ListaMultiAlmacenes = () => {
                 onClose={handleCloseModalAgregar}
                 modalOpen={openModalAgregar}
                 agregarAlmacenLista={agregarAlmacenLista}
-            /> 
+            />
         </Box>
     );
 };

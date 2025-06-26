@@ -378,7 +378,9 @@ export const AgregarProductosAlmacen = () => {
     }
     const idUsuario = localStorage.getItem("idUsuario");
 
-    // * esto es lo que se envia al backend
+    const isTraspaso = formData.tipo?.label?.toLowerCase() === "traspaso";
+    const isSalida = formData.tipoMovimiento?.label?.toLowerCase() === "salida";
+
     const datosParaEnviar = {
       fecha: productosAgregados[0].fecha,
       idTipoMovimiento: productosAgregados[0].idTipoMovimiento,
@@ -387,15 +389,19 @@ export const AgregarProductosAlmacen = () => {
       productos: productosAgregados.flatMap((item) => item.productos),
       total,
       idUsuario,
-      idAlmacenOrigen:
-        formData.tipo?.label?.toLowerCase() === "traspaso"
-          ? formData.almacenOrigen?.value
+      idAlmacenOrigen: isTraspaso
+        ? formData.almacenOrigen?.value
+        : isSalida
+          ? formData.almacenUnico?.value
           : null,
-      idAlmacenDestino:
-        formData.tipo?.label?.toLowerCase() === "traspaso"
-          ? formData.almacenDestino?.value
-          : formData.almacenUnico?.value,
+      idAlmacenDestino: isTraspaso
+        ? formData.almacenDestino?.value
+        : isSalida
+          ? null
+          : formData.almacenUnico?.value, // en entradas normales
     };
+
+
 
     // * Llamada a la API para agregar el inventario
     await agregarInventario(datosParaEnviar);
@@ -501,6 +507,25 @@ export const AgregarProductosAlmacen = () => {
     setTotal(nuevoTotal);
   }, [productosAgregados]);
 
+  useEffect(() => {
+    if (formData.tipo?.label?.toLowerCase() !== "traspaso") {
+      // Puedes cambiar la lógica aquí si quieres buscar por nombre 'PRINCIPAL'
+      const almacenPrincipal = listaAlmacenes.find(
+        (a) => a.label.toLowerCase() === "principal"
+      ) || listaAlmacenes[0];
+
+      if (almacenPrincipal) {
+        setFormData((prev) => ({
+          ...prev,
+          almacenUnico: almacenPrincipal,
+          almacenOrigen: null,
+          almacenDestino: null,
+        }));
+      }
+    }
+  }, [formData.tipo, listaAlmacenes]);
+
+
   const miniDrawerWidth = 0;
 
   // * funcion para formato de dinero
@@ -543,105 +568,86 @@ export const AgregarProductosAlmacen = () => {
           </Box>
 
           <form onSubmit={handleSubmit}>
-            <div className="row">
-              {/* TIPO DE MOVIMIENTO */}
+            {/* === FILA 1: Movimiento y Método === */}
+            <div className="row mb-3">
               <div className="col-md-3">
                 <label>Tipo Movimiento</label>
                 <Select
+                  className="select-estandar"
                   options={listaTipoMovimiento}
                   value={formData.tipoMovimiento}
-                  onChange={(opcion) =>
-                    handleSelectChange("tipoMovimiento", opcion)
-                  }
+                  onChange={(opcion) => handleSelectChange("tipoMovimiento", opcion)}
                   isDisabled={tipoMovimientoBloqueado}
                 />
-                {errors.tipoMovimiento && (
-                  <div className="text-danger">{errors.tipoMovimiento}</div>
-                )}
+                {errors.tipoMovimiento && <div className="text-danger">{errors.tipoMovimiento}</div>}
               </div>
 
-              {/* TIPO DE ENTRADA */}
               <div className="col-md-3">
-                <label>Metodo</label>
+                <label>Método</label>
                 <Select
+                  className="select-estandar"
                   options={listaTipoEntradaFiltrada}
                   value={formData.tipo}
                   onChange={(opcion) => handleSelectChange("tipo", opcion)}
                   isDisabled={tipoEntradaBloqueado}
                 />
-                {errors.tipo && (
-                  <div className="text-danger">{errors.tipo}</div>
-                )}
+                {errors.tipo && <div className="text-danger">{errors.tipo}</div>}
               </div>
 
-              {/* NUEVO CAMPO: ALMACÉN */}
-              {/* Renderizado dinámico de campos de almacén */}
               {formData.tipo?.label?.toLowerCase() === "traspaso" ? (
                 <>
-                  {/* Almacén Origen */}
                   <div className="col-md-3">
                     <label>De almacén</label>
                     <Select
+                      className="select-estandar"
                       options={listaAlmacenes}
                       value={formData.almacenOrigen}
-                      onChange={(opcion) =>
-                        handleSelectChange("almacenOrigen", opcion)
-                      }
+                      onChange={(opcion) => handleSelectChange("almacenOrigen", opcion)}
                       isDisabled={almacenBloqueado}
                     />
-                    {errors.almacenOrigen && (
-                      <div className="text-danger">{errors.almacenOrigen}</div>
-                    )}
+                    {errors.almacenOrigen && <div className="text-danger">{errors.almacenOrigen}</div>}
                   </div>
 
-                  {/* Almacén Destino */}
                   <div className="col-md-3">
                     <label>A almacén</label>
                     <Select
+                      className="select-estandar"
                       options={listaAlmacenes}
                       value={formData.almacenDestino}
-                      onChange={(opcion) =>
-                        handleSelectChange("almacenDestino", opcion)
-                      }
+                      onChange={(opcion) => handleSelectChange("almacenDestino", opcion)}
                       isDisabled={almacenBloqueado}
                     />
-                    {errors.almacenDestino && (
-                      <div className="text-danger">{errors.almacenDestino}</div>
-                    )}
+                    {errors.almacenDestino && <div className="text-danger">{errors.almacenDestino}</div>}
                   </div>
                 </>
               ) : (
                 <div className="col-md-3">
                   <label>Almacén</label>
-                  <Select
-                    options={listaAlmacenes}
-                    value={formData.almacenUnico}
-                    onChange={(opcion) =>
-                      handleSelectChange("almacenUnico", opcion)
-                    }
-                    isDisabled={almacenBloqueado}
+                  <input
+                    type="text"
+                    className="form-control"
+                    value={formData.almacenUnico?.label || ""}
+                    disabled
                   />
-                  {errors.almacenUnico && (
-                    <div className="text-danger">{errors.almacenUnico}</div>
-                  )}
                 </div>
               )}
+            </div>
 
-              {/* PROVEEDORES */}
+            {/* === FILA 2: Proveedor, Fecha, Producto, Autoriza === */}
+            <div className="row mb-3">
               <div className="col-md-3">
                 <label>Proveedor</label>
                 <Select
+                  className="select-estandar"
                   options={listaProveedores}
                   value={formData.proveedor}
                   onChange={(opcion) => handleSelectChange("proveedor", opcion)}
                   isDisabled={proveedorBloqueado}
                 />
-                {errors.proveedor && (
-                  <div className="text-danger">{errors.proveedor}</div>
-                )}
+                {errors.proveedor && <div className="text-danger">{errors.proveedor}</div>}
               </div>
-              {/* FECHA */}
-              <div className="col-md-3" style={{ marginTop: "18px" }}>
+
+              <div className="col-md-3">
                 <label>Fecha</label>
                 <input
                   type="date"
@@ -649,39 +655,52 @@ export const AgregarProductosAlmacen = () => {
                   className="form-control"
                   value={formData.fecha}
                   onChange={handleChange}
-                  onFocus={(e) => e.target.showPicker()} // Abre el calendario al hacer clic en el input
+                  onFocus={(e) => e.target.showPicker()}
                   disabled={FechaBloqueado}
                 />
-                {errors.fecha && (
-                  <div className="text-danger">{errors.fecha}</div>
-                )}
+                {errors.fecha && <div className="text-danger">{errors.fecha}</div>}
               </div>
 
-              {/* PRODUCTOS */}
               <div className="col-md-3">
-                <label>Producto</label>
-                <IconButton
-                  color="primary"
-                  onClick={handleOpenModal}
-                  flexdirection={"flex-end"}
-                  disabled={!proveedorSeleccionado}
-                >
-                  <ContentPasteSearchIcon sx={{ fontSize: 29 }} />
-                </IconButton>
-                <Select
-                  ref={productosRef}
-                  options={listaProductos}
-                  value={formData.producto}
-                  onChange={(opcion) => handleSelectChange("producto", opcion)}
-                  isDisabled={!proveedorSeleccionado}
-                />
-                {errors.producto && (
-                  <div className="text-danger">{errors.producto}</div>
-                )}
+                <label style={{ marginLeft: "40px" }}>Producto</label>
+                <div className="d-flex align-items-center">
+                  <IconButton
+                    color="primary"
+                    onClick={handleOpenModal}
+                    disabled={!proveedorSeleccionado}
+                  >
+                    <ContentPasteSearchIcon sx={{ fontSize: 29 }} />
+                  </IconButton>
+                  <div className="flex-grow-1">
+                    <Select
+                      className="select-estandar"
+                      ref={productosRef}
+                      options={listaProductos}
+                      value={formData.producto}
+                      onChange={(opcion) => handleSelectChange("producto", opcion)}
+                      isDisabled={!proveedorSeleccionado}
+                    />
+                  </div>
+                </div>
+                {errors.producto && <div className="text-danger">{errors.producto}</div>}
               </div>
 
+              <div className="col-md-3">
+                <label>Autoriza</label>
+                <Select
+                  className="select-estandar"
+                  options={listaAutorizaciones}
+                  value={formData.autorizo}
+                  onChange={(opcion) => handleSelectChange("autorizo", opcion)}
+                  isDisabled={autorizoBloqueado}
+                />
+                {errors.autorizo && <div className="text-danger">{errors.autorizo}</div>}
+              </div>
+            </div>
 
-              <div className="col-md-3" style={{ marginTop: "20px" }}>
+            {/* === FILA 3: Cantidad, Costo, Botón === */}
+            <div className="row mb-3">
+              <div className="col-md-3">
                 <label>Cantidad</label>
                 <input
                   type="number"
@@ -692,12 +711,10 @@ export const AgregarProductosAlmacen = () => {
                   ref={cantidadRef}
                   onKeyDown={handleKeyDownCostoUnit}
                 />
-                {errors.cantidad && (
-                  <div className="text-danger">{errors.cantidad}</div>
-                )}
+                {errors.cantidad && <div className="text-danger">{errors.cantidad}</div>}
               </div>
 
-              <div className="col-md-3" style={{ marginTop: "20px" }}>
+              <div className="col-md-3">
                 <label>Costo Unitario</label>
                 <input
                   type="number"
@@ -708,38 +725,24 @@ export const AgregarProductosAlmacen = () => {
                   ref={costoUnitarioRef}
                   onKeyDown={handleKeyDownAgregar}
                 />
-                {errors.costo_unitario && (
-                  <div className="text-danger">{errors.costo_unitario}</div>
-                )}
+                {errors.costo_unitario && <div className="text-danger">{errors.costo_unitario}</div>}
               </div>
 
-              <div
-                className="mt-1 row-1"
-                style={{ display: "flex", alignItems: "venter" }}
-              >
-                <Button
-                  type="submit"
-                  variant="contained"
-                  color="primary"
-                  ref={agregarRef}
-                  onKeyDown={handleCombinedKeyDown}
-                >
-                  Agregar
-                </Button>
+              <div className="row mt-3 justify-content-end">
+                <div className="col-md-3 d-flex justify-content-end">
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    color="primary"
+                    ref={agregarRef}
+                    onKeyDown={handleCombinedKeyDown}
+                  >
+                    Agregar
+                  </Button>
+                </div>
               </div>
 
-              <div style={{ marginLeft: "auto", width: "25%" }}>
-                <label>Autoriza</label>
-                <Select
-                  options={listaAutorizaciones}
-                  value={formData.autorizo}
-                  onChange={(opcion) => handleSelectChange("autorizo", opcion)}
-                  isDisabled={autorizoBloqueado}
-                />
-                {errors.autorizo && (
-                  <div className="text-danger">{errors.autorizo}</div>
-                )}
-              </div>
+
             </div>
 
 

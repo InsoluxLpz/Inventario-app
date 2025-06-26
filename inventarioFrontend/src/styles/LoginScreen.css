@@ -245,3 +245,13 @@
     align-items: center;
     z-index: 1050;
 }
+
+.select-estandar .css-13cymwt-control {
+  min-height: 38px !important; /* Para que coincida con input normal */
+  font-size: 14px;
+}
+
+input.form-control {
+  height: 38px;
+  font-size: 14px;
+}

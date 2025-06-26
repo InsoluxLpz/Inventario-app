@@ -69,4 +69,22 @@ router.put('/actualizar_almacen/:id', async (req, res) => {
     }
 });
 
+router.delete('/eliminar_almacen/:id', async (req, res) => {
+    const { id } = req.params;
+
+    if (!id) {
+        return res.status(400).json({ message: 'Falta el ID para eliminar el registro' });
+    }
+
+    try {
+        const query = `DELETE FROM cat_almacenes WHERE id = ?`;
+        await db.query(query, [id]);
+
+        return res.status(200).json('Registro eliminado correctamente');
+    } catch (error) {
+        console.error('Error al eliminar el registro:', error);
+        return res.status(500).json({ message: 'Error al eliminar el registro' });
+    }
+});
+
 module.exports = router;

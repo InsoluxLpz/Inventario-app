@@ -115,3 +115,47 @@ export const ActualizarAlmacen = async (id, almacenData) => {
     return null;
   }
 };
+
+export const EliminarrAlmacen = async (id) => {
+  try {
+    const response = await fetch(
+      `${API_URL}/almacenes/eliminar_almacen/${id}`,
+      {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    const data = await response.json();
+
+    if (response.ok) {
+      Swal.fire({
+        title: "Éxito",
+        text: "Almacén eliminado correctamente.",
+        icon: "success",
+        timer: 1000, // Se cierra automáticamente después de 5 segundos
+        showConfirmButton: false, // Oculta el botón de aceptar
+      });
+      return data;
+    } else {
+      Swal.fire(
+        "Error",
+        data.message || "Hubo un problema al actualizar el almacén.",
+        "error"
+      );
+      return {
+        error: data.message || "Hubo un problema al actualizar el almacén.",
+      };
+    }
+  } catch (error) {
+    console.error("Error al realizar la solicitud:", error);
+    Swal.fire(
+      "Error",
+      "Hubo un problema al conectar con el servidor.",
+      "error"
+    );
+    return null;
+  }
+};

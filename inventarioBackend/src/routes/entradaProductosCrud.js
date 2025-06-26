@@ -3,7 +3,6 @@ const { dbConexion } = require('../database/config');
 const router = express.Router();
 const db = dbConexion();
 
-
 router.post('/agregar_inventario', async (req, res) => {
     const {
         fecha,
@@ -17,23 +16,82 @@ router.post('/agregar_inventario', async (req, res) => {
         idAlmacenDestino,
     } = req.body;
 
-    console.log('Datos recibidos:', { fecha, idTipoMovimiento, idTipoSubmovimiento, idAutorizo, productos, idUsuario, total, idAlmacenOrigen, idAlmacenDestino });
+    console.log('Datos recibidos:', {
+        fecha,
+        idTipoMovimiento,
+        idTipoSubmovimiento,
+        idAutorizo,
+        productos,
+        idUsuario,
+        total,
+        idAlmacenOrigen,
+        idAlmacenDestino
+    });
 
-    // Validación de datos
     if (!fecha || !productos || productos.length === 0 ||
-        !idTipoMovimiento || !idTipoSubmovimiento || !idAutorizo || !idUsuario || !idAlmacenDestino) {
-        return res.status(400).json({ message: 'Todos los campos son obligatorios y debe haber al menos un producto' });
+        !idTipoMovimiento || !idTipoSubmovimiento || !idAutorizo || !idUsuario) {
+        return res.status(400).json({ message: 'Faltan campos obligatorios' });
+    }
+
+    // Validaciones por tipo de movimiento
+    if (idTipoMovimiento === 1) {
+        // Entrada
+        if (!idAlmacenDestino) {
+            return res.status(400).json({ message: 'El almacén destino es obligatorio para entradas' });
+        }
+    } else if (idTipoMovimiento === 2) {
+        // Salida
+        if (idTipoSubmovimiento === 3) {
+            // Traspaso
+            if (!idAlmacenOrigen || !idAlmacenDestino) {
+                return res.status(400).json({ message: 'El traspaso requiere almacén origen y destino' });
+            }
+        } else {
+            // Salida normal
+            if (!idAlmacenOrigen) {
+                return res.status(400).json({ message: 'El almacén origen es obligatorio para salidas' });
+            }
+        }
     }
 
     let connection;
     try {
         connection = await db.getConnection();
+
+        // 🔍 Validar stock si es traspaso
+        if (idTipoMovimiento === 2 && idTipoSubmovimiento === 3) {
+            for (let producto of productos) {
+                const idProducto = producto.idProducto?.value || producto.idProducto;
+                const cantidadSolicitada = Number(producto.cantidad);
+
+                const [stockResult] = await connection.query(
+                    `SELECT cantidad FROM inventario_almacen 
+                     WHERE idProducto = ? AND idAlmacen = ?`,
+                    [idProducto, idAlmacenOrigen]
+                );
+
+                const cantidadDisponible = stockResult.length > 0 ? stockResult[0].cantidad : 0;
+
+                if (cantidadDisponible < cantidadSolicitada) {
+                    return res.status(400).json({
+                        message: `Stock insuficiente en el almacén.`,
+                        detalle: {
+                            idProducto,
+                            cantidadDisponible,
+                            cantidadSolicitada
+                        }
+                    });
+                }
+            }
+        }
+
         await connection.beginTransaction();
 
         const queryMaestro = `
             INSERT INTO movimientos_almacen
-            (fecha, idTipoMovimiento, idTipoSubmovimiento, idAutorizo, idUsuario, total,idAlmacenOrigen,idAlmacenDestino)
+            (fecha, idTipoMovimiento, idTipoSubmovimiento, idAutorizo, idUsuario, total, idAlmacenOrigen, idAlmacenDestino)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
+
         const [result] = await connection.query(queryMaestro, [
             fecha,
             idTipoMovimiento,
@@ -45,16 +103,13 @@ router.post('/agregar_inventario', async (req, res) => {
             idAlmacenDestino,
         ]);
 
-        const idMovimiento = result.insertId; // Usar el mismo idMovimiento para todos los productos
-        console.log('Movimiento insertado con ID:', result.insertId); // Verifica si el movimiento se inserta solo una vez
+        const idMovimiento = result.insertId;
 
-        // Insertar cada producto en movimientos_almacen_detalle
         const queryDetalle = `
             INSERT INTO movimientos_almacen_detalle
             (idMovimiento, idProducto, idProveedor, cantidad, costo_unitario, subtotal)
             VALUES (?, ?, ?, ?, ?, ?)`;
 
-        // Para cada producto, asignamos el mismo idMovimiento y el idTipoSubmovimiento
         for (let producto of productos) {
             const idProducto = producto.idProducto?.value || producto.idProducto;
             const idProveedor = producto.idProveedor?.value || null;
@@ -62,9 +117,8 @@ router.post('/agregar_inventario', async (req, res) => {
             const costo_unitario = Number(producto.costo_unitario);
             const subtotal = cantidad * costo_unitario;
 
-            // Insertamos el producto en la tabla
             await connection.query(queryDetalle, [
-                idMovimiento,  // El idMovimiento es el mismo para todos los productos
+                idMovimiento,
                 idProducto,
                 idProveedor,
                 cantidad,
@@ -73,17 +127,18 @@ router.post('/agregar_inventario', async (req, res) => {
             ]);
         }
 
-        await connection.commit(); // Confirmar transacción
+        await connection.commit();
         res.status(201).json({ message: "Productos agregados correctamente", idMovimiento });
 
     } catch (error) {
-        if (connection) await connection.rollback(); // Revertir cambios en caso de error
+        if (connection) await connection.rollback();
         console.error("Error al insertar el movimiento:", error);
-        res.status(500).json({ message: "Stock insuficiente", error });
+        res.status(500).json({ message: "Error al insertar el movimiento", error });
     } finally {
-        if (connection) connection.release(); // Liberar la conexión
+        if (connection) connection.release();
     }
 });
+
 
 // Actualizar un registro del inventario por ID
 router.put('/actualizar_inventario/:id', async (req, res) => {
@@ -164,19 +219,17 @@ router.get('/obtener_inventario', async (req, res) => {
       cum.nombre as unidadMedida,
       p.precio as costoUnitario,
       ia.cantidad as cantidad,
-      iad.idAlmacen as idAlmacen,
+      ia.idAlmacen as idAlmacen,
       alm.nombre AS nombre_inventario,
       p.codigo
     FROM productos p
     LEFT JOIN inventario_almacen ia ON p.id = ia.idProducto
-    LEFT JOIN inventario_almacen_detalle iad ON p.id = iad.idProducto
     LEFT JOIN cat_almacenes alm ON ia.idAlmacen = alm.id
     LEFT JOIN cat_grupos cp ON cp.id = p.idGrupo
     LEFT JOIN cat_unidad_medida cum ON p.idUnidadMedida = cum.id
     WHERE p.status = 1
   `;
 
-    // Agrega filtro por almacén si se proporciona
     if (idAlmacen) {
         query += ` AND ia.idAlmacen = ?`;
     }
@@ -198,11 +251,13 @@ router.get('/obtener_movimientos', async (req, res) => {
         fechaFin,
         page = 1,
         limit = 50,
-        tipoMovimiento, // Añadido tipoMovimiento
-        subMovimiento   // Añadido subMovimiento
+        tipoMovimiento,
+        subMovimiento,
+        idAlmacen,
     } = req.query;
+
     const offset = (page - 1) * limit;
-    console.log("page:", page, "limit:", limit, "offset:", offset, "tipoMovimiento", tipoMovimiento, "subMovimiento", subMovimiento);
+    console.log("page:", page, "limit:", limit, "offset:", offset, "tipoMovimiento", tipoMovimiento, "subMovimiento", subMovimiento, "idAlmacen:", idAlmacen);
 
     try {
         let query = `
@@ -235,7 +290,7 @@ router.get('/obtener_movimientos', async (req, res) => {
         const queryParams = [];
         let whereConditions = [];
 
-        // Filtro por fecha (ajustando para incluir el día completo)
+        // Filtro por fecha
         if (fechaInicio && fechaFin) {
             const fechaInicioCompleta = `${fechaInicio} 00:00:00`;
             const fechaFinCompleta = `${fechaFin} 23:59:59`;
@@ -255,22 +310,24 @@ router.get('/obtener_movimientos', async (req, res) => {
             queryParams.push(subMovimiento);
         }
 
-        // Si hay condiciones, agregarlas al query
+        // Filtro por almacén (origen o destino)
+        if (idAlmacen) {
+            whereConditions.push("(ma.idAlmacenOrigen = ? OR ma.idAlmacenDestino = ?)");
+            queryParams.push(idAlmacen, idAlmacen);
+        }
+
         if (whereConditions.length > 0) {
             query += " WHERE " + whereConditions.join(" AND ");
         }
 
-        // Agrupamiento y orden
         query += " GROUP BY ma.id, tm.idMovimiento, sm.id";
-        query += " ORDER BY ma.fecha DESC"; // Ordenar por fecha más reciente
-
-        // Paginación
+        query += " ORDER BY ma.fecha DESC";
         query += " LIMIT ? OFFSET ?";
         queryParams.push(Number(limit), Number(offset));
 
         const [result] = await db.query(query, queryParams);
 
-        // Query para contar total de registros sin paginación
+        // Contar total de registros
         let totalQuery = `
             SELECT COUNT(DISTINCT ma.id) AS total
             FROM movimientos_almacen ma
@@ -281,7 +338,6 @@ router.get('/obtener_movimientos', async (req, res) => {
         const totalQueryParams = [];
         let totalWhereConditions = [];
 
-        // Filtros para el total (ajustando fechas)
         if (fechaInicio && fechaFin) {
             const fechaInicioCompleta = `${fechaInicio} 00:00:00`;
             const fechaFinCompleta = `${fechaFin} 23:59:59`;
@@ -299,13 +355,17 @@ router.get('/obtener_movimientos', async (req, res) => {
             totalQueryParams.push(subMovimiento);
         }
 
+        if (idAlmacen) {
+            totalWhereConditions.push("(ma.idAlmacenOrigen = ? OR ma.idAlmacenDestino = ?)");
+            totalQueryParams.push(idAlmacen, idAlmacen);
+        }
+
         if (totalWhereConditions.length > 0) {
             totalQuery += " WHERE " + totalWhereConditions.join(" AND ");
         }
 
         const [[totalResult]] = await db.query(totalQuery, totalQueryParams);
 
-        // Devolver los datos con metadatos
         res.status(200).json({
             data: result,
             meta: {
@@ -323,35 +383,44 @@ router.get('/obtener_movimientos', async (req, res) => {
 });
 
 
+
 // * consulta para la tabla movimientos almacen detalles
 router.get('/obtener_movimientos_detalles/:idMovimiento', async (req, res) => {
     const { idMovimiento } = req.params;
 
     try {
         const [result] = await db.query(`
-            SELECT 
-                ma.id AS idMovimiento,
-                ma.fecha,
-                ma.total,
-                tm.movimiento AS tipo_movimiento,
-                sm.tipoSubMovimiento,
-                a.nombre AS autorizado_por,
-                u.nombre AS usuario,
-                p.nombre AS producto,
-                pr.nombre_empresa AS proveedor,
-                mad.cantidad,
-                mad.costo_unitario,
-                mad.subtotal
-            FROM movimientos_almacen ma
-            JOIN cat_tipo_movimiento tm ON ma.idTipoMovimiento = tm.idMovimiento
-            JOIN cat_sub_movimientos sm ON ma.idTipoSubmovimiento = sm.id
-            JOIN cat_autorizaciones a ON ma.idAutorizo = a.idAutorizo
-            JOIN usuarios u ON ma.idUsuario = u.idUsuario
-            JOIN movimientos_almacen_detalle mad ON ma.id = mad.idMovimiento
-            JOIN productos p ON mad.idProducto = p.id
-            JOIN proveedores pr ON mad.idProveedor = pr.id
-            WHERE ma.id = ?  
-            ORDER BY ma.fecha DESC;
+        SELECT 
+            ma.id AS idMovimiento,
+            ma.fecha,
+            ma.idAlmacenOrigen AS idOrigen,
+            ao.nombre AS nombreAlmacenOrigen,        
+            ma.idAlmacenDestino AS idDestino,
+            ad.nombre AS nombreAlmacenDestino,        
+            ma.total,
+            tm.movimiento AS tipo_movimiento,
+            sm.tipoSubMovimiento,
+            a.nombre AS autorizado_por,
+            u.nombre AS usuario,
+            p.nombre AS producto,
+            pr.nombre_empresa AS proveedor,
+            mad.cantidad,
+            mad.costo_unitario,
+            mad.subtotal
+        FROM movimientos_almacen ma
+        JOIN cat_tipo_movimiento tm ON ma.idTipoMovimiento = tm.idMovimiento
+        JOIN cat_sub_movimientos sm ON ma.idTipoSubmovimiento = sm.id
+        JOIN cat_autorizaciones a ON ma.idAutorizo = a.idAutorizo
+        JOIN usuarios u ON ma.idUsuario = u.idUsuario
+        JOIN movimientos_almacen_detalle mad ON ma.id = mad.idMovimiento
+        JOIN productos p ON mad.idProducto = p.id
+        JOIN proveedores pr ON mad.idProveedor = pr.id
+
+        LEFT JOIN cat_almacenes ao ON ma.idAlmacenOrigen = ao.id
+        LEFT JOIN cat_almacenes ad ON ma.idAlmacenDestino = ad.id
+        WHERE ma.id = ?  
+        ORDER BY ma.fecha DESC;
+
         `, [idMovimiento]);
 
         // Si hay resultados, enviarlos como respuesta
@@ -382,10 +451,12 @@ router.get('/obtener_movimientosXProductos_detalles/:idProducto?', async (req, r
            SELECT iad.id AS idDetalle, 
                     iad.idMovimiento, 
                     iad.idProducto, 
+                    iad.idAlmacen,
                     p.nombre AS nombreProducto, 
                     iad.idTipoMovimiento, 
                     tm.movimiento AS tipoMovimiento, 
                     sm.tipoSubMovimiento, 
+                    ca.nombre AS nombre_almacen,
                     iad.cantidad, 
                     iad.costo_unitario, 
                     iad.precio_nuevo, 
@@ -405,6 +476,8 @@ router.get('/obtener_movimientosXProductos_detalles/:idProducto?', async (req, r
                 JOIN productos p ON p.id = iad.idProducto 
                 JOIN cat_sub_movimientos sm ON sm.id = iad.idTipoSubmovimiento  
                 JOIN cat_unidad_medida ud ON ud.id = iad.idUnidadMedida
+                JOIN cat_almacenes ca ON iad.idAlmacen = ca.id
+
                 WHERE 1 = 1
         `;
 

@@ -464,7 +464,7 @@ export const RealizarMantenimiento = () => {
                                     )}
                                 </div>
                                 <div className="col-md-4 mb-2">
-                                    <label className="form-label">Inventario</label>
+                                    <label className="form-label">Almacen</label>
                                     <Select
                                         key={formData.idAlmacen}
                                         ref={autorizoRef}

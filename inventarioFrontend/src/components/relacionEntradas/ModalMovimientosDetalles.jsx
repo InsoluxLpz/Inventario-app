@@ -39,6 +39,7 @@ export const ModalMovimientosDetalles = ({ open, onClose, idMovimiento }) => {
 
       setMovimientoInfo(movimientoData);
       setDetalleMovimiento(detalles);
+      console.log(data)
     } catch (error) {
       console.error("Error al obtener detalles del movimiento:", error);
     }
@@ -125,6 +126,8 @@ export const ModalMovimientosDetalles = ({ open, onClose, idMovimiento }) => {
                     value: movimientoInfo.tipo_movimiento,
                   },
                   { label: "Método", value: movimientoInfo.tipoSubMovimiento },
+                  { label: "Almacen origen", value: movimientoInfo.nombreAlmacenOrigen },
+                  { label: "Almacen destino", value: movimientoInfo.nombreAlmacenDestino },
                 ].map((item, index) => (
                   <Grid item xs={6} key={index}>
                     <Typography

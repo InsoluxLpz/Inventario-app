@@ -86,6 +86,7 @@ export const MovXProductosTable = () => {
         filtro.fechaInicio,
         filtro.fechaFin
       );
+      console.log(data)
 
       if (data) {
         const sortedData = data.sort((a, b) => a.idDetalle - b.idDetalle);
@@ -241,6 +242,7 @@ export const MovXProductosTable = () => {
                       "Producto",
                       "Tipo de movimiento",
                       "Subtipo",
+                      "Almacen",
                       "Existencia anterior",
                       "Cantidad",
                       "Existencia posterior",
@@ -282,6 +284,9 @@ export const MovXProductosTable = () => {
                       </TableCell>
                       <TableCell align="left">
                         {producto.tipoSubMovimiento}
+                      </TableCell>
+                      <TableCell align="left">
+                        {producto.nombre_almacen}
                       </TableCell>
                       <TableCell align="left">
                         {producto.existencia_anterior}

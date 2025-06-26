@@ -158,7 +158,7 @@ export const VerMantenimientoCancelado = ({ modalOpen, onClose, mantenimiento, l
                                     </div>
 
                                     <div className="col-md-4 mb-2">
-                                        <label className="form-label">inventario</label>
+                                        <label className="form-label">Almacen</label>
                                         <input
                                             // ref={autorizoRef}
                                             id="idAlmacen"

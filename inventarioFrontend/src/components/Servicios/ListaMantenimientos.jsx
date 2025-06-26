@@ -245,7 +245,7 @@ export const ListaMantenimientos = () => {
                   name="inventario"
                   options={opcionesInventario}
                   isMulti={false}
-                  placeholder="SELECCIONA INVENTARIO"
+                  placeholder="SELECCIONA ALMACEN"
                   value={filtro.inventario}
                   onChange={(selectedOption) =>
                     setFiltro({ ...filtro, inventario: selectedOption })
@@ -407,7 +407,7 @@ export const ListaMantenimientos = () => {
               <Table >
                 <TableHead>
                   <TableRow>
-                    {["Vehiculo", "Servicio(s)", "Refacciones Almacen", "Fecha de Inicio", "Comentario", "Costo Total", "Inventario", "status", "Acciones"].map((header) => (
+                    {["Vehiculo", "Servicio(s)", "Refacciones Almacen", "Fecha de Inicio", "Comentario", "Costo Total", "Almacen", "status", "Acciones"].map((header) => (
                       <TableCell key={header} align="center" sx={{ fontWeight: "bold", backgroundColor: "#f4f6f7", color: "black", textAlign: "left", width: "6.66%" }}>
                         {header}
                       </TableCell>

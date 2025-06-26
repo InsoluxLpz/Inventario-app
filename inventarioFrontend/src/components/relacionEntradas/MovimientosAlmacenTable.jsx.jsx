@@ -105,8 +105,9 @@ export const MovimientosAlmacenTable = () => {
     fechaFin,
     page = 1,
     limit = 50,
-    tipoMovimiento = "", // Añadir tipoMovimiento
-    subMovimiento = "" // Añadir subMovimiento
+    tipoMovimiento = "",
+    subMovimiento = "",
+    idAlmacen = ""
   ) => {
     try {
       const data = await cargarListasMovimientos(
@@ -114,11 +115,11 @@ export const MovimientosAlmacenTable = () => {
         fechaFin,
         page,
         limit,
-        tipoMovimiento, // Pasar el tipoMovimiento al backend
-        subMovimiento // Pasar el subMovimiento al backend
+        tipoMovimiento,
+        subMovimiento,
+        idAlmacen // ✅ ahora sí lo pasamos
       );
 
-      console.log("data", data);
       if (data && data.data) {
         setInventario(data.data);
         const totalRecords = data.meta.total || 0;
@@ -129,8 +130,10 @@ export const MovimientosAlmacenTable = () => {
     }
   };
 
+
   // * funcion para cargar los tipos de movimientos y subtipos en el select
   useEffect(() => {
+
     const fetchAlmacen = async () => {
       const data = await obtenerInventarios();
       if (data) {
@@ -390,9 +393,7 @@ export const MovimientosAlmacenTable = () => {
                       // "No.Movimiento",
                       "Fecha",
                       "Tipo de Movimiento",
-                      "Subtipo", -
-                      // "Realizo Mov.",
-                      // "Autorizo",
+                      "Subtipo",
                       "Detalles",
                     ].map((header) => (
                       <TableCell

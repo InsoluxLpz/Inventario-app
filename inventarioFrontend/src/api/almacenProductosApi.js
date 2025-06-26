@@ -177,17 +177,22 @@ export const cargarListasMovimientos = async (
     page = 1,
     limit = 50,
     tipoMovimiento = "",
-    subMovimiento = ""
+    subMovimiento = "",
+    idAlmacen = ""
 ) => {
     try {
-        let url = `${API_URL}/entrada/obtener_movimientos?fechaInicio=${fechaInicio}&fechaFin=${fechaFin}&page=${page}&limit=${limit}`;
+        const params = new URLSearchParams({
+            fechaInicio,
+            fechaFin,
+            page: page.toString(),
+            limit: limit.toString(),
+        });
 
-        if (tipoMovimiento) {
-            url += `&tipoMovimiento=${tipoMovimiento}`;
-        }
-        if (subMovimiento) {
-            url += `&subMovimiento=${subMovimiento}`;
-        }
+        if (tipoMovimiento) params.append("tipoMovimiento", tipoMovimiento);
+        if (subMovimiento) params.append("subMovimiento", subMovimiento);
+        if (idAlmacen) params.append("idAlmacen", idAlmacen);
+
+        const url = `${API_URL}/entrada/obtener_movimientos?${params.toString()}`;
 
         console.log("URL solicitada:", url);
 
